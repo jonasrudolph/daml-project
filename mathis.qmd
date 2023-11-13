@@ -38,10 +38,25 @@ jobs <- read.csv("Salary.csv")
 head(jobs)
 ```
 
+f
+3qf4
+feqf
+feq4
 ```{r}
 jobs |> arrange(desc(Salary))
 ```
+#
+feq
 
+
+ewf34g45
+
+
+erf43g3w
+
+feqf
+
+f3g4btrve
 # Lagemaße
 
 ```{r}
