@@ -1,5 +1,5 @@
 ---
-title: "Explorative Datenanalyse"
+title: "Prüfungsleistung Data Science & Machine Learning: Salary by job title and country"
 title-block-banner: true
 author: Mathis, Julia und Jonas
 format: 
@@ -15,23 +15,273 @@ format:
 date: 2023-11-13
 ---
 
-## Quarto
+# Explorative Datenanalyse
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+## Vorbereitung
 
 ```{r}
-1 + 1
+library(tidyverse)
+library(explore) 
+library(ggplot2)
 ```
 
-You can add options to executable code like this
+## Einlesen der zu Analysierenden Daten
 
 ```{r}
-#| echo: false
-2 * 2
+salary <- read_csv("Salary.csv")
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+## Ertes Anschauen des Datensatzes
+
+Nun werfen wir einen ersten Blick auf die Struktur der Daten in dem wir die ersten 10 Datensätze ausgeben:
+
+```{r}
+head(salary, 10)
+```
+
+```{r}
+describe_tbl(salary)
+```
+
+In dem Datensatz gibt es 6684 Instanzen, keine von diesen enthalten Werte ohne Angaben.
+
+Innerhalb der Tabelle haben wir nur zwei verschiedene Datentypen. Die Felder \*Age, Education Level, Years of Experience, Salary, Senior\* sind nummerische Merkmale. Die Felder *Gender, Job Title, Country, Race* sind  kategorische Merkmale.
+
+```{r}
+describe(salary)
+```
+
+| Spalte              | Typ         | Bedeutung                     |
+|---------------------|-------------|-------------------------------|
+| Age                 | Numerisch   | Alter                         |
+| Gender              | Kategorisch | Geschlecht                    |
+| Education Level     | Numerisch   | Bildungsgrad                  |
+| Job Title           | Kategorisch | Jobtitel                      |
+| Years of Experience | Numerisch   | Arbeitserfahrung in Jahren    |
+| Salary              | Numerisch   | Gehalt                        |
+| Country             | Kategorisch | Land                          |
+| Race                | Kategorisch | Ethnizität                    |
+| Senior              | Numerisch   | Senior position ja(1)/nein(0) |
+
+: Datentypen und Bedeutung der Spalten
+
+Umbennen der Spalten in einfache Namen:
+
+```{r}
+salary <- salary |>
+    rename(
+      Job.Title = `Job Title`,
+      Years.Of.Experience = `Years of Experience`,
+      Education.Level = `Education Level`
+    )
+```
+
+Verteilung der Jobs in %:
+
+```{r}
+explore (salary, Job.Title)
+```
+
+Grundlegende Statistische Merkmale des Datensatzes
+
+```{r}
+summary(salary)
+```
+
+```{r}
+Salary_long <- select(salary, - Job.Title, -Gender, -Race, -Country, -Senior)
+Salary_long <- pivot_longer(Salary_long, colnames(Salary_long))
+Salary <- as.data.frame(Salary_long) 
+head(Salary_long)
+```
+
+```{r}
+ggplot(Salary_long, aes(x = value)) +
+  geom_histogram() +
+  facet_wrap(~ name, scales = "free")
+```
+
+Hier kann man folgende Dinge erkennen:
+
+-   Age, Years of Experience und Education Level sind Linksschief und haben ggf. Bedarf einer Transformation für ML-Modelle
+
+-   Age und Years of Experience haben Extrempunkte im oberen Wertebereich, während Salary einer gleichmäßigen Verteilung folgt
+
+Aufgrund der guten Strukturiertheit der Daten eignen sie sich dem ersten Anschein nach gut für eine Ausführliche Explorative Analyse.
+
+# Aufbereiten der Daten
+
+Endgültiges Datenset erstellen
+
+```{r}
+salary_final <- salary
+```
+
+```{r}
+hist(salary_final$Salary)
+```
+
+```{r}
+
+salary_final$SalaryKat <- cut(salary_final$Salary, 
+                  breaks = c(-Inf, 50000, 100000, 150000, 200000, 250000, Inf),                      labels = c("50000", "100000", "150000", "200000","250000", "300000"))
+
+```
+
+```{r}
+explore(salary_final, SalaryKat)
+```
+
+# ein paar tests
+
+```{r}
+correlations <- cor(salary_final[, c("Age", "Education.Level", "Years.Of.Experience", "Salary")])
+
+# Ausgabe der Korrelationen
+print(correlations)
+
+```
+
+```{r}
+
+numerical_variables <- salary_final[, c("Age", "Education.Level", "Years.Of.Experience", "Salary")]
+
+
+par(mfrow = c(2, 2))  # Definiere die Anordnung der Plots (2x2 Grid)
+
+for (variable in colnames(numerical_variables)) {
+  plot(numerical_variables[[variable]], main = paste("Line Plot of", variable), type = "l", col = "blue", lwd = 2)
+}
+
+```
+
+```{r}
+with(salary_final, plot(Years.Of.Experience, Salary, main = "Scatter Plot of Years of Experience vs Salary",
+                        xlab = "Years of Experience", ylab = "Salary", pch = 16, col = "blue"))
+
+```
+
+```{r}
+
+with(salary_final, {
+
+  plot(Years.Of.Experience, Salary, 
+       main = "Scatter Plot of Years of Experience vs Salary",
+       xlab = "Years of Experience", ylab = "Salary", 
+       pch = 16, col = "blue")
+
+  cor_value <- cor(Years.Of.Experience, Salary)
+
+
+  text(20, 200000, paste("Correlation:", round(cor_value, 2)), col = "red")
+})
+
+
+```
+
+```{r}
+
+with(salary_final, {
+
+  plot(Education.Level, Salary, 
+       main = "Scatter Plot of Education Level vs Salary",
+       xlab = "Education Level", ylab = "Salary", 
+       pch = 16, col = "blue")
+
+
+  cor_value <- cor(Education.Level, Salary)
+
+  text(2, 200000, paste("Correlation:", round(cor_value, 2)), col = "red")
+})
+
+```
+
+```{r}
+
+
+
+ggplot(salary_final, aes(x = Race, y = Salary)) +
+  geom_bar(stat = "summary", fun = "mean", fill = "blue") +
+  labs(title = "Average Salary by Race",
+       x = "Race",
+       y = "Average Salary")
+
+```
+
+```{r}
+
+
+
+ggplot(salary_final, aes(x = Gender, y = Salary, fill = Gender)) +
+  geom_boxplot() +
+  labs(title = "Distribution of Salary by Gender",
+       x = "Gender",
+       y = "Salary")
+
+```
+
+```{r}
+
+
+
+ggplot(salary_final, aes(x = Country, y = Salary, fill = Country)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge", color = "black") +
+  labs(title = "Average Salary by Country",
+       x = "Country",
+       y = "Average Salary") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r}
+
+
+
+ggplot(salary_final, aes(x = Country, y = Salary, fill = Gender)) +
+  geom_bar(stat = "summary", fun = "mean", position = "stack", color = "black") +
+  labs(title = "Average Salary by Country and Gender",
+       x = "Country",
+       y = "Average Salary") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+```
+
+```{r}
+
+
+
+
+ggplot(salary_final, aes(x = Country, y = Salary, fill = factor(Education.Level))) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge", color = "black") +
+  labs(title = "Average Salary by Country and Education Level",
+       x = "Country",
+       y = "Average Salary") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
+
+```
+
+```{r}
+
+
+
+ggplot(salary_final, aes(x = Country, y = Salary, fill = Race)) +
+  geom_bar(stat = "summary", fun = "mean", position = "stack", color = "black") +
+  labs(title = "Average Salary by Country and Race",
+       x = "Country",
+       y = "Average Salary") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+```{r}
+
+
+
+ggplot(salary_final, aes(x = Country, y = Salary, fill = Race)) +
+  geom_boxplot() +
+  stat_summary(fun = "median", geom = "point", shape = 18, size = 3, color = "red", position = position_dodge(width = 0.75)) +
+  labs(title = "Salary Distribution by Country and Race",
+       x = "Country",
+       y = "Salary") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
+
+```
