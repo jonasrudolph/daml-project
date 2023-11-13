@@ -1,0 +1,492 @@
+---
+title: "Hauspreise"
+subtitle: "EDA und Regression"
+title-block-banner: true
+lang: de
+author: "Prof. Dr. Yvonne Gorniak"
+format: 
+  html: 
+    toc: true
+    toc_float: true
+    number-sections: true
+    embed-resources: true
+    code-fold: true
+    code-summary: "Code anzeigen"
+date: 2023-11-05
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=FALSE, include = FALSE}
+library(tidyverse) 
+library(tidymodels)
+library(explore) 
+library(rpart.plot) 
+library(viridis)
+library(corrplot)
+library(GGally)
+```
+
+
+# Aufgabe und Daten verstehen
+Sie sind ein frisch angeheuerter Data-Scientist in einer Immobilienfirma in Kalifornien. Sie sollen feststellen, wovon die Immobilienpreise beeinflusst werden und ein Modell zur Vorhersage von Immobilienpreisen erstellen. Die Aufgabe, vor der Sie stehen, ist eine typische Regressionsaufgabe. 
+
+Nach einiger Suche finden Sie Daten aus der kalifornischen Volkszählung, die Sie zunächst auf ihre Verwendbarkeit überprüfen (Zugegeben, diese Daten sind aus der kalifornischen Volkszählung von 1990, bieten aber viele Eigenschaften, anhand derer sich gut lernen lässt...)
+
+Laden wir zuerst die Daten:
+
+```{r, message=FALSE}
+housing <- read_csv("housing.csv")
+
+```
+
+Nun werfen wir einen kurzen Blick auf die Datenstruktur:
+
+```{r}
+housing
+```
+
+Jede Zeile steht für einen Bezirk. Es gibt zehn Merkmale. 
+
+Variable                |Typ    |Bedeutung
+:-----------------------|:------|:------------------------------------
+**longitude **          |dbl    | Längenmaß des Bezirkes
+**latitude**            |dbl    | Breitenmaß des  Bezirkes
+**housing_median_age**  |dbl    | Median des Alters der Häuser im Bezirk
+**total_rooms**         |dbl    | Anzahl der Räume (über alle Häuser des Bezirkes)
+**total_bedrooms**      |dbl    | Anzahl der Schlafzimmer (über alle Häuser des Bezirkes)
+**population**          |dbl    | Größe der Bevölkerung des Bezirkes
+**households**          |dbl    | Anzahl der Haushalte im Bezirk
+**median_income**       |dbl    | Mittleres Einkommen 
+**median_house_value**  |dbl    | Mittlerer Hauspreis
+**ocean_proximity**      |chr    | Nähe zum Ozean
+
+```{r}
+describe_tbl(housing)
+```
+
+Im Datensatz gibt es 20.640 Instazen (Beobachtungen). 207 dieser Instanzen enthalten Werte ohne Angabe (NA). Um diese werden wir uns kümmern müssen. 
+
+
+```{r}
+describe(housing)
+```
+Bis auf das Feld *ocean_proximity* sind alle Merkmale numerisch. Es ist zu erkennen, dass *ocean_proximity* ein kategorisches Merkmal ist. Schauen wir uns die möglichen Werte an: 
+
+```{r}
+# describe(housing, ocean_proximity)
+explore(housing, ocean_proximity)
+```
+Einige Statistiken wie Minimum, Maximum und Mittelwert der numerischen Variablen haben wir bereits gesehen. Schauen wir noch weitere an: 
+
+```{r}
+summary(housing)
+```
+
+Nutzen wir noch eine andere Möglichkeit, schnell einen Eindruck von den Daten zu erhalten. Wir können für jedes numerisches Merkmal ein Histogramm plotten: 
+
+```{r}
+housing_long <- select(housing, -ocean_proximity)
+housing_long <- pivot_longer(housing_long, colnames(housing_long))
+housing_long <- as.data.frame(housing_long)
+head(housing_long)
+```
+
+```{r}
+ggplot(housing_long, aes(x = value)) +    # Draw each column as histogram
+  geom_histogram() + 
+  facet_wrap(~ name, scales = "free")
+```
+
+
+In diesen Histogrammen gibt es einiges zu sehen: 
+
+- Das mittlere Einkommen sieht nicht nach Werten in US-Dollar aus. Wir erfahren (durch Rücksprache mit den Datenerhebern), dass die Daten skaliert wurden, die Zahlen stehen für ungefähr 10.000 USD und wurden bei 15 gekappt. 
+
+- Auch das mittlere Alter und der mittlere Wert wurden gekappt. Das könnte ein Problem darstellen, wenn wir Werte über 500.000 USD vorhersagen sollen. 
+
+- Die Wertebereiche sind sehr unterschiedlich. Wir werden skalieren müssen. 
+
+- Viele Histogramme sind *rechtsschief*. Für einige ML-Modelle wird hier ggf. eine Transformation erforderlich. 
+
+```{r}
+#explore(housing)
+```
+
+
+
+
+**Die Daten scheinen geeignet für die Analyse, so dass die ursprüngliche Aufgabenstellung nicht geändert werden muss.**
+
+# Daten aufbereiten
+
+Erstellen wir nun das endgültige Datenset. 
+
+```{r}
+housing_final <- housing
+```
+
+Moment, bevor wir loslegen, legen wir uns zunächst einen Testdatensatz beiseite. 
+
+## Erstelle einen Testdatensatz
+
+Wir könnten einfach 80% der Daten zufällig für unseren Trainingsdatensatz auswählen. Wenn der Datensatz aber nicht besonders groß ist, kann ein erhebliches Stichproben-Bias verursacht werden. Von den Experten wissen wir, dass das mittlere Einkommen ein wichtiges Merkmal ist. Daher möchten wir sicherstellen, dass wir alle Einkommenskategorien gut repräsentieren. 
+
+Dazu bestimmen wir zunächst die Einkommensgruppen. 
+
+```{r}
+hist(housing_final$median_income)
+```
+
+
+```{r}
+
+housing_final$IncomeKat <- cut(housing_final$median_income, 
+                    breaks = c(-Inf, 1.5, 3, 4.5, 6, Inf), 
+                    labels = c("1", "2", "3", "4", "5"))
+```
+
+```{r}
+explore(housing_final, IncomeKat)
+```
+
+Nun bestimmen wir die stratifizierte Stichprobe:
+
+```{r}
+set.seed(501)
+housing_split <- initial_split(housing_final, prop = 0.80, strata = IncomeKat)
+housing_split
+```
+
+```{r}
+train <- training(housing_split)
+test <- testing(housing_split)
+```
+
+
+```{r}
+explore(train, IncomeKat)
+explore(test, IncomeKat)
+```
+
+Die Spalte der Einkommenskateorie wird nicht mehr benötigt. 
+
+```{r}
+train <- train %>% select(-IncomeKat)
+test <- test %>% select(-IncomeKat)
+```
+
+
+
+## Fehlende Daten 
+Die meisten ML-Modelle können mit fehlenden Daten nicht umgehen. Wir haben gesehen, dass *total_bedrooms* fehlende Daten enthält. Wir ersetzen diese fehlenden Werte mit dem Median. 
+
+```{r}
+train <-  train %>% mutate(total_bedrooms = replace_na(total_bedrooms, median(total_bedrooms, na.rm = TRUE)))
+
+```
+
+## Kategorische Daten
+Damit die kategorische Variable für eine Regression auch verwendet werden kann, können wir ein sogenanntes "One-Hot-Encoding" durchführen, bzw. sogenannte Dummy-Variablen einführen. 
+
+```{r}
+explore(housing_final, ocean_proximity)
+```
+
+
+```{r}
+train$near_ocean <- train$ocean_proximity=="NEAR OCEAN"
+train$near_bay <- train$ocean_proximity=="NEAR BAY"
+train$inland <- train$ocean_proximity=="INLAND"
+#trainl$island <- train$ocean_proximity=="ISLAND"
+train$one_h_ocean <- train$ocean_proximity=="<1H OCEAN"
+train <- train %>% select(-ocean_proximity)
+```
+
+
+# Modell bilden
+
+Zunächst werden Muster in den Daten gesucht, um unsere Thesen zu untersuchen. 
+
+## Explorative Datenanalyse
+
+### Visualisierung
+
+```{r}
+train %>%
+  ggplot() +
+  aes(x = longitude, y = latitude) +
+  geom_point()
+```
+```{r}
+train %>%
+  ggplot() +
+  aes(x = longitude, y = latitude, alpha = 0.1) +
+  geom_point()
+```
+
+```{r}
+train %>%
+  ggplot() +
+  aes(x = longitude, y = latitude, alpha = 0.1, size = population) + 
+  geom_point(aes(color = median_house_value)) +
+  scale_colour_gradientn(colors = viridis(3))
+```
+Oben: Immobilienpreise in Kalifornien: Gelb ist teuer, Lila bedeutet günstig, größere Kreise stehen für Bereiche mit mehr Bevölkerung. 
+
+### Suche nach Korrelationen
+
+```{r}
+cor(train, train$median_house_value)
+```
+```{r}
+cor_mat <- cor(train, train$median_house_value)
+corrplot(cor_mat, method = 'ellipse')
+```
+
+```{r}
+ggpairs(train %>% select(median_house_value, median_income, total_rooms))
+```
+
+Das am Erfolg versprechendste Merkmal zur Vorhersage des mittleren Immobilienwerts ist das mittlere Einkommen. Daher plotten wir hier einmal ein separates Streudiagramm:
+
+```{r}
+train %>%
+  ggplot() +
+  aes(x = median_income, y = median_house_value) +
+  geom_point()
+
+```
+
+Die Korrelation ist recht stark (der Trend nach oben ist klar zu sehen und die Punkte sind nicht allzu verstreut). Wir erkennen die Preisbegrenzung als horizontale Linie. Weitere Linien sind weniger offensichtlich, diese sollten ggf. entfernt werden, um dieses nicht in den Modellen zu reproduzieren. 
+
+
+### Experimentieren mit Kombinationen von Merkmalen
+
+Die Anzahl der Räume in einem Bezirk ist nicht besonders aussagekräftig, wenn man nicht weiß, wie viele Haushalte es dort gibt. Eigentlich benötigen wir die Anzahl der Räume pro Haushalt. Auch die Anzahl der Schlafzimmer pro Raum und die Bewohner pro Haushalt könnten interessant sein. 
+
+```{r}
+cor(
+  train %>% mutate(rooms_per_household = total_rooms/households) %>%
+            mutate(bedrooms_per_room = total_bedrooms/total_rooms) %>% 
+            mutate(population_per_household = population/households), 
+  train$median_house_value)
+```
+
+Wir fügen diese Merkmal hinzu
+
+```{r}
+train <- train %>%  mutate(rooms_per_household = total_rooms/households) %>%
+                    mutate(bedrooms_per_room = total_bedrooms/total_rooms) %>% 
+                    mutate(population_per_household = population/households)
+#test <- test %>% mutate(bedrooms_per_room = total_bedrooms/total_rooms)
+```
+
+
+# Finden von Modellen 
+
+## Skalieren
+
+Wir führen eine z-Standardisierung durch, bei der zuerst der Mittelwert abgezogen wird und anschließend durch die Standardabweichung geteilt wird. Damit haben die standardisierten Werte stets den Mittelwert Null und eine Standardabweichung von 1. 
+
+```{r}
+cols_to_scale <- colnames(train %>% select(-median_house_value))
+```
+
+
+```{r}
+train_scale <- train %>% mutate_at(cols_to_scale, ~(scale(.) %>% as.vector))
+#test_scale <- test %>% mutate_at(cols_to_scale, ~(scale(.)%>% as.vector))
+```
+
+```{r}
+summary(train_scale)
+```
+```{r}
+sd(train_scale$latitude)
+```
+
+## Modelle trainieren und auswerten
+
+Zuerst trainieren wir ein **lineares Regressionsmodell**. 
+
+```{r}
+lm_model <- linear_reg() |> set_engine("lm")
+```
+
+```{r}
+lm_fit <- lm_model |> fit(median_house_value ~ ., data = train_scale)
+```
+
+```{r}
+lm_fit |> extract_fit_engine() |> summary()
+```
+
+Betrachten wir den Fehler der Vorhersage auf dem gesamten Trainingsdatensatz:
+
+
+```{r}
+pred_reg <- predict(lm_fit, new_data = train_scale)
+
+compare <- train_scale |> 
+  select(median_house_value) |> 
+  bind_cols(pred_reg)
+head(compare)
+```
+
+```{r}
+rmse(compare, median_house_value, .pred)
+```
+
+Der RMSE beschreibt die mittlere Abweichung bei der Vorhersage. Im Vergleich mit den Werten der Hauspreise (vergleiche 1. und 3. Quartil) ist das Ergebnis eher bescheiden. Hier liegt *Underfitting* vor, bei dem das Modell bereits auf dem Trainingsdatensatz schlecht abschneidet.
+Es gibt die Möglichkeit ein mächtigeres (nicht lineares) Modell zuverwenden, oder zu versuchen, Merkmale hinzuzufügen. Versuchen wir es mit einem mächtigeren Modell, einem **Entscheidungsbaum**: 
+
+```{r}
+tree_mod <- decision_tree(mode = "regression", min_n = 2, cost_complexity = 0) 
+```
+
+```{r}
+tree_fit <- 
+  tree_mod |> 
+  fit(median_house_value ~ ., data = train_scale)
+```
+
+
+Betrachten wir den Fehler der Vorhersage auf dem gesamten Trainingsdatensatz:
+
+```{r}
+pred_tree <- predict(tree_fit, new_data = train_scale)
+
+compare <- train_scale |> 
+  select(median_house_value) |> 
+  bind_cols(pred_tree)
+head(compare)
+```
+```{r}
+rmse(compare, median_house_value, .pred)
+```
+
+Der RMSE scheint vielversprechend, jedoch können wir aufgrund der Hyperparameter des Entscheidungsbaumes bereits sagen, dass mit sehr hoher Wahrscheinlichkeit ein Overfitting vorliegt. Wenn wir die Parameter ändern (Standardeinstellungen verwenden), so dass kein vollständiger Baum erzeugt wird, sieht die Sache anders aus: 
+
+```{r}
+tree_mod2 <- decision_tree(mode = "regression") 
+```
+
+```{r}
+tree_fit2 <- 
+  tree_mod2 |> 
+  fit(median_house_value ~ ., data = train_scale)
+```
+
+```{r}
+pred_tree2 <- predict(tree_fit2, new_data = train_scale)
+
+compare2 <- train_scale |> 
+  select(median_house_value) |> 
+  bind_cols(pred_tree2)
+head(compare2)
+```
+```{r}
+rmse(compare2, median_house_value, .pred)
+```
+
+
+Wir führen mit den Standard-Einstellungen eine Kreuzvalidierung durch.
+
+```{r}
+folds <- vfold_cv(train_scale, v = 10)
+wf <- workflow() |> add_model(tree_mod2) |> add_formula(median_house_value ~ .)
+
+tree_fit2_cv <- wf |> fit_resamples(folds)
+```
+
+```{r}
+tree_fit2_cv |> collect_metrics()
+```
+
+
+Unsere Vermutung wird bestätigt. Das Overfitting im Entscheidungsbaum ist so stark, dass dieses Modell ungenauer ist als die lineare Regression. 
+
+
+Probieren wir als weiteres Modell einen **Random Forest** aus. 
+
+```{r}
+forest_mod <- rand_forest(trees = 100)  |>  
+    set_mode("regression") 
+```
+
+```{r}
+forest_fit <- forest_mod |> 
+  fit(median_house_value ~ ., data = train_scale)
+```
+
+```{r}
+pred_tree3 <- predict(forest_fit, new_data = train_scale)
+
+compare3 <- train_scale |> 
+  select(median_house_value) |> 
+  bind_cols(pred_tree3)
+head(compare3)
+```
+```{r}
+rmse(compare3, median_house_value, .pred)
+```
+
+Das scheint deutlich besser und könnte mit optimierten Hyperparameter-Einstellungen gut funktionieren. 
+
+## Modell optimieren
+
+Hier kann z.B. per Gittersuche nach guten Hyperparameter-Einstellungen gesucht werden. Siehe z.B. <https://tune.tidymodels.org/reference/tune_grid.html>
+
+
+# Modell beurteilen
+
+Am Ende der Modellerstellung stehen ein bis mehrere optimierte Modelle, aus denen nun eines endgültig zum Einsatz kommen soll. Neben wir an, dass der Random Forest als Modell eingesetzt werden soll. Dieses endgültige Modell evaluieren wir mit dem Testdatensatz. 
+
+Hier ist es wichtig, dass dieselben Vorverarbeitungsschritte des Trainingsdatensatzes auch auf den Testdatensatz angewendet werden. Dieses waren: 
+
+- *total_bedrooms* mit median (des Trainingssets!) ersetzen
+- *One-Hot-Encoding*
+- Neue Merkmale
+- Skalieren (dies muss mit den Mittelwerten und Standardabweichungen des Trainingsdatensatzes durchgeführt werden!)
+
+
+```{r}
+test_scale <- test
+(median_train <- median(train$total_bedrooms, na.rm = TRUE))
+
+test_scale <- test_scale %>% mutate(total_bedrooms = replace_na(total_bedrooms, median_train))
+
+test_scale$near_ocean <- test_scale$ocean_proximity=="NEAR OCEAN"
+test_scale$near_bay <- test_scale$ocean_proximity=="NEAR BAY"
+test_scale$inland <- test_scale$ocean_proximity=="INLAND"
+#trainl$island <- train$ocean_proximity=="ISLAND"
+test_scale$one_h_ocean <- test_scale$ocean_proximity=="<1H OCEAN"
+test_scale <- test_scale %>% select(-ocean_proximity)
+
+test_scale <- test_scale %>%  mutate(rooms_per_household = total_rooms/households) %>%
+                    mutate(bedrooms_per_room = total_bedrooms/total_rooms) %>% 
+                    mutate(population_per_household = population/households)
+
+trainMean <- apply(train,2,mean)
+trainSd <- apply(train,2,sd)
+test_scale <- sweep(sweep(test_scale, 2L, trainMean), 2, trainSd, "/")
+
+```
+
+
+Dann kann der RMSE der getroffenen Vorhersage berechnet werden: 
+
+```{r}
+pred_test <- predict(forest_fit, new_data = test_scale)
+
+compare_test <- test |> 
+  select(median_house_value) |> 
+  bind_cols(pred_test)
+head(compare_test)
+```
+```{r}
+rmse(compare_test, median_house_value, .pred)
+```
