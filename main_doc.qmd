@@ -1,7 +1,18 @@
 ---
-title: "main doc"
-format: html
-editor: visual
+title: "Explorative Datenanalyse"
+title-block-banner: true
+author: Mathis, Julia und Jonas
+format: 
+  html: 
+    theme: Superhero
+    toc: true
+    toc_float: true
+    embed-resources: true
+    code-fold: true
+  pdf: 
+    toc: true
+    number-sections: true
+date: 2023-11-13
 ---
 
 ## Quarto
