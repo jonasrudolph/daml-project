@@ -76,7 +76,7 @@ salary <- salary |>
     )
 ```
 
-Verteilung der Jobs in %:
+Verteilung der Jobs in %: (hier ein problem. verteilung kann nicht stimmen)
 
 ```{r}
 explore (salary, Job.Title)
@@ -109,9 +109,11 @@ Hier kann man folgende Dinge erkennen:
 
 Aufgrund der guten Strukturiertheit der Daten eignen sie sich dem ersten Anschein nach gut für eine Ausführliche Explorative Analyse.
 
-# Aufbereiten der Daten
+## Aufbereiten der Daten -\> abschneiden von allen jobs unter anzahl x
 
-Endgültiges Datenset erstellen
+### Endgültiges Datenset erstellen
+
+Zuweisen der aufbereiteten Daten
 
 ```{r}
 salary_final <- salary
@@ -137,69 +139,27 @@ explore(salary_final, SalaryKat)
 ```{r}
 correlations <- cor(salary_final[, c("Age", "Education.Level", "Years.Of.Experience", "Salary")])
 
-# Ausgabe der Korrelationen
 print(correlations)
+```
+
+```{r}
+ggplot(salary_final, aes(x = Years.Of.Experience, y = Salary)) +
+  geom_point(color = "blue", size = 3, shape = 16) +
+  labs(title = "Scatter Plot of Years of Experience vs Salary",
+       x = "Years of Experience",
+       y = "Salary")
+```
+
+```{r}
+ggplot(salary_final, aes(x = Education.Level, y = Salary)) +
+  geom_point(color = "blue", size = 3, shape = 16) +
+  labs(title = "Scatter Plot of Years of Experience vs Salary",
+       x = "Years of Experience",
+       y = "Salary")
 
 ```
 
 ```{r}
-
-numerical_variables <- salary_final[, c("Age", "Education.Level", "Years.Of.Experience", "Salary")]
-
-
-par(mfrow = c(2, 2))  # Definiere die Anordnung der Plots (2x2 Grid)
-
-for (variable in colnames(numerical_variables)) {
-  plot(numerical_variables[[variable]], main = paste("Line Plot of", variable), type = "l", col = "blue", lwd = 2)
-}
-
-```
-
-```{r}
-with(salary_final, plot(Years.Of.Experience, Salary, main = "Scatter Plot of Years of Experience vs Salary",
-                        xlab = "Years of Experience", ylab = "Salary", pch = 16, col = "blue"))
-
-```
-
-```{r}
-
-with(salary_final, {
-
-  plot(Years.Of.Experience, Salary, 
-       main = "Scatter Plot of Years of Experience vs Salary",
-       xlab = "Years of Experience", ylab = "Salary", 
-       pch = 16, col = "blue")
-
-  cor_value <- cor(Years.Of.Experience, Salary)
-
-
-  text(20, 200000, paste("Correlation:", round(cor_value, 2)), col = "red")
-})
-
-
-```
-
-```{r}
-
-with(salary_final, {
-
-  plot(Education.Level, Salary, 
-       main = "Scatter Plot of Education Level vs Salary",
-       xlab = "Education Level", ylab = "Salary", 
-       pch = 16, col = "blue")
-
-
-  cor_value <- cor(Education.Level, Salary)
-
-  text(2, 200000, paste("Correlation:", round(cor_value, 2)), col = "red")
-})
-
-```
-
-```{r}
-
-
-
 ggplot(salary_final, aes(x = Race, y = Salary)) +
   geom_bar(stat = "summary", fun = "mean", fill = "blue") +
   labs(title = "Average Salary by Race",
@@ -209,28 +169,20 @@ ggplot(salary_final, aes(x = Race, y = Salary)) +
 ```
 
 ```{r}
-
-
-
 ggplot(salary_final, aes(x = Gender, y = Salary, fill = Gender)) +
   geom_boxplot() +
   labs(title = "Distribution of Salary by Gender",
        x = "Gender",
        y = "Salary")
-
 ```
 
 ```{r}
-
-
-
 ggplot(salary_final, aes(x = Country, y = Salary, fill = Country)) +
   geom_bar(stat = "summary", fun = "mean", position = "dodge", color = "black") +
   labs(title = "Average Salary by Country",
        x = "Country",
        y = "Average Salary") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
 ```
 
 ```{r}
@@ -247,23 +199,15 @@ ggplot(salary_final, aes(x = Country, y = Salary, fill = Gender)) +
 ```
 
 ```{r}
-
-
-
-
 ggplot(salary_final, aes(x = Country, y = Salary, fill = factor(Education.Level))) +
   geom_bar(stat = "summary", fun = "mean", position = "dodge", color = "black") +
   labs(title = "Average Salary by Country and Education Level",
        x = "Country",
        y = "Average Salary") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  
-
 ```
 
 ```{r}
-
-
-
 ggplot(salary_final, aes(x = Country, y = Salary, fill = Race)) +
   geom_bar(stat = "summary", fun = "mean", position = "stack", color = "black") +
   labs(title = "Average Salary by Country and Race",
@@ -273,9 +217,6 @@ ggplot(salary_final, aes(x = Country, y = Salary, fill = Race)) +
 ```
 
 ```{r}
-
-
-
 ggplot(salary_final, aes(x = Country, y = Salary, fill = Race)) +
   geom_boxplot() +
   stat_summary(fun = "median", geom = "point", shape = 18, size = 3, color = "red", position = position_dodge(width = 0.75)) +
@@ -284,4 +225,64 @@ ggplot(salary_final, aes(x = Country, y = Salary, fill = Race)) +
        y = "Salary") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  
 
+```
+
+```{r}
+ggplot(salary_final, aes(x = Job.Title, y = Salary)) +
+  geom_bar(stat = "summary", fun = "mean", fill = "blue", color = "black") +
+  labs(title = "Average Salary by Job Title",
+       x = "Job Title",
+       y = "Average Salary") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
+```
+
+```{r}
+job_title_count <- table(salary_final$Job.Title)
+print(job_title_count)
+```
+
+```{r}
+job_title_count <- table(salary_final$Job.Title)
+job_title_df <- data.frame(Job_Title = names(job_title_count), Frequency = as.numeric(job_title_count))
+
+ggplot(job_title_df, aes(x = Job_Title, y = Frequency)) +
+  geom_bar(stat = "identity", fill = "blue", color = "black") +
+  labs(title = "Frequency of Unique Job Titles",
+       x = "Job Titles",
+       y = "Frequency") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
+```
+
+Da in dem Datensatz teilweise Jobs nur einmalig vertreten sind, kann ein erhebliches Stichproben-Bias verursacht werden. Da das mittlere Einkommen ein wichtiges Merkmal in unserer explorativen Datenanalyse darstellt und mindestens 30 Einträge für eine aussagekräftige Stichprobe nötig sind, haben wir uns dazu entschlossen alle Einträge mit N\<30 bei der Anzahl der Jobtitel (N) abzuschneiden.
+
+```{r}
+filtered_data <- salary_final %>%
+  group_by(Job.Title) %>%
+  summarise(job_count = n()) %>%
+  filter(job_count > 30) %>%
+  inner_join(salary_final, by = "Job.Title")
+
+print(filtered_data)
+```
+
+```{r}
+job_title_count <- table(filtered_data$Job.Title)
+print(job_title_count)
+```
+
+```{r}
+job_title_count <- table(filtered_data$Job.Title)
+job_title_df <- data.frame(Job_Title = names(job_title_count), Frequency = as.numeric(job_title_count))
+
+ggplot(job_title_df, aes(x = Job_Title, y = Frequency)) +
+  geom_bar(stat = "identity", fill = "blue", color = "black") +
+  labs(title = "Frequency of Unique Job Titles",
+       x = "Job Titles",
+       y = "Frequency") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
+```
+
+```{r}
+job_title_count_filtered <- table(filtered_data$Job.Title)
+cat(paste(names(job_title_count_filtered), ":", job_title_count_filtered, "\n"))
 ```
