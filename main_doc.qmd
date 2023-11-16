@@ -23,6 +23,7 @@ date: 2023-11-13
 library(tidyverse)
 library(explore) 
 library(ggplot2)
+library(corrplot)
 ```
 
 ## Einlesen der zu Analysierenden Daten
@@ -89,7 +90,7 @@ summary(salary)
 ```
 
 ```{r}
-Salary_long <- select(salary, - Job.Title, -Gender, -Race, -Country, -Senior)
+Salary_long <- select(salary, -Job.Title, -Gender, -Race, -Country, -Senior)
 Salary_long <- pivot_longer(Salary_long, colnames(Salary_long))
 Salary <- as.data.frame(Salary_long) 
 head(Salary_long)
@@ -286,3 +287,16 @@ ggplot(job_title_df, aes(x = Job_Title, y = Frequency)) +
 job_title_count_filtered <- table(filtered_data$Job.Title)
 cat(paste(names(job_title_count_filtered), ":", job_title_count_filtered, "\n"))
 ```
+
+```{r}
+filtered_data_numeric <- select(salary, Salary, Age, Years.Of.Experience, Education.Level)
+glimpse(filtered_data_numeric)
+cor(filtered_data_numeric)
+```
+
+```{r}
+filtered_data_numeric |>
+   cor() |> 
+   corrplot(method = 'ellipse')
+```
+
