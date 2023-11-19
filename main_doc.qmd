@@ -300,3 +300,277 @@ filtered_data_numeric |>
    corrplot(method = 'ellipse')
 ```
 
+anzahl der technischen und adminsitrativen berufe
+
+```{r}
+
+# Filtern nach technischen Jobs
+technische_jobs <- filtered_data[grep("data|engineer|developer|analyst|scientist", tolower(filtered_data$Job.Title)), ]
+
+# Filtern nach wirtschaftlichen/administrativen Jobs
+admin_jobs <- filtered_data[grep("associate|director|manager|sales|coordinator|generalist", tolower(filtered_data$Job.Title)), ]
+
+# Beispiel für die Ausgabe der ersten paar Zeilen der gefilterten Daten
+head(technische_jobs)
+head(admin_jobs)
+
+```
+
+```{r}
+
+# Anzahl der technischen Jobs
+anzahl_technische_jobs <- nrow(technische_jobs)
+cat("Anzahl der technischen Jobs:", anzahl_technische_jobs, "\n")
+
+# Anzahl der administrativen Jobs
+anzahl_admin_jobs <- nrow(admin_jobs)
+cat("Anzahl der administrativen Jobs:", anzahl_admin_jobs, "\n")
+
+```
+
+```{r}
+
+# Anzahl der Zeilen (Werte) in filtered_data
+anzahl_werte_filtered_data <- nrow(filtered_data)
+
+# Anzeigen der Anzahl der Werte
+cat("Anzahl der Werte in filtered_data:", anzahl_werte_filtered_data, "\n")
+
+```
+
+```{r}
+anzahl_jobs <- anzahl_technische_jobs + anzahl_admin_jobs
+cat(anzahl_jobs)
+```
+
+problem da jobs anscheinend doppelt gezählt werden ich glaube wir müssen den jobs eine id geben
+
+```{r}
+
+
+# Add ID-Spalte
+filtered_data$ID <- 1:nrow(filtered_data)
+
+# Filtern nach technischen Jobs und Entfernen von Duplikaten
+technische_jobs2 <- unique(filtered_data[grep("data|engineer|developer|analyst|scientist", tolower(filtered_data$Job.Title)), ])
+
+# Filtern nach wirtschaftlichen/administrativen Jobs und Entfernen von Duplikaten
+admin_jobs2 <- unique(filtered_data[grep("associate|director|manager|sales|coordinator|generalist", tolower(filtered_data$Job.Title)), ])
+
+# Merke die IDs der übereinstimmenden Zeilen
+ids_technische_jobs <- filtered_data$ID[filtered_data$Job.Title %in% technische_jobs2$Job.Title]
+ids_admin_jobs <- filtered_data$ID[filtered_data$Job.Title %in% admin_jobs2$Job.Title]
+
+# Entferne die entsprechenden Zeilen aus filtered_data
+filtered_data_neu <- filtered_data[!(filtered_data$ID %in% c(ids_technische_jobs, ids_admin_jobs)), ]
+
+# Beispiel für die Ausgabe der ersten paar Zeilen der gefilterten Daten
+head(filtered_data_neu)
+
+```
+
+```{r}
+anzahl_technische_jobs2 <- nrow(technische_jobs2)
+cat("Anzahl der technischen Jobs2:", anzahl_technische_jobs2, "\n")
+
+anzahl_admin_jobs2 <- nrow(admin_jobs2)
+cat("Anzahl der administrativen Jobs2:", anzahl_admin_jobs2, "\n")
+```
+
+```{r}
+
+```
+
+basieren auf filtered_data ein neues dataset erstellt wird aus dem ein datensatz gelöscht wird sobald eine zeile einer der \_jobs table zugewiesen wird damit es nicht doppelt gezählt werden kann
+
+-   Männer haben im Durchschnitt mehr Yrs of Experience als Frauen -\> Lässt sich die Genderpaygap auf die Yrs of Exp übertragen?
+
+```{r}
+ggplot(filtered_data, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Boxplot: Years of Experience vs. Gender",
+       x = "Gender",
+       y = "Years of Experience",
+       fill = "Gender") +
+  theme_minimal()
+
+```
+
+```{r}
+# Bibliothek ggplot2 laden
+library(ggplot2)
+
+# Daten für China filtern
+data_china <- subset(filtered_data, Country == "China")
+
+# Boxplot erstellen
+ggplot(data_china, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Boxplot: Years of Experience vs. Gender (China)",
+       x = "Gender",
+       y = "Years of Experience",
+       fill = "Gender") +
+  theme_minimal()
+
+```
+
+```{r}
+# Bibliothek ggplot2 laden
+library(ggplot2)
+
+# Daten für China filtern
+data_china <- subset(filtered_data, Country == "China")
+
+# Boxplot für Salary vs. Gender erstellen
+ggplot(data_china, aes(x = factor(Gender), y = Salary, fill = Gender)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Boxplot: Salary vs. Gender (China)",
+       x = "Gender",
+       y = "Salary",
+       fill = "Gender") +
+  theme_minimal()
+
+```
+
+```{r}
+# Bibliothek ggplot2 laden
+library(ggplot2)
+
+# Daten für USA filtern
+data_usa <- subset(filtered_data, Country == "USA")
+
+# Boxplot erstellen
+ggplot(data_usa, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Boxplot: Years of Experience vs. Gender (USA)",
+       x = "Gender",
+       y = "Years of Experience",
+       fill = "Gender") +
+  theme_minimal()
+
+```
+
+```{r}
+# Bibliothek ggplot2 laden
+library(ggplot2)
+
+# Daten für USA filtern
+data_usa <- subset(filtered_data, Country == "USA")
+
+# Boxplot für Salary vs. Gender erstellen
+ggplot(data_usa, aes(x = factor(Gender), y = Salary, fill = Gender)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Boxplot: Salary vs. Gender (USA)",
+       x = "Gender",
+       y = "Salary",
+       fill = "Gender") +
+  theme_minimal()
+
+```
+
+ist jetzt der gender pay gap in china doch größer da der größte faktor für salary years of experience ist?
+
+```{r}
+# Korrelation zwischen Salary und Years.Of.Experience berechnen
+correlation_salary_experience <- cor(filtered_data$Salary, filtered_data$Years.Of.Experience)
+
+# Ausgabe des Ergebnisses
+cat("Die Korrelation zwischen Salary und Years.Of.Experience ist:", correlation_salary_experience, "\n")
+```
+
+```{r}
+# Korrelation zwischen Salary und Education.Level berechnen
+correlation_salary_education <- cor(filtered_data$Salary, filtered_data$Education.Level, use = "complete.obs")
+
+# Ausgabe des Ergebnisses
+cat("Die Korrelation zwischen Salary und Education.Level ist:", correlation_salary_education, "\n")
+
+```
+
+```{r}
+# Korrelation zwischen Salary und Age berechnen
+correlation_salary_age <- cor(filtered_data$Salary, filtered_data$Age, use = "complete.obs")
+
+# Ausgabe des Ergebnisses
+cat("Die Korrelation zwischen Salary und Age ist:", correlation_salary_age, "\n")
+```
+
+```{r}
+# Korrelation zwischen Years.Of.Experience und Age berechnen
+correlation_experience_age <- cor(filtered_data$Years.Of.Experience, filtered_data$Age, use = "complete.obs")
+
+# Ausgabe des Ergebnisses
+cat("Die Korrelation zwischen Years.Of.Experience und Age ist:", correlation_experience_age, "\n")
+
+```
+
+das ergebnis der correlationen: von salary und years.of.experience ist es 0.81 von Salary und Age ist es 0.73 und die von Age und Years.Of.Experience ist 0.93 wie kommt so ein starker unterschied zu stande bei den werten im vergleich zu salary obwohl sie doch eine hohe correlation zueinander haben
+
+Verteilung der Daten: Es ist möglich, dass die Verteilung der Daten in den Variablen "Age" und "Years.Of.Experience" anders ist als in der Variable "Salary". Wenn die Daten in "Age" und "Years.Of.Experience" breiter gestreut sind, kann dies zu einer geringeren Korrelation führen, selbst wenn eine starke lineare Beziehung besteht.
+
+Nicht-lineare Beziehung: Die Korrelation misst nur lineare Beziehungen. Wenn die Beziehung zwischen "Age" und "Years.Of.Experience" nicht linear ist, könnte dies zu einem niedrigeren Korrelationswert führen.
+
+Ausreißer: Das Vorhandensein von Ausreißern kann die Korrelation beeinflussen. Wenn es Ausreißer in einer der Variablen gibt, kann dies den Korrelationswert beeinträchtigen.
+
+Stichprobengröße: Bei kleineren Stichproben können Korrelationswerte instabiler sein.
+
+```{r}
+# Durchschnittliche Gehälter pro Jobtyp für technische_jobs2 berechnen
+average_salaries_technical <- mean(technische_jobs2$Salary)
+
+# Durchschnittliche Gehälter pro Jobtyp für admin_jobs2 berechnen
+average_salaries_admin <- mean(admin_jobs2$Salary)
+
+# Daten zusammenführen
+all_average_salaries <- data.frame(Job.Type = c("technisch", "admin"),
+                                   Average.Salary = c(average_salaries_technical, average_salaries_admin))
+
+# Diagramm erstellen
+ggplot(all_average_salaries, aes(x = Job.Type, y = Average.Salary, fill = Job.Type)) +
+  geom_bar(stat = "identity", position = "dodge", alpha = 0.7) +
+  labs(title = "Durchschnittliche Gehälter nach Jobtyp",
+       x = "Jobtyp",
+       y = "Durchschnittliches Gehalt") +
+  theme_minimal()
+```
+
+Und das Obwohl in den Admin Jobs auch direktoren und Manager vertreten sind
+
+Nehmen wir an das Manager ein Job Titel wie Projekt Manager ist und nicht Manager für Projekt Management und dieser Titel in unserem Datensatz Director ist? Thema Führungsposition
+
+# Ohne Witz ich bin Dumm wie Brot. Das Problem mit der Klassifiierung der Jobs nach Technisch und Administrativ lässt sich lösen in dem ich die nicht in 2 tabellen aufteile sondern sie klassifiziere...
+
+Vielleicht einen Anderen Datensatz hinzuziehen um Länder als "Aufgeklärt" zu bewerten
+
+```{r}
+# Beispiel-Datensatz erstellen (ersetzen Sie dies durch Ihren tatsächlichen Datensatz)
+set.seed(42)
+technische_jobs <- data.frame(
+  Race = sample(c("White", "Black", "Asian", "Other"), 100, replace = TRUE)
+)
+
+# Diagramm erstellen
+ggplot(technische_jobs, aes(x = Race, fill = Race)) +
+  geom_bar() +
+  labs(title = "Verteilung der Race in technische_jobs",
+       x = "Race",
+       y = "Anzahl") +
+  theme_minimal()
+
+```
+
+```{r}
+# Annahme: "filtered_data" ist Ihr Datensatz
+# Annahme: Die Spalten sind "Seniority" und "Years.Of.Experience"
+
+# Korrelation zwischen Seniority und Years.Of.Experience berechnen
+correlation_seniority_experience <- cor(filtered_data$Seniority, filtered_data$Years.Of.Experience, use = "complete.obs")
+
+# Ausgabe des Ergebnisses
+cat("Die Korrelation zwischen Seniority und Years.Of.Experience ist:", correlation_seniority_experience, "\n")
+
+```
+
+years of seniority muss numerisch werden
+
+Frage: Wie unterscheide ich einen native und expat im jeweiligen Land. Welche annahmen sind dafür nötig?
