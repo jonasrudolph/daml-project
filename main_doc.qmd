@@ -15,9 +15,9 @@ format:
 date: 2023-11-13
 ---
 
-# Explorative Datenanalyse
+# Vorbereitung
 
-## Vorbereitung
+## Importieren der benötigten Packages
 
 ```{r}
 library(tidyverse)
