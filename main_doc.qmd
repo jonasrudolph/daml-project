@@ -26,7 +26,7 @@ library(ggplot2)
 library(corrplot)
 ```
 
-## Einlesen der zu Analysierenden Daten balbalbas
+## Einlesen der zu Analysierenden Daten 
 
 Der Datensatz, der in diesem Projekt analysiert wird, stammt von der website "Kaggle" und beschreibt das Gehalt nach Job und Land in dem gearbeitet wird.
 
@@ -74,8 +74,6 @@ describe(salary)
 
 Im folgenden Abschnitt werden verschiedene Funktionen dafür verwendet, um die Datentypen und Bedeutung der Spalten zu verstehen.
 
-Umbennen der Spalten in einfache Namen:
-
 ```{r}
 salary <- salary |>
     rename(
@@ -85,19 +83,27 @@ salary <- salary |>
     )
 ```
 
-Hier werden die Spaltennamen der Spalten verändert, welche ein Leerzeichen im Namen haben. Es handelt sich hierbei um die Spalten "Job Title", "Years of Experience" und "Education level". Das Leerzeichen wird einfach durch einen Punkt ersetzt.
+Hier werden die Spaltennamen der Spalten verändert, welche ein Leerzeichen im Namen haben. Es handelt sich hierbei um die Spalten "Job Title", "Years of Experience" und "Education level". Das Leerzeichen wird einfach durch einen Punkt ersetzt. Da noch häufig im Laufe des Projektes auf die Spaltennamen zugegriffen werdne muss, wird Uns das in der Zukunft noch Zeit sparen.
 
-Verteilung der Jobs in %: (hier ein problem. verteilung kann nicht stimmen)
+Nun werfen verschaffen Wir uns einen Überblick über die prozentuale Verteilung der Jobtitel. Aus der Grafik geht hervor, dass der Beruf des "Data Scientist" der meist ausgeführte Beruf ist. Außerdem gibt es innerhalb des Datensatzes auch viele "Data Analsysten" , sowie auch "Backend Devolper".
 
 ```{r}
 explore (salary, Job.Title)
 ```
 
-Grundlegende Statistische Merkmale des Datensatzes
+### Grundlegende Statistische Merkmale des Datensatzes
+
+Im folgenden wird ein Überblick über die grundlegenden statistischen Merkmale geworfen:
 
 ```{r}
 summary(salary)
 ```
+
+Erkennbar hier ist es, dass es innerhalb des Datensatzes ein durchschnittliches Alter von 32 Jahren vorliegt. Das Alter streckt sich von 21 Jahren bis zu 62 Jahren. Außerdem gibt es beim "Education-Level" Werte zwischen 1, 2 und 3, wobei der Durchschnitt jedoch bei 1 liegt. Außerdem gibt es bei der Berufserfahrung ( Years of Experience) Werte zwischen 0 bis zu 34 Jahren. Der Median hier beträgt 7.
+
+#### Umstrukturierung des Datensatzes 
+
+Im folgenden wird der Datensatz umstrukturiert und ein neuer Wert Namens "Value" wird erschaffen. Dies geschieht um möglicherweise besser analysieren und visualisieren zu können.
 
 ```{r}
 Salary_long <- select(salary, -Job.Title, -Gender, -Race, -Country, -Senior)
@@ -105,6 +111,8 @@ Salary_long <- pivot_longer(Salary_long, colnames(Salary_long))
 Salary <- as.data.frame(Salary_long) 
 head(Salary_long)
 ```
+
+Insgesamt werden in diesem Codechunk die Spalten die nicht nummerische Merkmale sind entfernt und der verbleibende Datensatz wird von einem breiten in ein längeres Format umgewandelt.
 
 ```{r}
 ggplot(Salary_long, aes(x = value)) +
@@ -120,19 +128,23 @@ Hier kann man folgende Dinge erkennen:
 
 Aufgrund der guten Strukturiertheit der Daten eignen sie sich dem ersten Anschein nach gut für eine Ausführliche Explorative Analyse.
 
-## Aufbereiten der Daten -\> abschneiden von allen jobs unter anzahl x
+## Datenaufbereitung
 
-### Endgültiges Datenset erstellen
+### Erstellung des entgültigen Datensets
 
-Zuweisen der aufbereiteten Daten
+Zunächst werden die Daten aus dem Ausgangsdatensatz in einen finalen Datensatz "salary_final" geschrieben.
 
 ```{r}
 salary_final <- salary
 ```
 
+Durch den Befehl "hist()" wird ein Histogramm erstellt . Es ermöglicht eine visuelle Darstellung der Häufigkeitsverteilung dieses GEhlatsdaten, indem es zeigt, wie oft bestimmte Gehaltsbereiche vorkommen.
+
 ```{r}
 hist(salary_final$Salary)
 ```
+
+Im folgenden wird eine neue Spalte "SalaryKat" erstellt die kategorische Werte basdierend auf den Gehältern enthält..........
 
 ```{r}
 
@@ -141,17 +153,23 @@ salary_final$SalaryKat <- cut(salary_final$Salary,
 
 ```
 
+........
+
 ```{r}
 explore(salary_final, SalaryKat)
 ```
 
-# ein paar tests
+# Tets
+
+im folgenden werden anhand der Daten ein paar Tests durchgeführt. Das Ergebnis dieses Codechunks ist eine Darstellung der Korrelationsmatrix.
 
 ```{r}
 correlations <- cor(salary_final[, c("Age", "Education.Level", "Years.Of.Experience", "Salary")])
 
 print(correlations)
 ```
+
+Erkennbar hier ist es zum Beispiel eine starke Korrelation zwischen dem Alter und den "Years of Experience". Desweiteren liegt auch eine starke Korrelation zwischnem den Years of Experience und dem entgültigen Gehalt. Eine nichgt so starke Korrelation liegt zwischen dem Alter und dem Education Level mit einem Wert von ungefähr 0,6.
 
 ```{r}
 ggplot(salary_final, aes(x = Years.Of.Experience, y = Salary)) +
