@@ -28,41 +28,55 @@ library(corrplot)
 
 ## Einlesen der zu Analysierenden Daten
 
+Der Datensatz, der in diesem Projekt analysiert wird, stammt von der website "Kaggle" und beschreibt das Gehalt nach Job und Land in dem gearbeitet wird.
+
 ```{r}
 salary <- read_csv("Salary.csv")
 ```
 
-## Ertes Anschauen des Datensatzes
+## Erster Überblick der Daten
 
-Nun werfen wir einen ersten Blick auf die Struktur der Daten in dem wir die ersten 10 Datensätze ausgeben:
+Um einen ersten Überblick zu erhalten, werden die ersten 10 Zeilen der Tabelle ausgelesen:
 
 ```{r}
 head(salary, 10)
 ```
 
+Mithilfe der "describe_tbl"- Funktion können die generellen Informationen über den Datensatz ermittelt werden.
+
 ```{r}
 describe_tbl(salary)
 ```
 
-In dem Datensatz gibt es 6684 Instanzen, keine von diesen enthalten Werte ohne Angaben.
+Wie oben zu erkennen, enthält der Datensatz 6684 Instanzen, wovon keine einen Wert ohne Angabe (NA's) besitzt.
 
-Innerhalb der Tabelle haben wir nur zwei verschiedene Datentypen. Die Felder \*Age, Education Level, Years of Experience, Salary, Senior\* sind nummerische Merkmale. Die Felder *Gender, Job Title, Country, Race* sind  kategorische Merkmale.
+Innerhalb der Tabelle haben wir nur zwei verschiedene Datentypen. Die Felder \*Age, Education Level, Years of Experience, Salary, Senior\* sind nummerische Merkmale. Die Felder *Gender, Job Title, Country, Race* sind kategorische Merkmale.
 
 ```{r}
 describe(salary)
 ```
 
++---------------------+-------------+-------------------------------+
 | Spalte              | Typ         | Bedeutung                     |
-|---------------------|-------------|-------------------------------|
++=====================+=============+===============================+
 | Age                 | Numerisch   | Alter                         |
++---------------------+-------------+-------------------------------+
 | Gender              | Kategorisch | Geschlecht                    |
++---------------------+-------------+-------------------------------+
 | Education Level     | Numerisch   | Bildungsgrad                  |
++---------------------+-------------+-------------------------------+
 | Job Title           | Kategorisch | Jobtitel                      |
++---------------------+-------------+-------------------------------+
 | Years of Experience | Numerisch   | Arbeitserfahrung in Jahren    |
++---------------------+-------------+-------------------------------+
 | Salary              | Numerisch   | Gehalt                        |
++---------------------+-------------+-------------------------------+
 | Country             | Kategorisch | Land                          |
++---------------------+-------------+-------------------------------+
 | Race                | Kategorisch | Ethnizität                    |
++---------------------+-------------+-------------------------------+
 | Senior              | Numerisch   | Senior position ja(1)/nein(0) |
++---------------------+-------------+-------------------------------+
 
 : Datentypen und Bedeutung der Spalten
 
