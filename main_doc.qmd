@@ -50,35 +50,29 @@ describe_tbl(salary)
 
 Wie oben zu erkennen, enthält der Datensatz 6684 Instanzen, wovon keine einen Wert ohne Angabe (NA's) besitzt.
 
-Innerhalb der Tabelle haben wir nur zwei verschiedene Datentypen. Die Felder \*Age, Education Level, Years of Experience, Salary, Senior\* sind nummerische Merkmale. Die Felder *Gender, Job Title, Country, Race* sind kategorische Merkmale.
+Nun wird ein kurzer Blick auf die Art der Merkmale geholfen. Gibt es kategorische oder nummerische Merkmale innerhalb des Datensatzes?
 
 ```{r}
 describe(salary)
 ```
 
-+---------------------+-------------+-------------------------------+
 | Spalte              | Typ         | Bedeutung                     |
-+=====================+=============+===============================+
+|---------------------|-------------|-------------------------------|
 | Age                 | Numerisch   | Alter                         |
-+---------------------+-------------+-------------------------------+
 | Gender              | Kategorisch | Geschlecht                    |
-+---------------------+-------------+-------------------------------+
 | Education Level     | Numerisch   | Bildungsgrad                  |
-+---------------------+-------------+-------------------------------+
 | Job Title           | Kategorisch | Jobtitel                      |
-+---------------------+-------------+-------------------------------+
 | Years of Experience | Numerisch   | Arbeitserfahrung in Jahren    |
-+---------------------+-------------+-------------------------------+
 | Salary              | Numerisch   | Gehalt                        |
-+---------------------+-------------+-------------------------------+
 | Country             | Kategorisch | Land                          |
-+---------------------+-------------+-------------------------------+
 | Race                | Kategorisch | Ethnizität                    |
-+---------------------+-------------+-------------------------------+
 | Senior              | Numerisch   | Senior position ja(1)/nein(0) |
-+---------------------+-------------+-------------------------------+
 
-: Datentypen und Bedeutung der Spalten
+:  Wie bereits oben in der Tabelle zu erkennen gibt es Innerhalb des Datensatzes nur zwei verschiedene Datentypen. Die Felder \*Age, Education Level, Years of Experience, Salary, Senior\* sind nummerische Merkmale. Die Felder *Gender, Job Title, Country, Race* sind kategorische Merkmale.
+
+## Daten verstehen
+
+Im folgenden Abschnitt werden verschiedene Funktionen dafür verwendet, um die Datentypen und Bedeutung der Spalten zu verstehen.
 
 Umbennen der Spalten in einfache Namen:
 
@@ -90,6 +84,8 @@ salary <- salary |>
       Education.Level = `Education Level`
     )
 ```
+
+Hier werden die Spaltennamen der Spalten verändert, welche ein Leerzeichen im Namen haben. Es handelt sich hierbei um die Spalten "Job Title", "Years of Experience" und "Education level". Das Leerzeichen wird einfach durch einen Punkt ersetzt.
 
 Verteilung der Jobs in %: (hier ein problem. verteilung kann nicht stimmen)
 
