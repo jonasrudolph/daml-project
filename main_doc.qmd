@@ -26,7 +26,7 @@ library(ggplot2)
 library(corrplot)
 ```
 
-## Einlesen der zu Analysierenden Daten
+## Einlesen der zu Analysierenden Daten balbalbas
 
 Der Datensatz, der in diesem Projekt analysiert wird, stammt von der website "Kaggle" und beschreibt das Gehalt nach Job und Land in dem gearbeitet wird.
 
@@ -68,7 +68,7 @@ describe(salary)
 | Race                | Kategorisch | Ethnizität                    |
 | Senior              | Numerisch   | Senior position ja(1)/nein(0) |
 
-:  Wie bereits oben in der Tabelle zu erkennen gibt es Innerhalb des Datensatzes nur zwei verschiedene Datentypen. Die Felder \*Age, Education Level, Years of Experience, Salary, Senior\* sind nummerische Merkmale. Die Felder *Gender, Job Title, Country, Race* sind kategorische Merkmale.
+: Wie bereits oben in der Tabelle zu erkennen gibt es Innerhalb des Datensatzes nur zwei verschiedene Datentypen. Die Felder \*Age, Education Level, Years of Experience, Salary, Senior\* sind nummerische Merkmale. Die Felder *Gender, Job Title, Country, Race* sind kategorische Merkmale.
 
 ## Daten verstehen
 
