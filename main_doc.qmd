@@ -26,7 +26,7 @@ library(ggplot2)
 library(corrplot)
 ```
 
-## Einlesen der zu Analysierenden Daten 
+## Einlesen der zu Analysierenden Daten
 
 Der Datensatz, der in diesem Projekt analysiert wird, stammt von der website "Kaggle" und beschreibt das Gehalt nach Job und Land in dem gearbeitet wird.
 
@@ -101,7 +101,7 @@ summary(salary)
 
 Erkennbar hier ist es, dass es innerhalb des Datensatzes ein durchschnittliches Alter von 32 Jahren vorliegt. Das Alter streckt sich von 21 Jahren bis zu 62 Jahren. Außerdem gibt es beim "Education-Level" Werte zwischen 1, 2 und 3, wobei der Durchschnitt jedoch bei 1 liegt. Außerdem gibt es bei der Berufserfahrung ( Years of Experience) Werte zwischen 0 bis zu 34 Jahren. Der Median hier beträgt 7.
 
-#### Umstrukturierung des Datensatzes 
+#### Umstrukturierung des Datensatzes
 
 Im folgenden wird der Datensatz umstrukturiert und ein neuer Wert Namens "Value" wird erschaffen. Dies geschieht um möglicherweise besser analysieren und visualisieren zu können.
 
@@ -592,13 +592,78 @@ ggplot(technische_jobs, aes(x = Race, fill = Race)) +
 # Annahme: Die Spalten sind "Seniority" und "Years.Of.Experience"
 
 # Korrelation zwischen Seniority und Years.Of.Experience berechnen
-correlation_seniority_experience <- cor(filtered_data$Seniority, filtered_data$Years.Of.Experience, use = "complete.obs")
+correlation_seniority_experience <- cor(filtered_data$Senior, filtered_data$Years.Of.Experience, use = "complete.obs")
 
 # Ausgabe des Ergebnisses
 cat("Die Korrelation zwischen Seniority und Years.Of.Experience ist:", correlation_seniority_experience, "\n")
 
 ```
 
-years of seniority muss numerisch werden
+## Datenaufbereitung 2
 
-Frage: Wie unterscheide ich einen native und expat im jeweiligen Land. Welche annahmen sind dafür nötig?
+Unsere Untersuchungen haben Ergeben das wir die Daten für unsere Explorative Datenanalyse aber auch die Regression neu aufbereiten müssen.
+
+Dazu suchen wir: unterscheide ich einen native und expat im jeweiligen Land. Welche annahmen sind dafür nötig? Hier die annahme das White generell nicht ausgewandert ist da wir hier länder mit ähnlicher kultur und salary haben
+
+```{r}
+ggplot(filtered_data, aes(x = Country, fill = Race)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Count of Races in Each Country",
+       x = "Country",
+       y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Dafür füge ich eine neue spalte ein die mit numerishcen werten arbeitet. 0 steht für einheimischer und 1 für expat. Den wert null erhalten alle zeilen bei denen wir folgende übereinstimmung feststllen (land und ethnizität hier country und race):
+African American (USA)
+White (Canada, USA, UK, Australia)
+Chinese (China)
+Australian(Australia)
+Welsh (UK)
+jede andere race ist ja dementsprechend expat und erhält eine 1 in der spalte expat
+
+```{r}
+# Erstellen der Spalte "Expat" basierend auf den angegebenen Kriterien
+filtered_data$Expat <- 0  # Standardwert 0 (Einheimische)
+
+# Festlegen von Bedingungen für Expats basierend auf Land und Ethnizität
+expat_conditions <- list(
+  filtered_data$Race == "African American" & filtered_data$Country == "USA",
+  filtered_data$Race %in% c("White", "Chinese", "Australian", "Welsh") &
+    filtered_data$Country %in% c("Canada", "USA", "UK", "Australia"),
+  TRUE  # Für alle anderen Rassen (Expat)
+)
+
+# Setzen von Werten entsprechend den Bedingungen
+filtered_data$Expat <- ifelse(expat_conditions[[1]] | expat_conditions[[2]], 0, 
+                               ifelse(expat_conditions[[3]], 1, NA))
+
+# Anzeige des aktualisierten Datensatzes zur Überprüfung
+head(filtered_data)
+
+```
+
+```{r}
+# Erstellung des Boxplots für Expats und Einheimische
+ggplot(filtered_data, aes(x = as.factor(Expat), y = Salary, fill = factor(Expat))) +
+  geom_boxplot() +
+  labs(title = "Vergleich der Gehälter von Expats und Einheimischen",
+       x = "Expat",
+       y = "Gehalt") +
+  scale_x_discrete(labels = c("Einheimische (0)", "Expats (1)")) +
+  theme_minimal()
+
+```
+
+```{r}
+# Mittelwert der Gehälter für Expats (Expat = 1)
+mean_salary_expat <- mean(filtered_data$Salary[filtered_data$Expat == 1], na.rm = TRUE)
+mean_salary_expat
+
+# Mittelwert der Gehälter für Einheimische (Expat = 0)
+mean_salary_native <- mean(filtered_data$Salary[filtered_data$Expat == 0], na.rm = TRUE)
+mean_salary_native
+
+```
+
+These verworfen.
