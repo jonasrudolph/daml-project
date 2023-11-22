@@ -158,7 +158,51 @@ salary_final$SalaryKat <- cut(salary_final$Salary,
 explore(salary_final, SalaryKat)
 ```
 
-## Tests
+## Korrelationen
+
+```{r}
+# Korrelation zwischen Salary und Years.Of.Experience berechnen
+correlation_salary_experience <- cor(salary_final$Salary, salary_final$Years.Of.Experience)
+
+# Ausgabe des Ergebnisses
+cat("Die Korrelation zwischen Salary und Years.Of.Experience ist:", correlation_salary_experience, "\n")
+```
+
+```{r}
+# Korrelation zwischen Salary und Age berechnen
+correlation_salary_age <- cor(salary_final$Salary, salary_final$Age, use = "complete.obs")
+
+# Ausgabe des Ergebnisses
+cat("Die Korrelation zwischen Salary und Age ist:", correlation_salary_age, "\n")
+```
+
+```{r}
+# Korrelation zwischen Years.Of.Experience und Age berechnen
+correlation_experience_age <- cor(salary_final$Years.Of.Experience, salary_final$Age, use = "complete.obs")
+
+# Ausgabe des Ergebnisses
+cat("Die Korrelation zwischen Years.Of.Experience und Age ist:", correlation_experience_age, "\n")
+```
+
+```{r}
+# Korrelation zwischen Seniority und Years.Of.Experience berechnen
+correlation_seniority_experience <- cor(salary_final$Senior, salary_final$Years.Of.Experience, use = "complete.obs")
+
+# Ausgabe des Ergebnisses
+cat("Die Korrelation zwischen Seniority und Years.Of.Experience ist:", correlation_seniority_experience, "\n")
+```
+
+das ergebnis der correlationen: von salary und years.of.experience ist es 0.81 von Salary und Age ist es 0.73 und die von Age und Years.Of.Experience ist 0.93 wie kommt so ein starker unterschied zu stande bei den werten im vergleich zu salary obwohl sie doch eine hohe correlation zueinander haben
+
+Verteilung der Daten: Es ist möglich, dass die Verteilung der Daten in den Variablen "Age" und "Years.Of.Experience" anders ist als in der Variable "Salary". Wenn die Daten in "Age" und "Years.Of.Experience" breiter gestreut sind, kann dies zu einer geringeren Korrelation führen, selbst wenn eine starke lineare Beziehung besteht.
+
+Nicht-lineare Beziehung: Die Korrelation misst nur lineare Beziehungen. Wenn die Beziehung zwischen "Age" und "Years.Of.Experience" nicht linear ist, könnte dies zu einem niedrigeren Korrelationswert führen.
+
+Ausreißer: Das Vorhandensein von Ausreißern kann die Korrelation beeinflussen. Wenn es Ausreißer in einer der Variablen gibt, kann dies den Korrelationswert beeinträchtigen.
+
+Stichprobengröße: Bei kleineren Stichproben können Korrelationswerte instabiler sein.
+
+## Tests für Thesen
 
 im folgenden werden anhand der Daten ein paar Tests durchgeführt um aussagen für Thesen heruaszufiltern. Das Ergebnis dieses Codechunks ist eine Darstellung der Korrelationsmatrix.
 
@@ -194,14 +238,6 @@ ggplot(salary_final, aes(x = Race, y = Salary)) +
        x = "Race",
        y = "Average Salary")
 
-```
-
-```{r}
-ggplot(salary_final, aes(x = Gender, y = Salary, fill = Gender)) +
-  geom_boxplot() +
-  labs(title = "Distribution of Salary by Gender",
-       x = "Gender",
-       y = "Salary")
 ```
 
 ```{r}
@@ -607,121 +643,15 @@ correlation_salary_experience <- cor(filtered_data$Salary, filtered_data$Years.O
 cat("Die Korrelation zwischen Salary und Years.Of.Experience ist:", correlation_salary_experience, "\n")
 ```
 
-These Korrekt da es im gleichen Verhältnis steht
-
-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
-
-```{r}
-# Korrelation zwischen Salary und Education.Level berechnen
-correlation_salary_education <- cor(filtered_data$Salary, filtered_data$Education.Level, use = "complete.obs")
-
-# Ausgabe des Ergebnisses
-cat("Die Korrelation zwischen Salary und Education.Level ist:", correlation_salary_education, "\n")
-
-```
-
-```{r}
-# Korrelation zwischen Salary und Age berechnen
-correlation_salary_age <- cor(filtered_data$Salary, filtered_data$Age, use = "complete.obs")
-
-# Ausgabe des Ergebnisses
-cat("Die Korrelation zwischen Salary und Age ist:", correlation_salary_age, "\n")
-```
-
-```{r}
-# Korrelation zwischen Years.Of.Experience und Age berechnen
-correlation_experience_age <- cor(filtered_data$Years.Of.Experience, filtered_data$Age, use = "complete.obs")
-
-# Ausgabe des Ergebnisses
-cat("Die Korrelation zwischen Years.Of.Experience und Age ist:", correlation_experience_age, "\n")
-
-```
-
-```{r}
-# Annahme: "filtered_data" ist Ihr Datensatz
-# Annahme: Die Spalten sind "Seniority" und "Years.Of.Experience"
-
-# Korrelation zwischen Seniority und Years.Of.Experience berechnen
-correlation_seniority_experience <- cor(filtered_data$Senior, filtered_data$Years.Of.Experience, use = "complete.obs")
-
-# Ausgabe des Ergebnisses
-cat("Die Korrelation zwischen Seniority und Years.Of.Experience ist:", correlation_seniority_experience, "\n")
-
-```
-
-das ergebnis der correlationen: von salary und years.of.experience ist es 0.81 von Salary und Age ist es 0.73 und die von Age und Years.Of.Experience ist 0.93 wie kommt so ein starker unterschied zu stande bei den werten im vergleich zu salary obwohl sie doch eine hohe correlation zueinander haben
-
-Verteilung der Daten: Es ist möglich, dass die Verteilung der Daten in den Variablen "Age" und "Years.Of.Experience" anders ist als in der Variable "Salary". Wenn die Daten in "Age" und "Years.Of.Experience" breiter gestreut sind, kann dies zu einer geringeren Korrelation führen, selbst wenn eine starke lineare Beziehung besteht.
-
-Nicht-lineare Beziehung: Die Korrelation misst nur lineare Beziehungen. Wenn die Beziehung zwischen "Age" und "Years.Of.Experience" nicht linear ist, könnte dies zu einem niedrigeren Korrelationswert führen.
-
-Ausreißer: Das Vorhandensein von Ausreißern kann die Korrelation beeinflussen. Wenn es Ausreißer in einer der Variablen gibt, kann dies den Korrelationswert beeinträchtigen.
-
-Stichprobengröße: Bei kleineren Stichproben können Korrelationswerte instabiler sein.
-
-\# Durchschnittliche Gehälter pro Jobtyp für technische_jobs2 berechnen
-
-average_salaries_technical \<- mean(technische_jobs2\$Salary)
-
-\# Durchschnittliche Gehälter pro Jobtyp für admin_jobs2 berechnen
-
-average_salaries_admin \<- mean(admin_jobs2\$Salary)
-
-\# Daten zusammenführen
-
-all_average_salaries \<- data.frame(Job.Type = c("technisch", "admin"),
-
-Average.Salary = c(average_salaries_technical, average_salaries_admin))
-
-\# Diagramm erstellen
-
-ggplot(all_average_salaries, aes(x = Job.Type, y = Average.Salary, fill = Job.Type)) +
-
-geom_bar(stat = "identity", position = "dodge", alpha = 0.7) +
-
-labs(title = "Durchschnittliche Gehälter nach Jobtyp",
-
-x = "Jobtyp",
-
-y = "Durchschnittliches Gehalt") +
-
-theme_minimal()
-
-```{r}
-# Filtern der Daten für technische und administrative Jobs basierend auf den Kriterien
-technische_jobs <- subset(filtered_data, job_type == 0)
-admin_jobs <- subset(filtered_data, job_type == 1)
-
-# Durchschnittliche Gehälter pro Jobtyp für technische Jobs berechnen
-average_salaries_technical <- mean(technische_jobs$Salary, na.rm = TRUE)
-
-# Durchschnittliche Gehälter pro Jobtyp für administrative Jobs berechnen
-average_salaries_admin <- mean(admin_jobs$Salary, na.rm = TRUE)
-
-# Zusammenführen der durchschnittlichen Gehälter in einem Datenrahmen
-all_average_salaries <- data.frame(Job.Type = c("technisch", "admin"),
-                                   Average.Salary = c(average_salaries_technical, average_salaries_admin))
-
-# Erstellung des Diagramms mit angepasster Achsenbeschriftung
-ggplot(all_average_salaries, aes(x = Job.Type, y = Average.Salary, fill = Job.Type)) +
-  geom_bar(stat = "identity", position = "dodge", alpha = 0.7) +
-  labs(title = "Durchschnittliche Gehälter nach Jobtyp",
-       x = "Jobtyp",
-       y = "Durchschnittliches Gehalt") +
-  theme_minimal() +
-  scale_y_continuous(labels = scales::comma)  # Verwendung von scales::comma für die Achsenbeschriftung in Tausenden
-
-```
-
-Und das Obwohl in den Admin Jobs auch direktoren und Manager vertreten sind
-
-Nehmen wir an das Manager ein Job Titel wie Projekt Manager ist und nicht Manager für Projekt Management und dieser Titel in unserem Datensatz Director ist? Thema Führungsposition
+These Korrekt da es im gleichen Verhältnis steht. Nicht desto trotz gibt es einen Unterschied zwischen den Geschlechtern bei gleichbleibender Arbeitderfahrung was auf einen kleinen Gender Pay gap schließen lässt.
 
 ## Expats verdienen mehr als Einheimisch
 
 Unsere Untersuchungen haben Ergeben das wir die Daten für unsere Explorative Datenanalyse aber auch die Regression neu aufbereiten müssen.
 
 Dazu suchen wir: unterscheide ich einen native und expat im jeweiligen Land. Welche annahmen sind dafür nötig? Hier die annahme das White generell nicht ausgewandert ist da wir hier länder mit ähnlicher kultur und salary haben
+
+### 1.: Alle Ethnizitäten je Land
 
 ```{r}
 ggplot(filtered_data, aes(x = Country, fill = Race)) +
@@ -732,7 +662,7 @@ ggplot(filtered_data, aes(x = Country, fill = Race)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Daten für Analyse von Expats und Einheimischen bereits Aufbereitet. Bitte hier nochma beschrieben
+Daten für Analyse von Expats und Einheimischen bereits Aufbereitet. Bitte hier nochmal beschrieben
 
 ```{r}
 # Erstellung des Boxplots für Expats und Einheimische
@@ -757,9 +687,9 @@ mean_salary_native
 
 ```
 
-These verworfen.
+These verworfen. Da es offensichtlich keine Unterschiede gibt. Ggf. noch einzelne Ethnizitäten betrachten
 
-## Gehaltscap education level vorhanden? 
+## Gehaltscap education level vorhanden?
 
 Ohne ein Mindestmaß ein Bildung ist keine weitere Gehaltsentwicklung möglich
 
@@ -779,7 +709,7 @@ Bildungsniveau Codes:
 
 3.  **Visualisierungen:** Verschiedene Visualisierungen wie Scatterplots oder Liniendiagramme könnten erstellt werden, um Trends oder Muster zwischen Gehalt und Bildungsniveau zu erkennen.
 
-### 1.: Desktiptive Statistiken: 
+### 1.: Desktiptive Statistiken:
 
 ```{r}
 # Bibliotheken laden
@@ -865,3 +795,48 @@ ggplot(filtered_data, aes(x = Education.Level, y = Salary, group = 1)) +
 ```
 
 These Korrekt: Ohne einen Hochschulabschluss gibt es eine Gehaltsgrenze. Die top 90% ohne Hochschulabschluss fangen bei den unteren 10% mit Hochschulabschluss an aus der Sicht des Gehalts.
+
+## Technische Jobs haben ein höheres Gehalt als Administrative Jobs - jedes Land?
+
+### 1.: Daten Aufbereiten
+
+Daten Aufbereiten
+
+### 2.: Insgesamt
+
+```{r}
+# Filtern der Daten für technische und administrative Jobs basierend auf den Kriterien
+technische_jobs <- subset(filtered_data, job_type == 0)
+admin_jobs <- subset(filtered_data, job_type == 1)
+
+# Durchschnittliche Gehälter pro Jobtyp für technische Jobs berechnen
+average_salaries_technical <- mean(technische_jobs$Salary, na.rm = TRUE)
+
+# Durchschnittliche Gehälter pro Jobtyp für administrative Jobs berechnen
+average_salaries_admin <- mean(admin_jobs$Salary, na.rm = TRUE)
+
+# Zusammenführen der durchschnittlichen Gehälter in einem Datenrahmen
+all_average_salaries <- data.frame(Job.Type = c("technisch", "admin"),
+                                   Average.Salary = c(average_salaries_technical, average_salaries_admin))
+
+# Erstellung des Diagramms mit angepasster Achsenbeschriftung
+ggplot(all_average_salaries, aes(x = Job.Type, y = Average.Salary, fill = Job.Type)) +
+  geom_bar(stat = "identity", position = "dodge", alpha = 0.7) +
+  labs(title = "Durchschnittliche Gehälter nach Jobtyp",
+       x = "Jobtyp",
+       y = "Durchschnittliches Gehalt") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::comma)  # Verwendung von scales::comma für die Achsenbeschriftung in Tausenden
+```
+
+### 3.: Je Land
+
+vergleich nach ländern
+
+```{r}
+
+```
+
+These Korrekt Und das Obwohl in den Admin Jobs auch direktoren und Manager vertreten sind
+
+Nehmen wir an das Manager ein Job Titel wie Projekt Manager ist und nicht Manager für Projekt Management und dieser Titel in unserem Datensatz Director ist? Thema Führungsposition
