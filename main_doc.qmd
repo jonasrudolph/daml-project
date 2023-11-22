@@ -26,7 +26,7 @@ library(ggplot2)
 library(corrplot)
 ```
 
-## Einlesen der zu Analysierenden Daten 
+## Einlesen der zu Analysierenden Daten
 
 Der Datensatz, der in diesem Projekt analysiert wird, stammt von der website "Kaggle" und beschreibt das Gehalt nach Job und Land in dem gearbeitet wird.
 
@@ -101,7 +101,7 @@ summary(salary)
 
 Erkennbar hier ist es, dass es innerhalb des Datensatzes ein durchschnittliches Alter von 32 Jahren vorliegt. Das Alter streckt sich von 21 Jahren bis zu 62 Jahren. Außerdem gibt es beim "Education-Level" Werte zwischen 1, 2 und 3, wobei der Durchschnitt jedoch bei 1 liegt. Außerdem gibt es bei der Berufserfahrung ( Years of Experience) Werte zwischen 0 bis zu 34 Jahren. Der Median hier beträgt 7.
 
-#### Umstrukturierung des Datensatzes 
+#### Umstrukturierung des Datensatzes
 
 Im folgenden wird der Datensatz umstrukturiert und ein neuer Wert Namens "Value" wird erschaffen. Dies geschieht um möglicherweise besser analysieren und visualisieren zu können.
 
@@ -159,7 +159,7 @@ salary_final$SalaryKat <- cut(salary_final$Salary,
 explore(salary_final, SalaryKat)
 ```
 
-# Tets
+# Tests
 
 im folgenden werden anhand der Daten ein paar Tests durchgeführt. Das Ergebnis dieses Codechunks ist eine Darstellung der Korrelationsmatrix.
 
