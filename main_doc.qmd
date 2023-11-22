@@ -24,6 +24,7 @@ library(tidyverse)
 library(explore) 
 library(ggplot2)
 library(corrplot)
+library(dplyr)
 ```
 
 ## Einlesen der zu Analysierenden Daten
@@ -70,7 +71,7 @@ describe(salary)
 
 : Wie bereits oben in der Tabelle zu erkennen gibt es Innerhalb des Datensatzes nur zwei verschiedene Datentypen. Die Felder \*Age, Education Level, Years of Experience, Salary, Senior\* sind nummerische Merkmale. Die Felder *Gender, Job Title, Country, Race* sind kategorische Merkmale.
 
-## Daten verstehen
+## 
 
 Im folgenden Abschnitt werden verschiedene Funktionen dafür verwendet, um die Datentypen und Bedeutung der Spalten zu verstehen.
 
@@ -91,7 +92,7 @@ Nun werfen verschaffen Wir uns einen Überblick über die prozentuale Verteilung
 explore (salary, Job.Title)
 ```
 
-### Grundlegende Statistische Merkmale des Datensatzes
+## Grundlegende Statistische Merkmale des Datensatzes
 
 Im folgenden wird ein Überblick über die grundlegenden statistischen Merkmale geworfen:
 
@@ -101,7 +102,7 @@ summary(salary)
 
 Erkennbar hier ist es, dass es innerhalb des Datensatzes ein durchschnittliches Alter von 32 Jahren vorliegt. Das Alter streckt sich von 21 Jahren bis zu 62 Jahren. Außerdem gibt es beim "Education-Level" Werte zwischen 1, 2 und 3, wobei der Durchschnitt jedoch bei 1 liegt. Außerdem gibt es bei der Berufserfahrung ( Years of Experience) Werte zwischen 0 bis zu 34 Jahren. Der Median hier beträgt 7.
 
-#### Umstrukturierung des Datensatzes
+## Umstrukturierung des Datensatzes zwecks Visualisierung
 
 Im folgenden wird der Datensatz umstrukturiert und ein neuer Wert Namens "Value" wird erschaffen. Dies geschieht um möglicherweise besser analysieren und visualisieren zu können.
 
@@ -128,9 +129,7 @@ Hier kann man folgende Dinge erkennen:
 
 Aufgrund der guten Strukturiertheit der Daten eignen sie sich dem ersten Anschein nach gut für eine Ausführliche Explorative Analyse.
 
-## Datenaufbereitung
-
-### Erstellung des entgültigen Datensets
+## Kategorisierung von Gehalt
 
 Zunächst werden die Daten aus dem Ausgangsdatensatz in einen finalen Datensatz "salary_final" geschrieben.
 
@@ -144,7 +143,7 @@ Durch den Befehl "hist()" wird ein Histogramm erstellt . Es ermöglicht eine vis
 hist(salary_final$Salary)
 ```
 
-Im folgenden wird eine neue Spalte "SalaryKat" erstellt die kategorische Werte basdierend auf den Gehältern enthält..........
+Im folgenden wird eine neue Spalte "SalaryKat" erstellt die kategorische Werte basdierend auf den Gehältern enthält...
 
 ```{r}
 
@@ -159,9 +158,53 @@ salary_final$SalaryKat <- cut(salary_final$Salary,
 explore(salary_final, SalaryKat)
 ```
 
-# Tests
+## Korrelationen
 
-im folgenden werden anhand der Daten ein paar Tests durchgeführt. Das Ergebnis dieses Codechunks ist eine Darstellung der Korrelationsmatrix.
+```{r}
+# Korrelation zwischen Salary und Years.Of.Experience berechnen
+correlation_salary_experience <- cor(salary_final$Salary, salary_final$Years.Of.Experience)
+
+# Ausgabe des Ergebnisses
+cat("Die Korrelation zwischen Salary und Years.Of.Experience ist:", correlation_salary_experience, "\n")
+```
+
+```{r}
+# Korrelation zwischen Salary und Age berechnen
+correlation_salary_age <- cor(salary_final$Salary, salary_final$Age, use = "complete.obs")
+
+# Ausgabe des Ergebnisses
+cat("Die Korrelation zwischen Salary und Age ist:", correlation_salary_age, "\n")
+```
+
+```{r}
+# Korrelation zwischen Years.Of.Experience und Age berechnen
+correlation_experience_age <- cor(salary_final$Years.Of.Experience, salary_final$Age, use = "complete.obs")
+
+# Ausgabe des Ergebnisses
+cat("Die Korrelation zwischen Years.Of.Experience und Age ist:", correlation_experience_age, "\n")
+```
+
+```{r}
+# Korrelation zwischen Seniority und Years.Of.Experience berechnen
+correlation_seniority_experience <- cor(salary_final$Senior, salary_final$Years.Of.Experience, use = "complete.obs")
+
+# Ausgabe des Ergebnisses
+cat("Die Korrelation zwischen Seniority und Years.Of.Experience ist:", correlation_seniority_experience, "\n")
+```
+
+das ergebnis der correlationen: von salary und years.of.experience ist es 0.81 von Salary und Age ist es 0.73 und die von Age und Years.Of.Experience ist 0.93 wie kommt so ein starker unterschied zu stande bei den werten im vergleich zu salary obwohl sie doch eine hohe correlation zueinander haben
+
+Verteilung der Daten: Es ist möglich, dass die Verteilung der Daten in den Variablen "Age" und "Years.Of.Experience" anders ist als in der Variable "Salary". Wenn die Daten in "Age" und "Years.Of.Experience" breiter gestreut sind, kann dies zu einer geringeren Korrelation führen, selbst wenn eine starke lineare Beziehung besteht.
+
+Nicht-lineare Beziehung: Die Korrelation misst nur lineare Beziehungen. Wenn die Beziehung zwischen "Age" und "Years.Of.Experience" nicht linear ist, könnte dies zu einem niedrigeren Korrelationswert führen.
+
+Ausreißer: Das Vorhandensein von Ausreißern kann die Korrelation beeinflussen. Wenn es Ausreißer in einer der Variablen gibt, kann dies den Korrelationswert beeinträchtigen.
+
+Stichprobengröße: Bei kleineren Stichproben können Korrelationswerte instabiler sein.
+
+## Tests für Thesen
+
+im folgenden werden anhand der Daten ein paar Tests durchgeführt um aussagen für Thesen heruaszufiltern. Das Ergebnis dieses Codechunks ist eine Darstellung der Korrelationsmatrix.
 
 ```{r}
 correlations <- cor(salary_final[, c("Age", "Education.Level", "Years.Of.Experience", "Salary")])
@@ -198,14 +241,6 @@ ggplot(salary_final, aes(x = Race, y = Salary)) +
 ```
 
 ```{r}
-ggplot(salary_final, aes(x = Gender, y = Salary, fill = Gender)) +
-  geom_boxplot() +
-  labs(title = "Distribution of Salary by Gender",
-       x = "Gender",
-       y = "Salary")
-```
-
-```{r}
 ggplot(salary_final, aes(x = Country, y = Salary, fill = Country)) +
   geom_bar(stat = "summary", fun = "mean", position = "dodge", color = "black") +
   labs(title = "Average Salary by Country",
@@ -215,9 +250,6 @@ ggplot(salary_final, aes(x = Country, y = Salary, fill = Country)) +
 ```
 
 ```{r}
-
-
-
 ggplot(salary_final, aes(x = Country, y = Salary, fill = Gender)) +
   geom_bar(stat = "summary", fun = "mean", position = "stack", color = "black") +
   labs(title = "Average Salary by Country and Gender",
@@ -256,7 +288,7 @@ ggplot(salary_final, aes(x = Country, y = Salary, fill = Race)) +
 
 ```
 
-Irgendwie zu viele Jobtitel
+Hier wird festgestellt das in dem Datensatz zu viele Jobtitle vorkommen
 
 ```{r}
 ggplot(salary_final, aes(x = Job.Title, y = Salary)) +
@@ -285,6 +317,24 @@ ggplot(job_title_df, aes(x = Job_Title, y = Frequency)) +
        y = "Frequency") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  
 ```
+
+Korrelationen aller Werte auf Salary
+
+```{r}
+filtered_data_numeric <- select(salary, Salary, Age, Years.Of.Experience, Education.Level)
+glimpse(filtered_data_numeric)
+cor(filtered_data_numeric)
+```
+
+```{r}
+filtered_data_numeric |>
+cor() |>
+corrplot(method = 'ellipse')
+```
+
+# Daten Aufbereiten
+
+## Jobs
 
 Da in dem Datensatz teilweise Jobs nur einmalig vertreten sind, kann ein erhebliches Stichproben-Bias verursacht werden. Da das mittlere Einkommen ein wichtiges Merkmal in unserer explorativen Datenanalyse darstellt und mindestens 30 Einträge für eine aussagekräftige Stichprobe nötig sind, haben wir uns dazu entschlossen alle Einträge mit N\<30 bei der Anzahl der Jobtitel (N) abzuschneiden.
 
@@ -315,26 +365,16 @@ ggplot(job_title_df, aes(x = Job_Title, y = Frequency)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  
 ```
 
+Auf min 30 Jobhäufigkeiten angepasst.
+
 ```{r}
 job_title_count_filtered <- table(filtered_data$Job.Title)
 cat(paste(names(job_title_count_filtered), ":", job_title_count_filtered, "\n"))
 ```
 
-Korrelationen aller werte
+## Job Typen
 
-```{r}
-filtered_data_numeric <- select(salary, Salary, Age, Years.Of.Experience, Education.Level)
-glimpse(filtered_data_numeric)
-cor(filtered_data_numeric)
-```
-
-```{r}
-filtered_data_numeric |>
-   cor() |> 
-   corrplot(method = 'ellipse')
-```
-
-anzahl der technischen und adminsitrativen berufe
+Anzahl der technischen und adminsitrativen Berufe
 
 ```{r}
 
@@ -413,7 +453,7 @@ cat("Anzahl der administrativen Jobs2:", anzahl_admin_jobs2, "\n")
 
 basieren auf filtered_data ein neues dataset erstellt wird aus dem ein datensatz gelöscht wird sobald eine zeile einer der \_jobs table zugewiesen wird damit es nicht doppelt gezählt werden kann. Warum auch immer funktioniert das nicht also neuer lösungsansatz:
 
-#### Das Problem mit der Klassifizierung der Jobs nach Technisch und Administrativ lässt sich lösen in dem ich die nicht in 2 tabellen aufteile sondern sie klassifiziere...
+#### Das Problem mit der Klassifizierung der Jobs nach Technisch und Administrativ lässt sich lösen in dem ich die nicht in 2 tabellen aufteile sondern jeder Zeile einen Wert des Entsprechenden job types zuordne
 
 ```{r}
 # Erstellung der neuen Spalte "job_type" basierend auf den gegebenen Filtern
@@ -472,7 +512,7 @@ print(count_job_types)
 
 Done. Im folgenden werden alle Diagramme auch über job_type ausgewertet könnnen.
 
--   Männer haben im Durchschnitt mehr Yrs of Experience als Frauen -\> Lässt sich die Genderpaygap auf die Yrs of Exp übertragen?
+## Expats & Einheimische
 
 ```{r}
 ggplot(filtered_data, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
@@ -708,8 +748,135 @@ filtered_data$Expat <- ifelse(expat_conditions[[1]] | expat_conditions[[2]], 0,
 
 # Anzeige des aktualisierten Datensatzes zur Überprüfung
 head(filtered_data)
+```
+
+# Thesen
+
+## Genderpaygap
+
+1.  Männer verdienen mehr als Frauen
+2.  Die Differenz der Salary zwischen den Geschlechtern ist in China höher als in den westlichen Ländern.
+3.  Männer haben im Durchschnitt mehr Yrs of Experience als Frauen -\> Lässt sich die Genderpaygap auf die Yrs of Exp übertragen? Und gilt dies auch für China
+
+### 1.: Männer verdienen mehr als Frauen
+
+```{r}
+ggplot(filtered_data, aes(x = factor(Gender), y = Salary, fill = Gender)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Boxplot: Salary vs. Gender",
+       x = "Gender",
+       y = "Salary",
+       fill = "Gender") +
+  theme_minimal()
+```
+
+These Korrekt
+
+### 2.: Die Differenz der Salary zwischen den Geschlechtern ist in China höher als in den westlichen Ländern. Hier alle westlichen Länder hinzufügen
+
+```{r}
+# Daten für USA filtern
+data_usa <- subset(filtered_data, Country == "USA")
+
+# Boxplot erstellen
+ggplot(data_usa, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Boxplot: Years of Experience vs. Gender (USA)",
+       x = "Gender",
+       y = "Years of Experience",
+       fill = "Gender") +
+  theme_minimal()
+```
+
+```{r}
+# Daten für China filtern
+data_china <- subset(filtered_data, Country == "China")
+
+# Boxplot für Salary vs. Gender erstellen
+ggplot(data_china, aes(x = factor(Gender), y = Salary, fill = Gender)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Boxplot: Salary vs. Gender (China)",
+       x = "Gender",
+       y = "Salary",
+       fill = "Gender") +
+  theme_minimal()
+```
+
+These Korrekt
+
+### 3.: Männer haben im Durchschnitt mehr Yrs of Experience als Frauen -\> Lässt sich die Genderpaygap auf die Yrs of Exp übertragen? Und gilt dies auch für China
+
+```{r}
+ggplot(filtered_data, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Boxplot: Years of Experience vs. Gender",
+       x = "Gender",
+       y = "Years of Experience",
+       fill = "Gender") +
+  theme_minimal()
+```
+
+```{r}
+# Daten für China filtern
+data_china <- subset(filtered_data, Country == "China")
+
+# Boxplot erstellen
+ggplot(data_china, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Boxplot: Years of Experience vs. Gender (China)",
+       x = "Gender",
+       y = "Years of Experience",
+       fill = "Gender") +
+  theme_minimal()
+```
+
+```{r}
+# Daten für USA filtern
+data_usa <- subset(filtered_data, Country == "USA")
+
+# Boxplot erstellen
+ggplot(data_usa, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Boxplot: Years of Experience vs. Gender (USA)",
+       x = "Gender",
+       y = "Years of Experience",
+       fill = "Gender") +
+  theme_minimal()
 
 ```
+
+ist jetzt der gender pay gap in china doch größer da der größte faktor für salary years of experience ist?
+
+Dafür schauen wir uns an: Korrelation von years of experience und salary
+
+```{r}
+# Korrelation zwischen Salary und Years.Of.Experience berechnen
+correlation_salary_experience <- cor(filtered_data$Salary, filtered_data$Years.Of.Experience)
+
+# Ausgabe des Ergebnisses
+cat("Die Korrelation zwischen Salary und Years.Of.Experience ist:", correlation_salary_experience, "\n")
+```
+
+These Korrekt da es im gleichen Verhältnis steht. Nicht desto trotz gibt es einen Unterschied zwischen den Geschlechtern bei gleichbleibender Arbeitderfahrung was auf einen kleinen Gender Pay gap schließen lässt.
+
+## Expats verdienen mehr als Einheimisch
+
+Unsere Untersuchungen haben Ergeben das wir die Daten für unsere Explorative Datenanalyse aber auch die Regression neu aufbereiten müssen.
+
+Dazu suchen wir: unterscheide ich einen native und expat im jeweiligen Land. Welche annahmen sind dafür nötig? Hier die annahme das White generell nicht ausgewandert ist da wir hier länder mit ähnlicher kultur und salary haben
+
+### 1.: Alle Ethnizitäten je Land
+
+```{r}
+ggplot(filtered_data, aes(x = Country, fill = Race)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Count of Races in Each Country",
+       x = "Country",
+       y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Daten für Analyse von Expats und Einheimischen bereits Aufbereitet. Bitte hier nochmal beschrieben
 
 ```{r}
 # Erstellung des Boxplots für Expats und Einheimische
@@ -734,19 +901,58 @@ mean_salary_native
 
 ```
 
-These verworfen.
+These verworfen. Da es offensichtlich keine Unterschiede gibt. Ggf. noch einzelne Ethnizitäten betrachten
 
-These Gehaltscap education level vorhanden?
+## Gehaltscap education level vorhanden?
+
+Ohne ein Mindestmaß ein Bildung ist keine weitere Gehaltsentwicklung möglich
+
+Bildungsniveau Codes:
+
+0 = High School Abschluss
+
+1 = Bachelor
+
+2 = Master
+
+3 = Doctor
 
 1.  **Deskriptive Statistiken:** Man könnte Quantile oder Perzentile des Gehalts für jedes Bildungsniveau berechnen. Dies bietet einen Überblick über die Verteilung der Gehälter und zeigt potenzielle Grenzwerte auf.
 
 2.  **Boxplots pro Bildungsniveau:** Man könnte Boxplots für jedes Bildungsniveau erstellen, um die Verteilung der Gehälter visuell zu vergleichen. Dies kann helfen, Ausreißer und Unterschiede zwischen den Bildungsniveaus zu identifizieren.
 
-3.  **Statistische Tests:** Man könnte statistische Tests durchführen, um festzustellen, ob es signifikante Unterschiede in den Gehältern zwischen den Bildungsniveaus gibt. Zum Beispiel könnten ANOVA oder andere geeignete Tests verwendet werden.
+3.  **Visualisierungen:** Verschiedene Visualisierungen wie Scatterplots oder Liniendiagramme könnten erstellt werden, um Trends oder Muster zwischen Gehalt und Bildungsniveau zu erkennen.
 
-4.  **Regression:** Eine Regressionsanalyse könnte durchgeführt werden, um zu untersuchen, wie das Bildungsniveau das Gehalt beeinflusst. Dies könnte helfen, die Grenzen des Gehaltsniveaus für jedes Bildungsniveau zu verstehen.
+### 1.: Desktiptive Statistiken:
 
-5.  **Visualisierungen:** Verschiedene Visualisierungen wie Scatterplots oder Liniendiagramme könnten erstellt werden, um Trends oder Muster zwischen Gehalt und Bildungsniveau zu erkennen.
+```{r}
+# Bibliotheken laden
+library(ggplot2)
+library(dplyr)
+
+# Daten berechnen
+salary_percentiles <- filtered_data %>%
+  group_by(Education.Level) %>%
+  summarise(`10th Percentile` = quantile(Salary, probs = 0.1, na.rm = TRUE),
+            `25th Percentile` = quantile(Salary, probs = 0.25, na.rm = TRUE),
+            `50th Percentile (Median)` = quantile(Salary, probs = 0.5, na.rm = TRUE),
+            `75th Percentile` = quantile(Salary, probs = 0.75, na.rm = TRUE),
+            `90th Percentile` = quantile(Salary, probs = 0.9, na.rm = TRUE))
+
+# Reshape der Daten für das Plotting
+salary_percentiles_long <- salary_percentiles %>%
+  tidyr::pivot_longer(cols = -Education.Level, names_to = "Percentile", values_to = "Salary")
+
+# Diagramm erstellen
+ggplot(salary_percentiles_long, aes(x = Education.Level, y = Salary, fill = Percentile)) +
+  geom_bar(stat = "identity", position = "dodge", alpha = 0.7) +
+  labs(title = "Perzentile des Gehalts nach Bildungsniveau",
+       x = "Bildungsniveau",
+       y = "Gehalt",
+       fill = "Perzentil") +
+  theme_minimal()
+
+```
 
 ```{r}
 # Berechnung der Durchschnittsgehälter pro Bildungsniveau
@@ -754,88 +960,97 @@ average_salary_education <- aggregate(Salary ~ Education.Level, data = filtered_
 
 # Anzeige der Durchschnittsgehälter pro Bildungsniveau
 average_salary_education
-
 ```
 
+### 2.: **Boxplots pro Bildungsniveau:**
+
 ```{r}
-library(ggplot2)
+# Bildungsniveau nach aufsteigender Reihenfolge sortieren
+filtered_data <- filtered_data %>%
+  mutate(Education.Level = factor(Education.Level, levels = unique(sort(Education.Level))))
 
-# Berechnung der Durchschnittsgehälter pro Bildungsniveau
-average_salary_education <- aggregate(Salary ~ Education.Level, data = filtered_data, FUN = mean, na.rm = TRUE)
-
-# Erstellung des Diagramms
-ggplot(average_salary_education, aes(x = factor(Education.Level), y = Salary)) +
-  geom_bar(stat = "identity", fill = "skyblue", alpha = 0.7) +
-  labs(title = "Durchschnittsgehälter nach Bildungsniveau",
+# Boxplot erstellen
+ggplot(filtered_data, aes(x = reorder(factor(Education.Level), Salary, FUN = median), y = Salary)) +
+  geom_boxplot(fill = "lightblue", color = "black") +
+  labs(title = "Boxplot des Gehalts nach Bildungsniveau",
        x = "Bildungsniveau",
-       y = "Durchschnittliches Gehalt") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Drehung der x-Achsenbeschriftungen für bessere Lesbarkeit
-
+       y = "Gehalt") +
+  theme_minimal()
 ```
 
-```{r}
-library(ggplot2)
+### 3.: **Visualisierungen:**
 
-# Annahme: 'Salary' und 'Education.Level' sind die entsprechenden Spalten in Ihrem 'filtered_data' Datensatz
+```{r}
+# Bildungsniveau nach aufsteigender Reihenfolge sortieren
+filtered_data <- filtered_data %>%
+  mutate(Education.Level = factor(Education.Level, levels = unique(sort(Education.Level))))
 
 # Scatterplot erstellen
-ggplot(filtered_data, aes(x = Education.Level, y = Salary)) +
+ggplot(filtered_data, aes(x = reorder(factor(Education.Level), Salary, FUN = median), y = Salary)) +
   geom_point() + 
   labs(title = "Gehalt nach Bildungslevel",
        x = "Bildungslevel",
        y = "Gehalt") +
   theme_minimal()
-
 ```
 
-library(ggplot2)
+```{r}
+# Bildungslevel neu ordnen
+filtered_data$Education.Level <- factor(filtered_data$Education.Level, levels = c("0", "1", "2", "3"))
 
-\# Annahme: 'Salary' und 'Education.Level' sind die entsprechenden Spalten in Ihrem 'filtered_data' Datensatz
-
-\# Um das Bildungslevel als kontinuierliches Kontinuum zu betrachten
-
-\# Faktorisieren von 'Education.Level' in aufsteigender Reihenfolge
-
-filtered_data\$Education.Level \<- factor(filtered_data\$Education.Level, levels = unique(filtered_data\$Education.Level))
-
-\# Liniendiagramm erstellen
-
+# Liniendiagramm mit umgekehrter Reihenfolge des Bildungsniveaus erstellen
 ggplot(filtered_data, aes(x = Education.Level, y = Salary, group = 1)) +
-
-geom_line() +
-
-labs(title = "Gehalt nach Bildungslevel",
-
-x = "Bildungslevel",
-
-y = "Gehalt") +
-
-theme_minimal()
-
-```{r}
-library(dplyr)
-library(ggplot2)
-
-# Annahme: 'Salary' und 'Education.Level' sind die entsprechenden Spalten in Ihrem 'filtered_data' Datensatz
-
-# Durchschnittsgehalt für jeden Bildungslevel berechnen
-avg_salary_by_education <- filtered_data %>%
-  group_by(Education.Level) %>%
-  summarise(Avg_Salary = mean(Salary))
-
-# Liniendiagramm erstellen
-ggplot(avg_salary_by_education, aes(x = Education.Level, y = Avg_Salary, group = 1)) +
   geom_line() +
-  labs(title = "Durchschnittsgehalt nach Bildungslevel",
+  stat_summary(fun.y = median, geom = "point", size = 3, color = "red") +
+  labs(title = "Gehalt nach Bildungslevel",
        x = "Bildungslevel",
-       y = "Durchschnittsgehalt") +
+       y = "Gehalt") +
   theme_minimal()
-
 ```
 
-Anscheinen sehr starker unterschied von 0 auf 1 und 1 auf 2
+These Korrekt: Ohne einen Hochschulabschluss gibt es eine Gehaltsgrenze. Die top 90% ohne Hochschulabschluss fangen bei den unteren 10% mit Hochschulabschluss an aus der Sicht des Gehalts.
+
+## Technische Jobs haben ein höheres Gehalt als Administrative Jobs - jedes Land?
+
+### 1.: Daten Aufbereiten
+
+Daten Aufbereiten
+
+### 2.: Insgesamt
+
+```{r}
+# Filtern der Daten für technische und administrative Jobs basierend auf den Kriterien
+technische_jobs <- subset(filtered_data, job_type == 0)
+admin_jobs <- subset(filtered_data, job_type == 1)
+
+# Durchschnittliche Gehälter pro Jobtyp für technische Jobs berechnen
+average_salaries_technical <- mean(technische_jobs$Salary, na.rm = TRUE)
+
+# Durchschnittliche Gehälter pro Jobtyp für administrative Jobs berechnen
+average_salaries_admin <- mean(admin_jobs$Salary, na.rm = TRUE)
+
+# Zusammenführen der durchschnittlichen Gehälter in einem Datenrahmen
+all_average_salaries <- data.frame(Job.Type = c("technisch", "admin"),
+                                   Average.Salary = c(average_salaries_technical, average_salaries_admin))
+
+# Erstellung des Diagramms mit angepasster Achsenbeschriftung
+ggplot(all_average_salaries, aes(x = Job.Type, y = Average.Salary, fill = Job.Type)) +
+  geom_bar(stat = "identity", position = "dodge", alpha = 0.7) +
+  labs(title = "Durchschnittliche Gehälter nach Jobtyp",
+       x = "Jobtyp",
+       y = "Durchschnittliches Gehalt") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::comma)  # Verwendung von scales::comma für die Achsenbeschriftung in Tausenden
+```
+
+### 3.: Je Land
+
+vergleich nach ländern
 
 ```{r}
 
 ```
+
+These Korrekt Und das Obwohl in den Admin Jobs auch direktoren und Manager vertreten sind
+
+Nehmen wir an das Manager ein Job Titel wie Projekt Manager ist und nicht Manager für Projekt Management und dieser Titel in unserem Datensatz Director ist? Thema Führungsposition
