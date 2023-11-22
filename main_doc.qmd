@@ -256,6 +256,8 @@ ggplot(salary_final, aes(x = Country, y = Salary, fill = Race)) +
 
 ```
 
+Irgendwie zu viele Jobtitel
+
 ```{r}
 ggplot(salary_final, aes(x = Job.Title, y = Salary)) +
   geom_bar(stat = "summary", fun = "mean", fill = "blue", color = "black") +
@@ -269,6 +271,8 @@ ggplot(salary_final, aes(x = Job.Title, y = Salary)) +
 job_title_count <- table(salary_final$Job.Title)
 print(job_title_count)
 ```
+
+Hier nochmal das obere genauer grafisch herausgearbeitet
 
 ```{r}
 job_title_count <- table(salary_final$Job.Title)
@@ -316,6 +320,8 @@ job_title_count_filtered <- table(filtered_data$Job.Title)
 cat(paste(names(job_title_count_filtered), ":", job_title_count_filtered, "\n"))
 ```
 
+Korrelationen aller werte
+
 ```{r}
 filtered_data_numeric <- select(salary, Salary, Age, Years.Of.Experience, Education.Level)
 glimpse(filtered_data_numeric)
@@ -336,7 +342,7 @@ anzahl der technischen und adminsitrativen berufe
 technische_jobs <- filtered_data[grep("data|engineer|developer|analyst|scientist", tolower(filtered_data$Job.Title)), ]
 
 # Filtern nach wirtschaftlichen/administrativen Jobs
-admin_jobs <- filtered_data[grep("associate|director|manager|sales|coordinator|generalist", tolower(filtered_data$Job.Title)), ]
+admin_jobs <- filtered_data[grep("associate|director|manager|sales|coordinator|generalist|receptionist|designer", tolower(filtered_data$Job.Title)), ]
 
 # Beispiel für die Ausgabe der ersten paar Zeilen der gefilterten Daten
 head(technische_jobs)
@@ -383,7 +389,7 @@ filtered_data$ID <- 1:nrow(filtered_data)
 technische_jobs2 <- unique(filtered_data[grep("data|engineer|developer|analyst|scientist", tolower(filtered_data$Job.Title)), ])
 
 # Filtern nach wirtschaftlichen/administrativen Jobs und Entfernen von Duplikaten
-admin_jobs2 <- unique(filtered_data[grep("associate|director|manager|sales|coordinator|generalist", tolower(filtered_data$Job.Title)), ])
+admin_jobs2 <- unique(filtered_data[grep("associate|director|manager|sales|coordinator|generalist|receptionist|designer", tolower(filtered_data$Job.Title)), ])
 
 # Merke die IDs der übereinstimmenden Zeilen
 ids_technische_jobs <- filtered_data$ID[filtered_data$Job.Title %in% technische_jobs2$Job.Title]
@@ -405,11 +411,66 @@ anzahl_admin_jobs2 <- nrow(admin_jobs2)
 cat("Anzahl der administrativen Jobs2:", anzahl_admin_jobs2, "\n")
 ```
 
+basieren auf filtered_data ein neues dataset erstellt wird aus dem ein datensatz gelöscht wird sobald eine zeile einer der \_jobs table zugewiesen wird damit es nicht doppelt gezählt werden kann. Warum auch immer funktioniert das nicht also neuer lösungsansatz:
+
+#### Das Problem mit der Klassifizierung der Jobs nach Technisch und Administrativ lässt sich lösen in dem ich die nicht in 2 tabellen aufteile sondern sie klassifiziere...
+
 ```{r}
+# Erstellung der neuen Spalte "job_type" basierend auf den gegebenen Filtern
+filtered_data$job_type <- ifelse(
+    grepl("data|engineer|developer|analyst|scientist", tolower(filtered_data$Job.Title)),
+    0, # 0 für technische Jobs
+    ifelse(
+        grepl("associate|director|manager|sales|coordinator|generalist", tolower(filtered_data$Job.Title)),
+        1, # 1 für administrative Jobs
+        NA  # NA für alle anderen
+    )
+)
+
+# Anzeige der Anzahl aller Zeilen im Datensatz und der Anzahl der Zeilen für jede job_type-Ausprägung
+total_rows <- nrow(filtered_data)
+count_job_types <- table(filtered_data$job_type, useNA = "ifany")
+
+# Ausgabe der Ergebnisse
+print(paste("Gesamtanzahl der Zeilen im Datensatz:", total_rows))
+print("Anzahl der Zeilen für jede job_type-Ausprägung:")
+print(count_job_types)
 
 ```
 
-basieren auf filtered_data ein neues dataset erstellt wird aus dem ein datensatz gelöscht wird sobald eine zeile einer der \_jobs table zugewiesen wird damit es nicht doppelt gezählt werden kann
+Auflösen der NAs
+
+```{r}
+# Auswahl aller Zeilen mit NA-Werten in der Spalte "job_type"
+na_job_type_rows <- subset(filtered_data, is.na(job_type))
+
+# Anzeige der ausgewählten Zeilen mit NA in "job_type"
+na_job_type_rows
+
+```
+
+Das Ergebnis ist eine Table welche nur aus Product Designer & Receptionist besteht. Diese fügen wir den Administrativen Jobs hinzu.
+
+```{r}
+# Aktualisierung der job_type-Spalte für die spezifischen Job-Titel
+filtered_data$job_type[filtered_data$Job.Title %in% c("Product Designer", "Receptionist")] <- 1
+
+# Anzeige der aktualisierten Daten für die ausgewählten Job-Titel
+subset(filtered_data, Job.Title %in% c("Product Designer", "Receptionist"))
+
+
+# Anzeige der Anzahl aller Zeilen im Datensatz und der Anzahl der Zeilen für jede job_type-Ausprägung
+total_rows <- nrow(filtered_data)
+count_job_types <- table(filtered_data$job_type, useNA = "ifany")
+
+# Ausgabe der Ergebnisse
+print(paste("Gesamtanzahl der Zeilen im Datensatz:", total_rows))
+print("Anzahl der Zeilen für jede job_type-Ausprägung:")
+print(count_job_types)
+
+```
+
+Done. Im folgenden werden alle Diagramme auch über job_type ausgewertet könnnen.
 
 -   Männer haben im Durchschnitt mehr Yrs of Experience als Frauen -\> Lässt sich die Genderpaygap auf die Yrs of Exp übertragen?
 
@@ -532,6 +593,18 @@ cat("Die Korrelation zwischen Years.Of.Experience und Age ist:", correlation_exp
 
 ```
 
+```{r}
+# Annahme: "filtered_data" ist Ihr Datensatz
+# Annahme: Die Spalten sind "Seniority" und "Years.Of.Experience"
+
+# Korrelation zwischen Seniority und Years.Of.Experience berechnen
+correlation_seniority_experience <- cor(filtered_data$Senior, filtered_data$Years.Of.Experience, use = "complete.obs")
+
+# Ausgabe des Ergebnisses
+cat("Die Korrelation zwischen Seniority und Years.Of.Experience ist:", correlation_seniority_experience, "\n")
+
+```
+
 das ergebnis der correlationen: von salary und years.of.experience ist es 0.81 von Salary und Age ist es 0.73 und die von Age und Years.Of.Experience ist 0.93 wie kommt so ein starker unterschied zu stande bei den werten im vergleich zu salary obwohl sie doch eine hohe correlation zueinander haben
 
 Verteilung der Daten: Es ist möglich, dass die Verteilung der Daten in den Variablen "Age" und "Years.Of.Experience" anders ist als in der Variable "Salary". Wenn die Daten in "Age" und "Years.Of.Experience" breiter gestreut sind, kann dies zu einer geringeren Korrelation führen, selbst wenn eine starke lineare Beziehung besteht.
@@ -542,63 +615,233 @@ Ausreißer: Das Vorhandensein von Ausreißern kann die Korrelation beeinflussen.
 
 Stichprobengröße: Bei kleineren Stichproben können Korrelationswerte instabiler sein.
 
+\# Durchschnittliche Gehälter pro Jobtyp für technische_jobs2 berechnen
+
+average_salaries_technical \<- mean(technische_jobs2\$Salary)
+
+\# Durchschnittliche Gehälter pro Jobtyp für admin_jobs2 berechnen
+
+average_salaries_admin \<- mean(admin_jobs2\$Salary)
+
+\# Daten zusammenführen
+
+all_average_salaries \<- data.frame(Job.Type = c("technisch", "admin"),
+
+Average.Salary = c(average_salaries_technical, average_salaries_admin))
+
+\# Diagramm erstellen
+
+ggplot(all_average_salaries, aes(x = Job.Type, y = Average.Salary, fill = Job.Type)) +
+
+geom_bar(stat = "identity", position = "dodge", alpha = 0.7) +
+
+labs(title = "Durchschnittliche Gehälter nach Jobtyp",
+
+x = "Jobtyp",
+
+y = "Durchschnittliches Gehalt") +
+
+theme_minimal()
+
 ```{r}
-# Durchschnittliche Gehälter pro Jobtyp für technische_jobs2 berechnen
-average_salaries_technical <- mean(technische_jobs2$Salary)
+# Filtern der Daten für technische und administrative Jobs basierend auf den Kriterien
+technische_jobs <- subset(filtered_data, job_type == 0)
+admin_jobs <- subset(filtered_data, job_type == 1)
 
-# Durchschnittliche Gehälter pro Jobtyp für admin_jobs2 berechnen
-average_salaries_admin <- mean(admin_jobs2$Salary)
+# Durchschnittliche Gehälter pro Jobtyp für technische Jobs berechnen
+average_salaries_technical <- mean(technische_jobs$Salary, na.rm = TRUE)
 
-# Daten zusammenführen
+# Durchschnittliche Gehälter pro Jobtyp für administrative Jobs berechnen
+average_salaries_admin <- mean(admin_jobs$Salary, na.rm = TRUE)
+
+# Zusammenführen der durchschnittlichen Gehälter in einem Datenrahmen
 all_average_salaries <- data.frame(Job.Type = c("technisch", "admin"),
                                    Average.Salary = c(average_salaries_technical, average_salaries_admin))
 
-# Diagramm erstellen
+# Erstellung des Diagramms mit angepasster Achsenbeschriftung
 ggplot(all_average_salaries, aes(x = Job.Type, y = Average.Salary, fill = Job.Type)) +
   geom_bar(stat = "identity", position = "dodge", alpha = 0.7) +
   labs(title = "Durchschnittliche Gehälter nach Jobtyp",
        x = "Jobtyp",
        y = "Durchschnittliches Gehalt") +
-  theme_minimal()
+  theme_minimal() +
+  scale_y_continuous(labels = scales::comma)  # Verwendung von scales::comma für die Achsenbeschriftung in Tausenden
+
 ```
 
 Und das Obwohl in den Admin Jobs auch direktoren und Manager vertreten sind
 
 Nehmen wir an das Manager ein Job Titel wie Projekt Manager ist und nicht Manager für Projekt Management und dieser Titel in unserem Datensatz Director ist? Thema Führungsposition
 
-# Ohne Witz ich bin Dumm wie Brot. Das Problem mit der Klassifiierung der Jobs nach Technisch und Administrativ lässt sich lösen in dem ich die nicht in 2 tabellen aufteile sondern sie klassifiziere...
+## Datenaufbereitung 2
 
-Vielleicht einen Anderen Datensatz hinzuziehen um Länder als "Aufgeklärt" zu bewerten
+Unsere Untersuchungen haben Ergeben das wir die Daten für unsere Explorative Datenanalyse aber auch die Regression neu aufbereiten müssen.
+
+Dazu suchen wir: unterscheide ich einen native und expat im jeweiligen Land. Welche annahmen sind dafür nötig? Hier die annahme das White generell nicht ausgewandert ist da wir hier länder mit ähnlicher kultur und salary haben
 
 ```{r}
-# Beispiel-Datensatz erstellen (ersetzen Sie dies durch Ihren tatsächlichen Datensatz)
-set.seed(42)
-technische_jobs <- data.frame(
-  Race = sample(c("White", "Black", "Asian", "Other"), 100, replace = TRUE)
+ggplot(filtered_data, aes(x = Country, fill = Race)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Count of Races in Each Country",
+       x = "Country",
+       y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Dafür füge ich eine neue spalte ein die mit numerishcen werten arbeitet. 0 steht für einheimischer und 1 für expat. Den wert null erhalten alle zeilen bei denen wir folgende übereinstimmung feststllen (land und ethnizität hier country und race):
+African American (USA)
+White (Canada, USA, UK, Australia)
+Chinese (China)
+Australian(Australia)
+Welsh (UK)
+jede andere race ist ja dementsprechend expat und erhält eine 1 in der spalte expat
+
+```{r}
+# Erstellen der Spalte "Expat" basierend auf den angegebenen Kriterien
+filtered_data$Expat <- 0  # Standardwert 0 (Einheimische)
+
+# Festlegen von Bedingungen für Expats basierend auf Land und Ethnizität
+expat_conditions <- list(
+  filtered_data$Race == "African American" & filtered_data$Country == "USA",
+  filtered_data$Race %in% c("White", "Chinese", "Australian", "Welsh") &
+    filtered_data$Country %in% c("Canada", "USA", "UK", "Australia"),
+  TRUE  # Für alle anderen Rassen (Expat)
 )
 
-# Diagramm erstellen
-ggplot(technische_jobs, aes(x = Race, fill = Race)) +
-  geom_bar() +
-  labs(title = "Verteilung der Race in technische_jobs",
-       x = "Race",
-       y = "Anzahl") +
+# Setzen von Werten entsprechend den Bedingungen
+filtered_data$Expat <- ifelse(expat_conditions[[1]] | expat_conditions[[2]], 0, 
+                               ifelse(expat_conditions[[3]], 1, NA))
+
+# Anzeige des aktualisierten Datensatzes zur Überprüfung
+head(filtered_data)
+
+```
+
+```{r}
+# Erstellung des Boxplots für Expats und Einheimische
+ggplot(filtered_data, aes(x = as.factor(Expat), y = Salary, fill = factor(Expat))) +
+  geom_boxplot() +
+  labs(title = "Vergleich der Gehälter von Expats und Einheimischen",
+       x = "Expat",
+       y = "Gehalt") +
+  scale_x_discrete(labels = c("Einheimische (0)", "Expats (1)")) +
   theme_minimal()
 
 ```
 
 ```{r}
-# Annahme: "filtered_data" ist Ihr Datensatz
-# Annahme: Die Spalten sind "Seniority" und "Years.Of.Experience"
+# Mittelwert der Gehälter für Expats (Expat = 1)
+mean_salary_expat <- mean(filtered_data$Salary[filtered_data$Expat == 1], na.rm = TRUE)
+mean_salary_expat
 
-# Korrelation zwischen Seniority und Years.Of.Experience berechnen
-correlation_seniority_experience <- cor(filtered_data$Seniority, filtered_data$Years.Of.Experience, use = "complete.obs")
-
-# Ausgabe des Ergebnisses
-cat("Die Korrelation zwischen Seniority und Years.Of.Experience ist:", correlation_seniority_experience, "\n")
+# Mittelwert der Gehälter für Einheimische (Expat = 0)
+mean_salary_native <- mean(filtered_data$Salary[filtered_data$Expat == 0], na.rm = TRUE)
+mean_salary_native
 
 ```
 
-years of seniority muss numerisch werden
+These verworfen.
 
-Frage: Wie unterscheide ich einen native und expat im jeweiligen Land. Welche annahmen sind dafür nötig?
+These Gehaltscap education level vorhanden?
+
+1.  **Deskriptive Statistiken:** Man könnte Quantile oder Perzentile des Gehalts für jedes Bildungsniveau berechnen. Dies bietet einen Überblick über die Verteilung der Gehälter und zeigt potenzielle Grenzwerte auf.
+
+2.  **Boxplots pro Bildungsniveau:** Man könnte Boxplots für jedes Bildungsniveau erstellen, um die Verteilung der Gehälter visuell zu vergleichen. Dies kann helfen, Ausreißer und Unterschiede zwischen den Bildungsniveaus zu identifizieren.
+
+3.  **Statistische Tests:** Man könnte statistische Tests durchführen, um festzustellen, ob es signifikante Unterschiede in den Gehältern zwischen den Bildungsniveaus gibt. Zum Beispiel könnten ANOVA oder andere geeignete Tests verwendet werden.
+
+4.  **Regression:** Eine Regressionsanalyse könnte durchgeführt werden, um zu untersuchen, wie das Bildungsniveau das Gehalt beeinflusst. Dies könnte helfen, die Grenzen des Gehaltsniveaus für jedes Bildungsniveau zu verstehen.
+
+5.  **Visualisierungen:** Verschiedene Visualisierungen wie Scatterplots oder Liniendiagramme könnten erstellt werden, um Trends oder Muster zwischen Gehalt und Bildungsniveau zu erkennen.
+
+```{r}
+# Berechnung der Durchschnittsgehälter pro Bildungsniveau
+average_salary_education <- aggregate(Salary ~ Education.Level, data = filtered_data, FUN = mean, na.rm = TRUE)
+
+# Anzeige der Durchschnittsgehälter pro Bildungsniveau
+average_salary_education
+
+```
+
+```{r}
+library(ggplot2)
+
+# Berechnung der Durchschnittsgehälter pro Bildungsniveau
+average_salary_education <- aggregate(Salary ~ Education.Level, data = filtered_data, FUN = mean, na.rm = TRUE)
+
+# Erstellung des Diagramms
+ggplot(average_salary_education, aes(x = factor(Education.Level), y = Salary)) +
+  geom_bar(stat = "identity", fill = "skyblue", alpha = 0.7) +
+  labs(title = "Durchschnittsgehälter nach Bildungsniveau",
+       x = "Bildungsniveau",
+       y = "Durchschnittliches Gehalt") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Drehung der x-Achsenbeschriftungen für bessere Lesbarkeit
+
+```
+
+```{r}
+library(ggplot2)
+
+# Annahme: 'Salary' und 'Education.Level' sind die entsprechenden Spalten in Ihrem 'filtered_data' Datensatz
+
+# Scatterplot erstellen
+ggplot(filtered_data, aes(x = Education.Level, y = Salary)) +
+  geom_point() + 
+  labs(title = "Gehalt nach Bildungslevel",
+       x = "Bildungslevel",
+       y = "Gehalt") +
+  theme_minimal()
+
+```
+
+library(ggplot2)
+
+\# Annahme: 'Salary' und 'Education.Level' sind die entsprechenden Spalten in Ihrem 'filtered_data' Datensatz
+
+\# Um das Bildungslevel als kontinuierliches Kontinuum zu betrachten
+
+\# Faktorisieren von 'Education.Level' in aufsteigender Reihenfolge
+
+filtered_data\$Education.Level \<- factor(filtered_data\$Education.Level, levels = unique(filtered_data\$Education.Level))
+
+\# Liniendiagramm erstellen
+
+ggplot(filtered_data, aes(x = Education.Level, y = Salary, group = 1)) +
+
+geom_line() +
+
+labs(title = "Gehalt nach Bildungslevel",
+
+x = "Bildungslevel",
+
+y = "Gehalt") +
+
+theme_minimal()
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+# Annahme: 'Salary' und 'Education.Level' sind die entsprechenden Spalten in Ihrem 'filtered_data' Datensatz
+
+# Durchschnittsgehalt für jeden Bildungslevel berechnen
+avg_salary_by_education <- filtered_data %>%
+  group_by(Education.Level) %>%
+  summarise(Avg_Salary = mean(Salary))
+
+# Liniendiagramm erstellen
+ggplot(avg_salary_by_education, aes(x = Education.Level, y = Avg_Salary, group = 1)) +
+  geom_line() +
+  labs(title = "Durchschnittsgehalt nach Bildungslevel",
+       x = "Bildungslevel",
+       y = "Durchschnittsgehalt") +
+  theme_minimal()
+
+```
+
+Anscheinen sehr starker unterschied von 0 auf 1 und 1 auf 2
+
+```{r}
+
+```
