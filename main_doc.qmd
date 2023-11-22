@@ -688,13 +688,7 @@ ggplot(filtered_data, aes(x = Country, fill = Race)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Dafür füge ich eine neue spalte ein die mit numerishcen werten arbeitet. 0 steht für einheimischer und 1 für expat. Den wert null erhalten alle zeilen bei denen wir folgende übereinstimmung feststllen (land und ethnizität hier country und race):
-African American (USA)
-White (Canada, USA, UK, Australia)
-Chinese (China)
-Australian(Australia)
-Welsh (UK)
-jede andere race ist ja dementsprechend expat und erhält eine 1 in der spalte expat
+Dafür füge ich eine neue spalte ein die mit numerishcen werten arbeitet. 0 steht für einheimischer und 1 für expat. Den wert null erhalten alle zeilen bei denen wir folgende übereinstimmung feststllen (land und ethnizität hier country und race): African American (USA) White (Canada, USA, UK, Australia) Chinese (China) Australian(Australia) Welsh (UK) jede andere race ist ja dementsprechend expat und erhält eine 1 in der spalte expat
 
 ```{r}
 # Erstellen der Spalte "Expat" basierend auf den angegebenen Kriterien
