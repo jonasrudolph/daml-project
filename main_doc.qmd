@@ -15,9 +15,11 @@ format:
 date: 2023-11-13
 ---
 
-# Vorbereitung
+# 1. Vorbereitung
 
-## Importieren der benötigten Packages
+Im folgenden Teil dieser Arbeit werden die Vorbereitungen getroffen, die notwendig sind um die Durchführung des Projekts zu ermöglichen.
+
+## 1.1 Importieren der benötigten Packages
 
 ```{r}
 library(tidyverse)
@@ -27,7 +29,7 @@ library(corrplot)
 library(dplyr)
 ```
 
-## Einlesen der zu Analysierenden Daten
+## 1.2 Einlesen der zu Analysierenden Daten
 
 Der Datensatz, der in diesem Projekt analysiert wird, stammt von der website "Kaggle" und beschreibt das Gehalt nach Job und Land in dem gearbeitet wird.
 
@@ -35,7 +37,7 @@ Der Datensatz, der in diesem Projekt analysiert wird, stammt von der website "Ka
 salary <- read_csv("Salary.csv")
 ```
 
-## Erster Überblick der Daten
+# 2. Erster Überblick der Daten
 
 Um einen ersten Überblick zu erhalten, werden die ersten 10 Zeilen der Tabelle ausgelesen:
 
@@ -71,7 +73,7 @@ describe(salary)
 
 : Wie bereits oben in der Tabelle zu erkennen gibt es Innerhalb des Datensatzes nur zwei verschiedene Datentypen. Die Felder \*Age, Education Level, Years of Experience, Salary, Senior\* sind nummerische Merkmale. Die Felder *Gender, Job Title, Country, Race* sind kategorische Merkmale.
 
-## 
+## 2.1 Bedeutung von Spalten und Datentypen
 
 Im folgenden Abschnitt werden verschiedene Funktionen dafür verwendet, um die Datentypen und Bedeutung der Spalten zu verstehen.
 
@@ -92,9 +94,9 @@ Nun werfen verschaffen Wir uns einen Überblick über die prozentuale Verteilung
 explore (salary, Job.Title)
 ```
 
-## Grundlegende Statistische Merkmale des Datensatzes
+## 2.2 Grundlegende Statistische Merkmale des Datensatzes
 
-Im folgenden wird ein Überblick über die grundlegenden statistischen Merkmale geworfen:
+Zunächst wird mithilfe der Funktion "summary( )" ein allgemeiner Überblick über die wichtigsten charackteristeischen Merkmale der einzelnen Splaten gegeben.
 
 ```{r}
 summary(salary)
@@ -102,9 +104,11 @@ summary(salary)
 
 Erkennbar hier ist es, dass es innerhalb des Datensatzes ein durchschnittliches Alter von 32 Jahren vorliegt. Das Alter streckt sich von 21 Jahren bis zu 62 Jahren. Außerdem gibt es beim "Education-Level" Werte zwischen 1, 2 und 3, wobei der Durchschnitt jedoch bei 1 liegt. Außerdem gibt es bei der Berufserfahrung ( Years of Experience) Werte zwischen 0 bis zu 34 Jahren. Der Median hier beträgt 7.
 
-## Umstrukturierung des Datensatzes zwecks Visualisierung
+# 3. Umstrukturierung des Datensatzes zwecks Visualisierung
 
-Im folgenden wird der Datensatz umstrukturiert und ein neuer Wert Namens "Value" wird erschaffen. Dies geschieht um möglicherweise besser analysieren und visualisieren zu können.
+Im folgenden wird der Datensatz umstrukturiert um den Datensat besser analysieren und visualieren zu können.
+
+Ein neuer Wert Namens "Value" wird erschaffen.
 
 ```{r}
 Salary_long <- select(salary, -Job.Title, -Gender, -Race, -Country, -Senior)
@@ -114,6 +118,8 @@ head(Salary_long)
 ```
 
 Insgesamt werden in diesem Codechunk die Spalten die nicht nummerische Merkmale sind entfernt und der verbleibende Datensatz wird von einem breiten in ein längeres Format umgewandelt.
+
+Mithilfe des oben erstellten Wertes "Value" wird nun ein Histogramm für jede Spalte innerhalb des Datensatzes "salary_long" erstellt. Außerdem wird nach der Variable "name" gruppiert.
 
 ```{r}
 ggplot(Salary_long, aes(x = value)) +
@@ -127,9 +133,9 @@ Hier kann man folgende Dinge erkennen:
 
 -   Age und Years of Experience haben Extrempunkte im oberen Wertebereich, während Salary einer gleichmäßigen Verteilung folgt
 
-Aufgrund der guten Strukturiertheit der Daten eignen sie sich dem ersten Anschein nach gut für eine Ausführliche Explorative Analyse.
+Aufgrund der guten Strukturierung der Daten ,eignen sie sich dem ersten Anschein nach gut für eine Ausführliche Explorative Analyse.
 
-## Kategorisierung von Gehalt
+## 3.1 Kategorisierung von Gehalt
 
 Zunächst werden die Daten aus dem Ausgangsdatensatz in einen finalen Datensatz "salary_final" geschrieben.
 
@@ -158,7 +164,13 @@ salary_final$SalaryKat <- cut(salary_final$Salary,
 explore(salary_final, SalaryKat)
 ```
 
-## Korrelationen
+## 3.2 Korrelationen
+
+Im Folgenden werden die Korrelationen zwischen den Verschiedenen Spalten errechnet.
+
+Die Berechnung von Korrelationen ermöglicht es, die Stärke und Richtung des Zusammenhangs zwischen zwei Variablen zu quantifizieren. Dies hilft bei der Modellvalisierung, um potenzielle Probleme, wie zum Beispiel die Multikollinearität zu erkennen.
+
+Nun werden verschiedene Korrelationen errechnet:
 
 ```{r}
 # Korrelation zwischen Salary und Years.Of.Experience berechnen
@@ -168,6 +180,8 @@ correlation_salary_experience <- cor(salary_final$Salary, salary_final$Years.Of.
 cat("Die Korrelation zwischen Salary und Years.Of.Experience ist:", correlation_salary_experience, "\n")
 ```
 
+"Hier würde Ich keinen Text vorschreiben, Ausgabe aussagekräftig genug"
+
 ```{r}
 # Korrelation zwischen Salary und Age berechnen
 correlation_salary_age <- cor(salary_final$Salary, salary_final$Age, use = "complete.obs")
@@ -176,6 +190,8 @@ correlation_salary_age <- cor(salary_final$Salary, salary_final$Age, use = "comp
 cat("Die Korrelation zwischen Salary und Age ist:", correlation_salary_age, "\n")
 ```
 
+"Hier würde Ich keinen Text vorschreiben, Ausgabe aussagekräftig genug"
+
 ```{r}
 # Korrelation zwischen Years.Of.Experience und Age berechnen
 correlation_experience_age <- cor(salary_final$Years.Of.Experience, salary_final$Age, use = "complete.obs")
@@ -183,6 +199,8 @@ correlation_experience_age <- cor(salary_final$Years.Of.Experience, salary_final
 # Ausgabe des Ergebnisses
 cat("Die Korrelation zwischen Years.Of.Experience und Age ist:", correlation_experience_age, "\n")
 ```
+
+"Hier würde Ich keinen Text vorschreiben, Ausgabe aussagekräftig genug"
 
 ```{r}
 # Korrelation zwischen Seniority und Years.Of.Experience berechnen
@@ -202,9 +220,11 @@ Ausreißer: Das Vorhandensein von Ausreißern kann die Korrelation beeinflussen.
 
 Stichprobengröße: Bei kleineren Stichproben können Korrelationswerte instabiler sein.
 
-## Tests für Thesen
+# 4. Tests für die Thesen
 
-im folgenden werden anhand der Daten ein paar Tests durchgeführt um aussagen für Thesen heruaszufiltern. Das Ergebnis dieses Codechunks ist eine Darstellung der Korrelationsmatrix.
+Im folgenden werden anhand der Daten ein paar Tests durchgeführt um Aussagen für die Thesen heruaszufiltern.
+
+Das Ergebnis dieses Codechunks ist eine Darstellung der Korrelationsmatrix:
 
 ```{r}
 correlations <- cor(salary_final[, c("Age", "Education.Level", "Years.Of.Experience", "Salary")])
@@ -212,7 +232,7 @@ correlations <- cor(salary_final[, c("Age", "Education.Level", "Years.Of.Experie
 print(correlations)
 ```
 
-Erkennbar hier ist es zum Beispiel eine starke Korrelation zwischen dem Alter und den "Years of Experience". Desweiteren liegt auch eine starke Korrelation zwischnem den Years of Experience und dem entgültigen Gehalt. Eine nichgt so starke Korrelation liegt zwischen dem Alter und dem Education Level mit einem Wert von ungefähr 0,6.
+Erkennbar hier ist zum Beispiel eine starke Korrelation zwischen dem Alter und den "Years of Experience". Desweiteren liegt auch eine starke Korrelation zwischnem den Years of Experience und dem entgültigen Gehalt. Eine nicht so starke Korrelation liegt zwischen dem Alter und dem Education Level mit einem Wert von ungefähr 0,6.
 
 ```{r}
 ggplot(salary_final, aes(x = Years.Of.Experience, y = Salary)) +
