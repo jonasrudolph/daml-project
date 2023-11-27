@@ -106,7 +106,7 @@ Erkennbar hier ist es, dass es innerhalb des Datensatzes ein durchschnittliches 
 
 # 3. Umstrukturierung des Datensatzes zwecks Visualisierung
 
-Im folgenden wird der Datensatz umstrukturiert um den Datensat besser analysieren und visualieren zu können.
+Im folgenden wird der Datensatz umstrukturiert um den Datensatz besser analysieren und visualieren zu können.
 
 Ein neuer Wert Namens "Value" wird erschaffen.
 
@@ -352,9 +352,11 @@ cor() |>
 corrplot(method = 'ellipse')
 ```
 
-# Daten Aufbereiten
+# 5. Daten Aufbereiten
 
-## Jobs
+(Tests der Thesen gibt uns die Antowrt darauf wie die Daten aufbereitet werden müssen)
+
+## 5.1 Jobs
 
 Da in dem Datensatz teilweise Jobs nur einmalig vertreten sind, kann ein erhebliches Stichproben-Bias verursacht werden. Da das mittlere Einkommen ein wichtiges Merkmal in unserer explorativen Datenanalyse darstellt und mindestens 30 Einträge für eine aussagekräftige Stichprobe nötig sind, haben wir uns dazu entschlossen alle Einträge mit N\<30 bei der Anzahl der Jobtitel (N) abzuschneiden.
 
@@ -392,7 +394,7 @@ job_title_count_filtered <- table(filtered_data$Job.Title)
 cat(paste(names(job_title_count_filtered), ":", job_title_count_filtered, "\n"))
 ```
 
-## Job Typen
+## 5.2 Job Typen
 
 Anzahl der technischen und adminsitrativen Berufe
 
@@ -473,7 +475,7 @@ cat("Anzahl der administrativen Jobs2:", anzahl_admin_jobs2, "\n")
 
 basieren auf filtered_data ein neues dataset erstellt wird aus dem ein datensatz gelöscht wird sobald eine zeile einer der \_jobs table zugewiesen wird damit es nicht doppelt gezählt werden kann. Warum auch immer funktioniert das nicht also neuer lösungsansatz:
 
-#### Das Problem mit der Klassifizierung der Jobs nach Technisch und Administrativ lässt sich lösen in dem ich die nicht in 2 tabellen aufteile sondern jeder Zeile einen Wert des Entsprechenden job types zuordne
+Das Problem mit der Klassifizierung der Jobs nach Technisch und Administrativ lässt sich lösen in dem ich die nicht in 2 tabellen aufteile sondern jeder Zeile einen Wert des Entsprechenden job types zuordne
 
 ```{r}
 # Erstellung der neuen Spalte "job_type" basierend auf den gegebenen Filtern
@@ -532,7 +534,7 @@ print(count_job_types)
 
 Done. Im folgenden werden alle Diagramme auch über job_type ausgewertet könnnen.
 
-## Expats & Einheimische
+## 5.3 Expats & Einheimische
 
 ```{r}
 ggplot(filtered_data, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
@@ -733,8 +735,6 @@ Und das Obwohl in den Admin Jobs auch direktoren und Manager vertreten sind
 
 Nehmen wir an das Manager ein Job Titel wie Projekt Manager ist und nicht Manager für Projekt Management und dieser Titel in unserem Datensatz Director ist? Thema Führungsposition
 
-## Datenaufbereitung 2
-
 Unsere Untersuchungen haben Ergeben das wir die Daten für unsere Explorative Datenanalyse aber auch die Regression neu aufbereiten müssen.
 
 Dazu suchen wir: unterscheide ich einen native und expat im jeweiligen Land. Welche annahmen sind dafür nötig? Hier die annahme das White generell nicht ausgewandert ist da wir hier länder mit ähnlicher kultur und salary haben
@@ -770,9 +770,9 @@ filtered_data$Expat <- ifelse(expat_conditions[[1]] | expat_conditions[[2]], 0,
 head(filtered_data)
 ```
 
-# Thesen
+# 6. Thesen
 
-## Genderpaygap
+## 6.1 Genderpaygap
 
 1.  Männer verdienen mehr als Frauen
 2.  Die Differenz der Salary zwischen den Geschlechtern ist in China höher als in den westlichen Ländern.
@@ -879,7 +879,7 @@ cat("Die Korrelation zwischen Salary und Years.Of.Experience ist:", correlation_
 
 These Korrekt da es im gleichen Verhältnis steht. Nicht desto trotz gibt es einen Unterschied zwischen den Geschlechtern bei gleichbleibender Arbeitderfahrung was auf einen kleinen Gender Pay gap schließen lässt.
 
-## Expats verdienen mehr als Einheimisch
+## 6.2 Expats verdienen mehr als Einheimisch
 
 Unsere Untersuchungen haben Ergeben das wir die Daten für unsere Explorative Datenanalyse aber auch die Regression neu aufbereiten müssen.
 
