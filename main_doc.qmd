@@ -222,7 +222,9 @@ Stichprobengröße: Bei kleineren Stichproben können Korrelationswerte instabil
 
 # 4. Tests für die Thesen
 
-Im folgenden werden anhand der Daten ein paar Tests durchgeführt um Aussagen für die Thesen heruaszufiltern. Dies geschieht mithilfe einer Visualisierung der Beziehungen zwischen den verschiedenen Spalten.
+Im folgenden werden anhand der Daten ein paar Tests durchgeführt um Aussagen für die Thesen heruaszufiltern. Dies geschieht mithilfe einer Visualisierung der Beziehungen zwischen den verschiedenen Spalten, sowie mitihilfe von Korrelationen.
+
+## 4.1 Korrelationen
 
 Das Ergebnis dieses Codechunks ist eine Darstellung der Korrelationsmatrix:
 
@@ -235,12 +237,28 @@ print(correlations)
 Erkennbar hier ist eine starke Korrelation zwischen dem Alter und den "Years of Experience". Desweiteren liegt auch eine starke Korrelation zwischnem den Years of Experience und dem entgültigen Gehalt. Eine nicht so starke Korrelation liegt zwischen dem Alter und dem Education Level mit einem Wert von ungefähr 0,6.
 
 ```{r}
+filtered_data_numeric <- select(salary, Salary, Age, Years.Of.Experience, Education.Level)
+glimpse(filtered_data_numeric)
+cor(filtered_data_numeric)
+```
+
+```{r}
+filtered_data_numeric |>
+cor() |>
+corrplot(method = 'ellipse')
+```
+
+## 4.2 Streudiagramme
+
+```{r}
 ggplot(salary_final, aes(x = Years.Of.Experience, y = Salary)) +
   geom_point(color = "blue", size = 3, shape = 16) +
   labs(title = "Scatter Plot of Years of Experience vs Salary",
        x = "Years of Experience",
        y = "Salary")
 ```
+
+In diesem Streudiagramm ist erkennbar, das es einen eindeutigen Trend nach oben gibt je mehr "Years of Experience" vorliegen. So ist auch zu sehen, dass die Topgehälter von 250.000€ zwischen 20 bis 30 Erfahrungsjahren liegen.
 
 ```{r}
 ggplot(salary_final, aes(x = Education.Level, y = Salary)) +
@@ -251,6 +269,14 @@ ggplot(salary_final, aes(x = Education.Level, y = Salary)) +
 
 ```
 
+Die vorliegende Datenanalyse zeigt einen klaren Trend zu höheren Gehaltsklassen, der mit einem Anstieg des Bildungsniveaus einhergeht. Diese Tendenz wird durch eine höhere Dichte in den oberen Gehaltsgruppen für Personen mit dem dritten Bildungsgrad im Vergleich zum zweiten und ersten Bildungsgrad deutlich.
+
+## 4.3 Balkendiagramme
+
+In diesem Abschnitt werden Balkendiagramme verwendet um den Datensatz auf Beziehungen zu analysieren.
+
+### 4.3.1 Average Salary by Race
+
 ```{r}
 ggplot(salary_final, aes(x = Race, y = Salary)) +
   geom_bar(stat = "summary", fun = "mean", fill = "blue") +
@@ -260,6 +286,10 @@ ggplot(salary_final, aes(x = Race, y = Salary)) +
 
 ```
 
+Die Grafik macht deutlich, dass die Gruppen "Black, Korean, Mixed und White" im Durchschnitt am meisten verdienen.
+
+### 4.3.2 Average Salary by Country
+
 ```{r}
 ggplot(salary_final, aes(x = Country, y = Salary, fill = Country)) +
   geom_bar(stat = "summary", fun = "mean", position = "dodge", color = "black") +
@@ -268,6 +298,12 @@ ggplot(salary_final, aes(x = Country, y = Salary, fill = Country)) +
        y = "Average Salary") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+
+Es ist ersichtlich, dass in den Ländern "Canada und China" das durchschnittliche Gehalt am größten ist. Jedochg ist zu erwähnen, dass alle Länder nah bei einander liegen.
+
+### 4.3.3 Average Salary by Country and Gender
+
+In diesem Fall wird ein gestapeltes Balkendiagramm erstellt. Die Balken sind nach Geschlecht gruppiert und gestapelt. DIes ermöglicht einen Vergleich der durchschnittlichen Gehälter zwischen den Ländern und Geschlechtern
 
 ```{r}
 ggplot(salary_final, aes(x = Country, y = Salary, fill = Gender)) +
@@ -279,6 +315,14 @@ ggplot(salary_final, aes(x = Country, y = Salary, fill = Gender)) +
 
 ```
 
+Hier ist zu erkennen, das alle Länder ungefähr die gleiche Verteilung zwischen "Male" und "Female" haben.
+
+### 4.3.4 Average Salary by Country and Education Level
+
+Zur Visualisierung der durchnittlichen Bezahlung für Länder und Bildungsniveau wird ein gruppiertes Balkendiagramm verwendet. DIe Balken sind nach Bildungsniveau und nebeneinander gruppiert.
+
+Desweiteren sind zur besseren Veranschaulichung die Beschriftungen auf der X-Achse um 45 Grad gedreht.
+
 ```{r}
 ggplot(salary_final, aes(x = Country, y = Salary, fill = factor(Education.Level))) +
   geom_bar(stat = "summary", fun = "mean", position = "dodge", color = "black") +
@@ -287,6 +331,12 @@ ggplot(salary_final, aes(x = Country, y = Salary, fill = factor(Education.Level)
        y = "Average Salary") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  
 ```
+
+Es ist deutlich zu erkennen, dass die Gehälter in jedem Land deutlich ansteigen je höher das Bildungsniveau ist.
+
+### 4.3.5 Average Salary by Country and Race
+
+Auch hier wird zum Vergleich der durchschnittlichen Gehälter zwischen den Ländern und ethnischen Gruppen, ein gestapeltes Balkendiagramm erstellt. Die Balken sind nach ethnischer Gruppe gruppiert und gestapelt.
 
 ```{r}
 ggplot(salary_final, aes(x = Country, y = Salary, fill = Race)) +
@@ -297,18 +347,11 @@ ggplot(salary_final, aes(x = Country, y = Salary, fill = Race)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
 ```
 
-```{r}
-ggplot(salary_final, aes(x = Country, y = Salary, fill = Race)) +
-  geom_boxplot() +
-  stat_summary(fun = "median", geom = "point", shape = 18, size = 3, color = "red", position = position_dodge(width = 0.75)) +
-  labs(title = "Salary Distribution by Country and Race",
-       x = "Country",
-       y = "Salary") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
+!!!!! Salary passt nicht!!!!!!!
 
-```
+Hier ist deutlich sichtbar, dass nicht in jedem Land logischerweise jede ethnische Gruppe vertreten ist. So sind nur in 2 Ländern mehr als 3 verschiedene Gruppen in diesem Datensatz aufgeführt
 
-Hier wird festgestellt das in dem Datensatz zu viele Jobtitle vorkommen
+### 4.3.6 Average Salary by Job Title
 
 ```{r}
 ggplot(salary_final, aes(x = Job.Title, y = Salary)) +
@@ -318,6 +361,8 @@ ggplot(salary_final, aes(x = Job.Title, y = Salary)) +
        y = "Average Salary") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  
 ```
+
+Hier wird festgestellt das in dem Datensatz zu viele Jobtitle vorkommen
 
 ```{r}
 job_title_count <- table(salary_final$Job.Title)
@@ -335,24 +380,25 @@ ggplot(job_title_df, aes(x = Job_Title, y = Frequency)) +
   labs(title = "Frequency of Unique Job Titles",
        x = "Job Titles",
        y = "Frequency") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+?????
+
+## 4.4 Boxplots
+
+```{r}
+ggplot(salary_final, aes(x = Country, y = Salary, fill = Race)) +
+  geom_boxplot() +
+  stat_summary(fun = "median", geom = "point", shape = 18, size = 3, color = "red", position = position_dodge(width = 0.75)) +
+  labs(title = "Salary Distribution by Country and Race",
+       x = "Country",
+       y = "Salary") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  
+
 ```
 
-Korrelationen aller Werte auf Salary
-
-```{r}
-filtered_data_numeric <- select(salary, Salary, Age, Years.Of.Experience, Education.Level)
-glimpse(filtered_data_numeric)
-cor(filtered_data_numeric)
-```
-
-```{r}
-filtered_data_numeric |>
-cor() |>
-corrplot(method = 'ellipse')
-```
-
-# 5. Daten Aufbereiten
+# 5. Daten Aufbereiten 2
 
 (Tests der Thesen gibt uns die Antowrt darauf wie die Daten aufbereitet werden müssen)
 
