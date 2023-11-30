@@ -21,7 +21,7 @@ Im folgenden Teil dieser Arbeit werden die Vorbereitungen getroffen, die notwend
 
 ## 1.1 Importieren der benötigten Packages
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 library(tidyverse)
 library(explore) 
 library(ggplot2)
@@ -222,7 +222,7 @@ Stichprobengröße: Bei kleineren Stichproben können Korrelationswerte instabil
 
 # 4. Tests für die Thesen
 
-Im folgenden werden anhand der Daten ein paar Tests durchgeführt um Aussagen für die Thesen heruaszufiltern.
+Im folgenden werden anhand der Daten ein paar Tests durchgeführt um Aussagen für die Thesen heruaszufiltern. Dies geschieht mithilfe einer Visualisierung der Beziehungen zwischen den verschiedenen Spalten.
 
 Das Ergebnis dieses Codechunks ist eine Darstellung der Korrelationsmatrix:
 
@@ -232,7 +232,7 @@ correlations <- cor(salary_final[, c("Age", "Education.Level", "Years.Of.Experie
 print(correlations)
 ```
 
-Erkennbar hier ist zum Beispiel eine starke Korrelation zwischen dem Alter und den "Years of Experience". Desweiteren liegt auch eine starke Korrelation zwischnem den Years of Experience und dem entgültigen Gehalt. Eine nicht so starke Korrelation liegt zwischen dem Alter und dem Education Level mit einem Wert von ungefähr 0,6.
+Erkennbar hier ist eine starke Korrelation zwischen dem Alter und den "Years of Experience". Desweiteren liegt auch eine starke Korrelation zwischnem den Years of Experience und dem entgültigen Gehalt. Eine nicht so starke Korrelation liegt zwischen dem Alter und dem Education Level mit einem Wert von ungefähr 0,6.
 
 ```{r}
 ggplot(salary_final, aes(x = Years.Of.Experience, y = Salary)) +
@@ -245,7 +245,7 @@ ggplot(salary_final, aes(x = Years.Of.Experience, y = Salary)) +
 ```{r}
 ggplot(salary_final, aes(x = Education.Level, y = Salary)) +
   geom_point(color = "blue", size = 3, shape = 16) +
-  labs(title = "Scatter Plot of Years of Experience vs Salary",
+  labs(title = "Scatter Plot of Education Level vs Salary",
        x = "Years of Experience",
        y = "Salary")
 
