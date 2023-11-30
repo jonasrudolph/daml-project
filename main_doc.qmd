@@ -106,7 +106,7 @@ Erkennbar hier ist es, dass es innerhalb des Datensatzes ein durchschnittliches 
 
 # 3. Umstrukturierung des Datensatzes zwecks Visualisierung
 
-Im folgenden wird der Datensatz umstrukturiert um den Datensatz besser analysieren und visualieren zu können.
+Im folgenden wird der Datensatz temporär umstrukturiert um den Datensatz besser analysieren und visualieren zu können.
 
 Ein neuer Wert Namens "Value" wird erschaffen.
 
@@ -275,7 +275,7 @@ Die vorliegende Datenanalyse zeigt einen klaren Trend zu höheren Gehaltsklassen
 
 In diesem Abschnitt werden Balkendiagramme verwendet um den Datensatz auf Beziehungen zu analysieren.
 
-### 4.3.1 Average Salary by Race
+###  4.3.1 Average Salary by Race
 
 ```{r}
 ggplot(salary_final, aes(x = Race, y = Salary)) +
@@ -398,7 +398,7 @@ ggplot(salary_final, aes(x = Country, y = Salary, fill = Race)) +
 
 ```
 
-# 5. Daten Aufbereiten 2
+# 5. Daten Aufbereiten
 
 (Tests der Thesen gibt uns die Antowrt darauf wie die Daten aufbereitet werden müssen)
 
@@ -818,6 +818,8 @@ head(filtered_data)
 
 # 6. Thesen
 
+Aus den überlegungen der Tests haben wir folgende Thesen formuliert.
+
 ## 6.1 Genderpaygap
 
 1.  Männer verdienen mehr als Frauen
@@ -1074,15 +1076,38 @@ ggplot(filtered_data, aes(x = Education.Level, y = Salary, group = 1)) +
   theme_minimal()
 ```
 
+hier diagramm erklären weil anderes aus vorlesung
+
 These Korrekt: Ohne einen Hochschulabschluss gibt es eine Gehaltsgrenze. Die top 90% ohne Hochschulabschluss fangen bei den unteren 10% mit Hochschulabschluss an aus der Sicht des Gehalts.
 
-## Technische Jobs haben ein höheres Gehalt als Administrative Jobs - jedes Land?
+## Technische Jobs haben ein höheres Gehalt als Administrative Jobs
 
 ### 1.: Daten Aufbereiten
 
-Daten Aufbereiten
+Unter dem Punkt Datenaufbereitung wurden zu diesem Zweck alle Jobs in Administrativ und Technisch eingeteilt. Zudem filtern wir noch zusätzlich alle Datensätze raus welche "Director" im Jobtitel enthalten da diese sich nicht auf eine der Kategorisieren eindeutig zuordnen lassen. (z.B. Engineering Director)
+
+```{r}
+# Kopie von filtered_data als filtered_data2 erstellen
+filtered_data2 <- filtered_data
+
+# Filtern der Daten für Jobs mit "Director" im Jobtitel in filtered_data2
+director_jobs <- filtered_data2 %>%
+  filter(grepl("Director", Job.Title))
+
+# Entfernen der Zeilen mit "Director" aus filtered_data2
+filtered_data2 <- filtered_data2 %>%
+  anti_join(director_jobs)
+```
+
+```{r}
+nrow(director_jobs)
+nrow(filtered_data)
+nrow(filtered_data2)
+```
 
 ### 2.: Insgesamt
+
+Eine Übersicht der durchschnittlichen Gehälter nach der Sortierung von Jobs technischer und adminsitrativer Natur.
 
 ```{r}
 # Filtern der Daten für technische und administrative Jobs basierend auf den Kriterien
@@ -1109,14 +1134,210 @@ ggplot(all_average_salaries, aes(x = Job.Type, y = Average.Salary, fill = Job.Ty
   scale_y_continuous(labels = scales::comma)  # Verwendung von scales::comma für die Achsenbeschriftung in Tausenden
 ```
 
-### 3.: Je Land
-
-vergleich nach ländern
-
 ```{r}
+# Filtern der Daten für technische und administrative Jobs basierend auf den Kriterien
+technische_jobs <- subset(filtered_data, job_type == 0)
+admin_jobs <- subset(filtered_data, job_type == 1)
+
+# Durchschnittliche Gehälter pro Jobtyp für technische Jobs berechnen
+average_salaries_technical <- mean(technische_jobs$Salary, na.rm = TRUE)
+
+# Durchschnittliche Gehälter pro Jobtyp für administrative Jobs berechnen
+average_salaries_admin <- mean(admin_jobs$Salary, na.rm = TRUE)
+
+# Ausgabe der berechneten durchschnittlichen Gehälter mit Beschriftung
+cat("Durchschnittliches Gehalt für technische Jobs:", average_salaries_technical, "\n")
+cat("Durchschnittliches Gehalt für administrative Jobs:", average_salaries_admin, "\n")
 
 ```
 
-These Korrekt Und das Obwohl in den Admin Jobs auch direktoren und Manager vertreten sind
+### 3.: Je Land
 
-Nehmen wir an das Manager ein Job Titel wie Projekt Manager ist und nicht Manager für Projekt Management und dieser Titel in unserem Datensatz Director ist? Thema Führungsposition
+Eine Übersicht der durchschnittlichen Gehälter nach der Sortierung von Jobs technischer und adminsitrativer Natur aller Länder.
+
+```{r}
+#Daten nach Bildungsniveau, Land und Median des Gehalts gruppieren
+summary_data <- aggregate(Salary ~ Education.Level + Country, data = filtered_data, FUN = median)
+
+#Balkendiagramm erstellen
+ggplot(summary_data, aes(x = Education.Level, y = Salary, fill = Country)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Median Gehalt nach Bildungslevel und Land", 
+       x = "Bildungslevel",
+       y = "Median Gehalt",
+       fill = "Land") +
+  theme_minimal()
+```
+
+These Korrekt, und das Obwohl in den Admin Jobs auch in seltenen Fällen Manager vertreten sind.
+
+Es lässt sich zudem beobachten das Doktoren in Australien ein höheres Gehalt verdienen als in anderen Ländern.
+
+## Data Scientist verdienen aufgrund der hohen Nachfrage der Berufsgruppe im Schnitt mehr Geld als andere Jobgruppen bei gleichbleibender Erfahrung und Abschlussniveau. 
+
+### 1.: Begründung
+
+Data Scientist ist laut dem Harvard Business Review der "Sexiest Job of the 21st Century"\*
+
+\*<https://hbr.org/2012/10/data-scientist-the-sexiest-job-of-the-21st-century>
+
+Bei dieser Aussage haben wir uns gefragt ob sich die Beschreibung auch auf die Gehälter des Data Scientists anwenden lässt.
+
+### 2.: Datenaufbereitung
+
+Rausfiltern aller Manager und Direktoren. Einengung nach Jobs mit dem Stichwort Data, Software, Developer und Engineer
+
+```{r}
+# Filtern der Daten für Jobs mit spezifischen Schlüsselwörtern im Jobtitel
+filtered_data3 <- filtered_data %>%
+  filter(grepl("Data|Software|Developer|Engineer", Job.Title))
+
+# Anzeigen aller eindeutigen Jobtitel und deren Häufigkeit in filtered_data3
+job_title_count <- table(filtered_data3$Job.Title)
+job_title_df <- data.frame(Job_Title = names(job_title_count), Frequency = as.numeric(job_title_count))
+
+# Anzeige des Dataframes mit den Jobtiteln und deren Häufigkeit
+job_title_df
+
+```
+
+```{r}
+# Filtern der Daten für Jobs ohne "Director" im Jobtitel
+filtered_data3 <- filtered_data3 %>%
+  filter(!grepl("Director|Manager", Job.Title))
+
+# Anzeigen aller eindeutigen Jobtitel und deren Häufigkeit in filtered_data3
+job_title_count <- table(filtered_data3$Job.Title)
+job_title_df <- data.frame(Job_Title = names(job_title_count), Frequency = as.numeric(job_title_count))
+
+# Anzeige des Dataframes mit den Jobtiteln und deren Häufigkeit
+job_title_df
+```
+
+Aufteilen der Jobs in die Sparte Data & Software
+
+```{r}
+# Erstellen der neuen Spalte 'data_job'
+filtered_data3 <- filtered_data3 %>%
+  mutate(data_job = ifelse(grepl("Data", Job.Title), 1, 0))
+```
+
+```{r}
+# Zählen der Anzahl von 0 und 1 in der Spalte data_job
+count_0 <- sum(filtered_data3$data_job == 0, na.rm = TRUE)
+count_1 <- sum(filtered_data3$data_job == 1, na.rm = TRUE)
+
+# Ausgabe der Anzahl von 0 und 1
+cat("Anzahl der Zeilen mit dem Wert 0 bei data_job (Data Scientists & Engineers):", count_0, "\n")
+cat("Anzahl der Zeilen mit dem Wert 1 bei data_job (Software Engineers & Co):", count_1, "\n")
+```
+
+### 3.: Balkendiagramm
+
+Hierzu teilen wir noch die Arbeitserfahrung in Quartile ein für eine bessere Übersicht. Die Bildungsniveaus sind ja bereits in 4 Werte Unterteilt.
+
+```{r}
+# Balkendiagramm für data_job im Vergleich zum Gehalt
+ggplot(filtered_data4, aes(x = factor(data_job), y = Salary)) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge", fill = "skyblue") +
+  labs(title = "Gehalt nach Data Job",
+       x = "Data Job",
+       y = "Gehalt (Mittelwert)")
+```
+
+```{r}
+# Berechnung der Quartile der Berufserfahrung
+filtered_data4 <- filtered_data4 %>%
+  mutate(Experience_Quartile = ntile(Years.Of.Experience, 4))
+
+# Erstellung des Balkendiagramms
+ggplot(filtered_data4, aes(y = Salary, x = factor(Experience_Quartile))) +
+  geom_bar(stat = "identity", position = "dodge", aes(fill = factor(data_job))) +
+  labs(title = "Quartile der Berufserfahrung nach Gehalt und Jobtyp",
+       x = "Quartile der Berufserfahrung",
+       y = "Gehalt") +
+  theme_minimal()
+
+```
+
+Bildungsniveau Codes:
+
+0 = High School Abschluss
+
+1 = Bachelor
+
+2 = Master
+
+3 = Doctor
+
+```{r}
+# Erstellung des Balkendiagramms für Education Level
+ggplot(filtered_data4, aes(y = Salary, x = factor(Education.Level))) +
+  geom_bar(stat = "identity", position = "dodge", aes(fill = factor(data_job))) +
+  labs(title = "Quartile des Bildungsniveaus nach Gehalt und Jobtyp",
+       x = "Quartile des Bildungsniveaus",
+       y = "Gehalt") +
+  theme_minimal()
+```
+
+Im Mittel verdienen Data Scientists mehr als Arbeitnehmer aus der Software Engineering & Co Gruppe. Wobei man beobachten kann das die Gruppe Data mindestens einen Bachelor bestitzt und erst ab dem Master mehr verdient als ihr counterpart. Bezüglich der Berufserfahrung lässt sich feststellen das es in jedem Quartil ein höheres Gehaltsniveau bei der Gruppe Data gibt.
+
+## Die Gehälter sind höher in Ländern mit höheren BIP pro Kopf
+
+Da dieses Land staistisch mehr Geld pro Einwohner erwirtschaftet.
+
+BIP pro Kopf (2023):
+
+Australien 64.813,85 US-Dollar Quelle: [Australien - BIP pro Kopf bis 2028 \| Statista](https://de.statista.com/statistik/daten/studie/14425/umfrage/bruttoinlandsprodukt-pro-kopf-in-australien/#:~:text=Im%20Jahr%202022%20hat%20das%20Bruttoinlandsprodukt%20pro%20Kopf,Kopf%20in%20Australien%20auf%20rund%2063.487%2C05%20US-Dollar%20prognostiziert. "https://de.statista.com/statistik/daten/studie/14425/umfrage/bruttoinlandsprodukt-pro-kopf-in-australien/#:~:text=im%20jahr%202022%20hat%20das%20bruttoinlandsprodukt%20pro%20kopf,kopf%20in%20australien%20auf%20rund%2063.487%2c05%20us-dollar%20prognostiziert.")
+
+Canada 53.246,98 US-Dollar Quelle: [Kanada - BIP pro Kopf bis 2028 \| Statista](https://de.statista.com/statistik/daten/studie/14428/umfrage/bruttoinlandsprodukt-pro-kopf-in-kanada/#:~:text=Im%20Jahr%202022%20hat%20das%20Bruttoinlandsprodukt%20pro%20Kopf,bis%202022%20und%20Prognosen%20bis%20zum%20Jahr%202028. "https://de.statista.com/statistik/daten/studie/14428/umfrage/bruttoinlandsprodukt-pro-kopf-in-kanada/#:~:text=im%20jahr%202022%20hat%20das%20bruttoinlandsprodukt%20pro%20kopf,bis%202022%20und%20prognosen%20bis%20zum%20jahr%202028.")
+
+China 12.541,40 US-Dollar Quelle: [China - BIP pro Kopf bis 2028 \| Statista](https://de.statista.com/statistik/daten/studie/19407/umfrage/bruttoinlandsprodukt-pro-kopf-in-china/#:~:text=Im%20Jahr%202022%20hat%20das%20Bruttoinlandsprodukt%20pro%20Kopf,bis%202022%20und%20Prognosen%20bis%20zum%20Jahr%202028. "https://de.statista.com/statistik/daten/studie/19407/umfrage/bruttoinlandsprodukt-pro-kopf-in-china/#:~:text=im%20jahr%202022%20hat%20das%20bruttoinlandsprodukt%20pro%20kopf,bis%202022%20und%20prognosen%20bis%20zum%20jahr%202028.")
+
+UK 48.912,78 US-Dollar Quelle: [Großbritannien - BIP pro Kopf bis 2028 \| Statista](https://de.statista.com/statistik/daten/studie/14453/umfrage/bruttoinlandsprodukt-pro-kopf-in-grossbritannien/#:~:text=F%C3%BCr%20das%20Jahr%202023%20wird%20das%20Bruttoinlandsprodukt%20pro,bis%202020%20und%20Prognosen%20bis%20zum%20Jahr%202028. "https://de.statista.com/statistik/daten/studie/14453/umfrage/bruttoinlandsprodukt-pro-kopf-in-grossbritannien/#:~:text=f%c3%bcr%20das%20jahr%202023%20wird%20das%20bruttoinlandsprodukt%20pro,bis%202020%20und%20prognosen%20bis%20zum%20jahr%202028.")
+
+USA 76.343 US-Dollar Quelle: [USA - BIP pro Kopf bis 2028 \| Statista](https://de.statista.com/statistik/daten/studie/14454/umfrage/bruttoinlandsprodukt-pro-kopf-in-den-usa/ "https://de.statista.com/statistik/daten/studie/14454/umfrage/bruttoinlandsprodukt-pro-kopf-in-den-usa/")
+
+### 1.: Aufbereitung
+
+```{r}
+# Erstelle eine neue Spalte "BIP_Per_Person" mit NA-Werten
+filtered_data3$BIP_Per_Person <- NA
+
+# Weise den genannten Ländern die entsprechenden BIP-Werte zu
+filtered_data3$BIP_Per_Person[filtered_data3$Country == "Australia"] <- 64813.85
+filtered_data3$BIP_Per_Person[filtered_data3$Country == "Canada"] <- 53246.98
+filtered_data3$BIP_Per_Person[filtered_data3$Country == "China"] <- 12541.40
+filtered_data3$BIP_Per_Person[filtered_data3$Country == "UK"] <- 48912.78
+filtered_data3$BIP_Per_Person[filtered_data3$Country == "USA"] <- 76343.00
+
+```
+
+```{r}
+head(filtered_data3)
+```
+
+Hat funktioniert.
+
+### 2.: Scatterplot
+
+```{r}
+# Scatterplot mit Farbgebung nach Ländern und Mittelwerten einzeichnen
+ggplot(filtered_data3, aes(x = BIP_Per_Person, y = Salary, color = Country)) +
+  geom_point() +
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 3, fill = "black") +
+  labs(title = "Vergleich von Gehalt und BIP pro Person nach Ländern",
+       x = "BIP pro Person",
+       y = "Gehalt",
+       color = "Land") 
+```
+
+```{r}
+# Berechnung der Mittelwerte nach Land
+mean_salaries_by_country <- filtered_data3 %>%
+  group_by(Country) %>%
+  summarise(mean_salary = mean(Salary, na.rm = TRUE))
+
+# Ausgabe der Mittelwerte nach Land
+mean_salaries_by_country
+```
