@@ -899,7 +899,7 @@ ggplot(filtered_data, aes(x = factor(Gender), y = Salary, fill = Gender)) +
   theme_minimal()
 ```
 
-These Korrekt
+Mithilfe des Boxplots ist zu erkennen, das der Median deutlich höher bei den Männer ist. Daraus lässt sich Schlussfolgern, dass die These Korrekt ist.
 
 ### 6.1.2.: Die Differenz der Salary zwischen den Geschlechtern ist in China höher als in den westlichen Ländern. Hier alle westlichen Länder hinzufügen
 
