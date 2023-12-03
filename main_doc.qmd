@@ -449,7 +449,7 @@ cat(paste(names(job_title_count_filtered), ":", job_title_count_filtered, "\n"))
 
 ## 5.2.1 Anzahl der technischen / administrativen Jobs
 
-Im Folgenden werden Jobs auf Basis Ihrer Jobtitel in technische und adminisztrative Kategoerien unterteilt. Danach werden die Datensätze \"technische_jobs\" und \"admin_Jobs\" erstellt.
+Im Folgenden werden Jobs auf Basis Ihrer Jobtitel in technische und adminisztrative Kategoerien unterteilt. Danach werden die Datensätze "technische_jobs" und "admin_Jobs" erstellt.
 
 ```{r}
 
@@ -755,7 +755,7 @@ cat("Die Korrelation zwischen Seniority und Years.Of.Experience ist:", correlati
 
 ```
 
-Das Ergebnis der Korrelationen: \
+Das Ergebnis der Korrelationen:\
 Von Salary und Years.of.experience ist es 0.81. Von Salary und Age ist es 0.73 und die von Age und Years.Of.Experience ist 0.93.
 
 Nun stellt sich folgende Frage: Wie kommt es zu so einem großen Unterschied Zwischen den Werten im Vergleich zu Salary, obwohl sie doch eine starke Korrelation zueinadner haben?
