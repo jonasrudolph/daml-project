@@ -400,7 +400,7 @@ ggplot(salary_final, aes(x = Country, y = Salary, fill = Race)) +
 
 # 5. Daten Aufbereiten 2
 
-(Tests der Thesen gibt uns die Antowrt darauf wie die Daten aufbereitet werden müssen)
+(Tests der Thesen gibt uns die Antwort darauf wie die Daten aufbereitet werden müssen)
 
 ## 5.1 Jobs
 
