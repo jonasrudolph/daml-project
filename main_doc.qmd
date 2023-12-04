@@ -405,7 +405,7 @@ ggplot(salary_final, aes(x = Country, y = Salary, fill = Race)) +
 
 # 5. Daten Aufbereiten
 
-(Tests der Thesen gibt uns die Antowrt darauf wie die Daten aufbereitet werden müssen)
+(Tests der Thesen gibt uns die Antwort darauf wie die Daten aufbereitet werden müssen)
 
 ## 5.1 Jobs
 
@@ -447,7 +447,9 @@ cat(paste(names(job_title_count_filtered), ":", job_title_count_filtered, "\n"))
 
 ## 5.2 Job Typen
 
-Anzahl der technischen und adminsitrativen Berufe
+## 5.2.1 Anzahl der technischen / administrativen Jobs
+
+Im Folgenden werden Jobs auf Basis Ihrer Jobtitel in technische und adminisztrative Kategoerien unterteilt. Danach werden die Datensätze "technische_jobs" und "admin_Jobs" erstellt.
 
 ```{r}
 
@@ -475,6 +477,10 @@ cat("Anzahl der administrativen Jobs:", anzahl_admin_jobs, "\n")
 
 ```
 
+Zu erkennen ist hier, dass es detlich mehr technische Jobs als administraive Jobs in diesem Datensatz gibt.
+
+???? notwenig nochmal zu wissen wie viele insgesamt in filtered data sind????
+
 ```{r}
 
 # Anzahl der Zeilen (Werte) in filtered_data
@@ -485,12 +491,24 @@ cat("Anzahl der Werte in filtered_data:", anzahl_werte_filtered_data, "\n")
 
 ```
 
+Insgesamt gibt es in dem gefilterten Datensatz 6398 Einträge, was bedeutet, dass ungefähr 60% technische Jobs und 40% administrative Jobs sind.
+
+Nun wird nochmal der gefilterte Datensatz mit der Summe von "anzahl_technische_jobs" und "anzahl_administraive Jobs" verglichen.
+
 ```{r}
 anzahl_jobs <- anzahl_technische_jobs + anzahl_admin_jobs
 cat(anzahl_jobs)
 ```
 
-problem da jobs anscheinend doppelt gezählt werden ich glaube wir müssen den jobs eine id geben
+Zu erkennen ist hier, dass es zwei unterschiedliche Werte für die Beiden Datensätze gibt.
+
+Wir vermuten, dass einige Jobs doppelt gezählt werden. Dies würde erklären, dass deutlich mehr Einträge in "anzahl_jobs" sind. Unser Lösungsvorschlag wäre hier, dass wir den Jobs IDs geben.
+
+#### 5.2.1.1 Lösungsansatz 1
+
+Der erste Lösungsansatz sieht wie folgt aus:
+
+Die jobs werden basierend auf bestimmten Namen ( data, enginner etc. ) gefiltert und alle Duplikate werden entfernt. Das Ergebnis ist nun ein neuer Datensatz "filtered_data_neu" in dem alle Zeilen außer, die technischen und administrativen Jobs enthält.
 
 ```{r}
 
@@ -524,9 +542,11 @@ anzahl_admin_jobs2 <- nrow(admin_jobs2)
 cat("Anzahl der administrativen Jobs2:", anzahl_admin_jobs2, "\n")
 ```
 
-basieren auf filtered_data ein neues dataset erstellt wird aus dem ein datensatz gelöscht wird sobald eine zeile einer der \_jobs table zugewiesen wird damit es nicht doppelt gezählt werden kann. Warum auch immer funktioniert das nicht also neuer lösungsansatz:
+Es scheint als würde dieser Lösungsansatz nicht funktionieren, da der neue Datensatz keine Einträge enthält.
 
-Das Problem mit der Klassifizierung der Jobs nach Technisch und Administrativ lässt sich lösen in dem ich die nicht in 2 tabellen aufteile sondern jeder Zeile einen Wert des Entsprechenden job types zuordne
+#### 5.2.1.2 Lösungsansatz 2
+
+Der zweite Lösungsansatz zum Problem der Klassifizierung der verschiedenen Job Typen kann gelöst werden, indem die beiden Jobs nicht in 2 Tabellen unterteilt werden, sondern Jede Zeile einen Wert des entsprechenden Jobs Typs zugeordnet wird.
 
 ```{r}
 # Erstellung der neuen Spalte "job_type" basierend auf den gegebenen Filtern
@@ -551,7 +571,9 @@ print(count_job_types)
 
 ```
 
-Auflösen der NAs
+Es wird eine neue Spalte namens "job_type" erstellt. Diese Spalte wird nun mit Werten gefüllt. Der Wert = für Zielen mit technischen Jobs und 1 für administrative Jobs. NA erhalten alle anderen Jobtypen.
+
+Nun werden die eben gefundenen NAs in einen neuen Datensatz geschrieben.
 
 ```{r}
 # Auswahl aller Zeilen mit NA-Werten in der Spalte "job_type"
@@ -562,7 +584,7 @@ na_job_type_rows
 
 ```
 
-Das Ergebnis ist eine Table welche nur aus Product Designer & Receptionist besteht. Diese fügen wir den Administrativen Jobs hinzu.
+Das Ergebnis dieser Abfrage ist eine Tabelle, welche nur aus Product Designer % Receptionist besteht. Diese werden nun den adminsitrativen Jobs hinzugefügt.
 
 ```{r}
 # Aktualisierung der job_type-Spalte für die spezifischen Job-Titel
@@ -583,9 +605,13 @@ print(count_job_types)
 
 ```
 
-Done. Im folgenden werden alle Diagramme auch über job_type ausgewertet könnnen.
+Nun ist das Klassifizierungsproblem gelöst. Aufgrund dessen können jetzt auch Diegramme über Job_types ausgewertet werden.
 
 ## 5.3 Expats & Einheimische
+
+Im folgenden werden einige Boxplots erstellt.
+
+### 5.3.1 Years of Experience vs. Gender
 
 ```{r}
 ggplot(filtered_data, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
@@ -597,6 +623,8 @@ ggplot(filtered_data, aes(x = factor(Gender), y = Years.Of.Experience, fill = Ge
   theme_minimal()
 
 ```
+
+### 5.3.2 Years of Experience vs. Gender (China)
 
 ```{r}
 # Bibliothek ggplot2 laden
@@ -616,6 +644,27 @@ ggplot(data_china, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gende
 
 ```
 
+### 5.3.3 Years of Experience vs. Gender( USA)
+
+```{r}
+# Bibliothek ggplot2 laden
+library(ggplot2)
+
+# Daten für USA filtern
+data_usa <- subset(filtered_data, Country == "USA")
+
+# Boxplot erstellen
+ggplot(data_usa, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Boxplot: Years of Experience vs. Gender (USA)",
+       x = "Gender",
+       y = "Years of Experience",
+       fill = "Gender") +
+  theme_minimal()
+```
+
+### 5.3.4 Salary vs. Gender ( China)
+
 ```{r}
 # Bibliothek ggplot2 laden
 library(ggplot2)
@@ -634,23 +683,7 @@ ggplot(data_china, aes(x = factor(Gender), y = Salary, fill = Gender)) +
 
 ```
 
-```{r}
-# Bibliothek ggplot2 laden
-library(ggplot2)
-
-# Daten für USA filtern
-data_usa <- subset(filtered_data, Country == "USA")
-
-# Boxplot erstellen
-ggplot(data_usa, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
-  geom_boxplot(alpha = 0.7) +
-  labs(title = "Boxplot: Years of Experience vs. Gender (USA)",
-       x = "Gender",
-       y = "Years of Experience",
-       fill = "Gender") +
-  theme_minimal()
-
-```
+### 5.3.5 Salary vs. Gender (USA)
 
 ```{r}
 # Bibliothek ggplot2 laden
@@ -670,7 +703,11 @@ ggplot(data_usa, aes(x = factor(Gender), y = Salary, fill = Gender)) +
 
 ```
 
-ist jetzt der gender pay gap in china doch größer da der größte faktor für salary years of experience ist?
+Nach intensiven Vergleichen der Grafiken bezüglich der Salary stellt sich nun die Frage:
+
+Ist die Gender-Pay-Gap in China doch Größer, da der größte Faktor für die Salary die Years of Experience sind?
+
+### 5.3.6 Korrelationen zwischen den Spalten
 
 ```{r}
 # Korrelation zwischen Salary und Years.Of.Experience berechnen
@@ -718,15 +755,28 @@ cat("Die Korrelation zwischen Seniority und Years.Of.Experience ist:", correlati
 
 ```
 
-das ergebnis der correlationen: von salary und years.of.experience ist es 0.81 von Salary und Age ist es 0.73 und die von Age und Years.Of.Experience ist 0.93 wie kommt so ein starker unterschied zu stande bei den werten im vergleich zu salary obwohl sie doch eine hohe correlation zueinander haben
+Das Ergebnis der Korrelationen:\
+Von Salary und Years.of.experience ist es 0.81. Von Salary und Age ist es 0.73 und die von Age und Years.Of.Experience ist 0.93.
 
-Verteilung der Daten: Es ist möglich, dass die Verteilung der Daten in den Variablen "Age" und "Years.Of.Experience" anders ist als in der Variable "Salary". Wenn die Daten in "Age" und "Years.Of.Experience" breiter gestreut sind, kann dies zu einer geringeren Korrelation führen, selbst wenn eine starke lineare Beziehung besteht.
+Nun stellt sich folgende Frage: Wie kommt es zu so einem großen Unterschied Zwischen den Werten im Vergleich zu Salary, obwohl sie doch eine starke Korrelation zueinadner haben?
 
-Nicht-lineare Beziehung: Die Korrelation misst nur lineare Beziehungen. Wenn die Beziehung zwischen "Age" und "Years.Of.Experience" nicht linear ist, könnte dies zu einem niedrigeren Korrelationswert führen.
+Mögliche Antworten auf diese Frage wären:
 
-Ausreißer: Das Vorhandensein von Ausreißern kann die Korrelation beeinflussen. Wenn es Ausreißer in einer der Variablen gibt, kann dies den Korrelationswert beeinträchtigen.
+Verteilung der Daten:
 
-Stichprobengröße: Bei kleineren Stichproben können Korrelationswerte instabiler sein.
+Es ist möglich, dass die Verteilung der Daten in den Variablen "Age" und "Years.Of.Experience" anders ist als in der Variable "Salary". Wenn die Daten in "Age" und "Years.Of.Experience" breiter gestreut sind, kann dies zu einer geringeren Korrelation führen, selbst wenn eine starke lineare Beziehung besteht.
+
+Nicht-lineare Beziehung:
+
+Die Korrelation misst nur lineare Beziehungen. Wenn die Beziehung zwischen "Age" und "Years.Of.Experience" nicht linear ist, könnte dies zu einem niedrigeren Korrelationswert führen.
+
+Ausreißer:
+
+Das Vorhandensein von Ausreißern kann die Korrelation beeinflussen. Wenn es Ausreißer in einer der Variablen gibt, kann dies den Korrelationswert beeinträchtigen.
+
+Stichprobengröße:
+
+Bei kleineren Stichproben können Korrelationswerte instabiler sein.
 
 \# Durchschnittliche Gehälter pro Jobtyp für technische_jobs2 berechnen
 
@@ -784,11 +834,13 @@ ggplot(all_average_salaries, aes(x = Job.Type, y = Average.Salary, fill = Job.Ty
 
 Und das Obwohl in den Admin Jobs auch direktoren und Manager vertreten sind
 
-Nehmen wir an das Manager ein Job Titel wie Projekt Manager ist und nicht Manager für Projekt Management und dieser Titel in unserem Datensatz Director ist? Thema Führungsposition
+Nehmen wir an das Manager ein Job Titel wie Projekt Manager ist und nicht Manager für Projekte und dieser Titel in unserem Datensatz Director ist? Thema Führungsposition
 
 Unsere Untersuchungen haben Ergeben das wir die Daten für unsere Explorative Datenanalyse aber auch die Regression neu aufbereiten müssen.
 
-Dazu suchen wir: unterscheide ich einen native und expat im jeweiligen Land. Welche annahmen sind dafür nötig? Hier die annahme das White generell nicht ausgewandert ist da wir hier länder mit ähnlicher kultur und salary haben
+Dazu suchen wir:
+
+Unterscheidet sich ein native und expat im jeweiligen Land? Welche Annahmen sind dafür nötig? Hier die Annahme das "White" generell nicht ausgewandert ist da wir hier Länder mit ähnlicher Kultur und Salary haben.
 
 ```{r}
 ggplot(filtered_data, aes(x = Country, fill = Race)) +
@@ -799,7 +851,9 @@ ggplot(filtered_data, aes(x = Country, fill = Race)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Dafür füge ich eine neue spalte ein die mit numerishcen werten arbeitet. 0 steht für einheimischer und 1 für expat. Den wert null erhalten alle zeilen bei denen wir folgende übereinstimmung feststllen (land und ethnizität hier country und race): African American (USA) White (Canada, USA, UK, Australia) Chinese (China) Australian(Australia) Welsh (UK) jede andere race ist ja dementsprechend expat und erhält eine 1 in der spalte expat
+Dafür wird eine neue Spalte eingefügt, die mit numerischen werten arbeitet. 0 steht für Einheimische und 1 für einen Expat. Den Wert null erhalten alle zeilen bei denen wir folgende Übereinstimmung feststellen: African American (USA) White (Canada, USA, UK, Australia) Chinese (China) Australian(Australia) Welsh (UK) jede andere Race ist ja dementsprechend Expat und erhält eine 1 in der Spalte Expat.
+
+????????
 
 ```{r}
 # Erstellen der Spalte "Expat" basierend auf den angegebenen Kriterien
@@ -821,9 +875,11 @@ filtered_data$Expat <- ifelse(expat_conditions[[1]] | expat_conditions[[2]], 0,
 head(filtered_data)
 ```
 
+Ausgabe hier sind nun die ersten Zeilen der aktualisierten Version von "filtered_data" indem die Spalte "Expat" basierend auf den oben genannten Kriterien befüllt wurde.
+
 # 6. Thesen
 
-Aus den überlegungen der Tests haben wir folgende Thesen formuliert.
+Aus den überlegungen der Tests und der Vorarbeit wurden folgende Thesen formuliert. Dieser Abschnitt wird in unterschiedliche Teilabschnitte geteilt.
 
 ## 6.1 Genderpaygap
 
@@ -843,7 +899,7 @@ ggplot(filtered_data, aes(x = factor(Gender), y = Salary, fill = Gender)) +
   theme_minimal()
 ```
 
-These Korrekt
+Mithilfe des Boxplots ist zu erkennen, das der Median deutlich höher bei den Männer ist. Daraus lässt sich Schlussfolgern, dass die These Korrekt ist.
 
 ### 6.1.2.: Die Differenz der Salary zwischen den Geschlechtern ist in China höher als in den westlichen Ländern. Hier alle westlichen Länder hinzufügen
 
