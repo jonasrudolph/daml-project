@@ -19,6 +19,18 @@ date: 2023-11-13
 
 Im folgenden Teil dieser Arbeit werden die Vorbereitungen getroffen, die notwendig sind um die Durchführung des Projekts zu ermöglichen.
 
+<https://www.kaggle.com/datasets/amirmahdiabbootalebi/salary-by-job-title-and-country>
+
+Zusätzliche Quellen für die Methodik:
+
+<https://www.datanovia.com/en/blog/top-r-color-palettes-to-know-for-great-data-visualization/>
+
+<https://ggplot2.tidyverse.org/reference/>
+
+[ggplot2 - Elegante R Plots (statistikprofis.com)](https://www.statistikprofis.com/post/ggplot)
+
+Dieses Datenset bietet eine umfassende Sammlung von Gehaltsinformationen aus verschiedenen Branchen und Regionen weltweit. Es enthält Details zu Berufsbezeichnungen, Gehältern, Berufssektoren, geografischen Standorten und mehr, die von seriösen Beschäftigungswebsites und Umfragen stammen. Analysieren Sie diese Daten, um Einblicke in Trends auf dem Arbeitsmarkt zu gewinnen, Vergütungen in verschiedenen Berufen zu vergleichen und informierte Entscheidungen über Ihre Karriere oder Einstellungsstrategien zu treffen. Das Datenset ist zur einfachen Analyse bereinigt und vorverarbeitet und steht unter einer offenen Lizenz für Forschungs- und Datenanalysezwecke zur Verfügung.
+
 ## 1.1 Importieren der benötigten Packages
 
 ```{r, warning=FALSE, message=FALSE}
@@ -27,6 +39,7 @@ library(explore)
 library(ggplot2)
 library(corrplot)
 library(dplyr)
+library(viridis)
 ```
 
 Häufig kommt:\
@@ -99,6 +112,106 @@ Nun werfen verschaffen Wir uns einen Überblick über die prozentuale Verteilung
 explore (salary, Job.Title)
 ```
 
+Altersverteilung:
+
+```{r}
+# Erstelle eine Histogramm-Visualisierung der Altersverteilung
+ggplot(salary, aes(x = Age)) +
+  geom_histogram(binwidth = 5, fill = "skyblue", color = "black", alpha = 0.8) +
+  labs(title = "Age Distribution",
+       x = "Age",
+       y = "Frequency")
+```
+
+Verteilung des Bildungsniveaus
+
+```{r}
+# Definiere eine Farbpalette mit 4 verschiedenen Farben
+my_colors <- c("skyblue", "lightgreen", "salmon", "gold") # Farben nach Wunsch ändern
+
+# Erstelle ein Balkendiagramm mit unterschiedlichen Farben für jede Stange basierend auf dem Bildungsniveau
+ggplot(salary, aes(x = factor(`Education.Level`))) +
+  geom_bar(fill = my_colors, color = "black") +
+  labs(title = "Verteilung des Bildungsniveaus",
+       x = "Bildungsniveau",
+       y = "Anzahl") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Verteilung der Arbeitserfahrung in Jahren
+
+Ab hier wurde Teilweise das Paket "Viridis" für die farbliche Darstellung verwendet um eine Alternative zur Manuellen Deklaration der Farben aufzuzeigen.
+
+```{r}
+# Erstelle ein Histogramm für die Verteilung der Jahre an Erfahrung
+ggplot(salary, aes(x = `Years.Of.Experience`)) +
+  geom_histogram(binwidth = 5, fill = viridis(8), color = "black") +
+  labs(title = "Verteilung der Berufserfahrung",
+       x = "Jahre an Erfahrung",
+       y = "Häufigkeit") +
+  theme_minimal()
+```
+
+Verteilung der Geschlechter
+
+```{r}
+# Erstellen des Diagramms
+ggplot(salary, aes(x=Gender)) +
+  geom_bar(fill=viridis(2)) +
+  ggtitle("Gender Distribution") +
+  xlab("Gender") +
+  ylab("Count") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+Verteilung der Länder
+
+(Alternative Nutzung des Farbschemas)
+
+```{r}
+# Erstellen des Diagramms
+ggplot(salary, aes(x = Country, fill = Country)) +
+  geom_bar() +
+  scale_fill_viridis(discrete = TRUE) +
+  ggtitle("Country Distribution") +
+  xlab("Country") +
+  ylab("Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Verteilung der Ethnizitäten
+
+```{r}
+# Erstellen des Diagramms
+ggplot(salary, aes(x = Race, fill = Race)) +
+  geom_bar() +
+  scale_fill_viridis(discrete = TRUE) +
+  ggtitle("Race Distribution") +
+  xlab("Race") +
+  ylab("Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Verteilung der 10 Häufigsten Job Titel
+
+```{r}
+# Die Top 10 Jobtitel auswählen
+top_job_titles <- names(sort(table(salary$Job.Title), decreasing = TRUE)[1:10])
+
+# Zufällige Farben für jeden Jobtitel generieren
+job_colors <- rainbow(length(top_job_titles))
+
+# Daten filtern und ggplot erstellen
+ggplot(salary[salary$Job.Title %in% top_job_titles, ], aes(x = factor(Job.Title, levels = top_job_titles), fill = factor(Job.Title))) +
+  geom_bar(fill=viridis(10)) +
+  scale_fill_manual(values = job_colors) +
+  labs(title = "Top 10 Job Titles Distribution",
+       x = "Job Title",
+       y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
 ## 2.2 Grundlegende Statistische Merkmale des Datensatzes
 
 Zunächst wird mithilfe der Funktion "summary( )" ein allgemeiner Überblick über die wichtigsten charackteristeischen Merkmale der einzelnen Splaten gegeben.
@@ -106,6 +219,8 @@ Zunächst wird mithilfe der Funktion "summary( )" ein allgemeiner Überblick üb
 ```{r}
 summary(salary)
 ```
+
+Hier alles genauer beschreiben
 
 Erkennbar hier ist es, dass es innerhalb des Datensatzes ein durchschnittliches Alter von 32 Jahren vorliegt. Das Alter streckt sich von 21 Jahren bis zu 62 Jahren. Außerdem gibt es beim "Education-Level" Werte zwischen 1, 2 und 3, wobei der Durchschnitt jedoch bei 1 liegt. Außerdem gibt es bei der Berufserfahrung ( Years of Experience) Werte zwischen 0 bis zu 34 Jahren. Der Median hier beträgt 7.
 
@@ -123,14 +238,6 @@ head(Salary_long)
 ```
 
 Insgesamt werden in diesem Codechunk die Spalten die nicht nummerische Merkmale sind entfernt und der verbleibende Datensatz wird von einem breiten in ein längeres Format umgewandelt.
-
-Mithilfe des oben erstellten Wertes "Value" wird nun ein Histogramm für jede Spalte innerhalb des Datensatzes "salary_long" erstellt. Außerdem wird nach der Variable "name" gruppiert.
-
-```{r}
-ggplot(Salary_long, aes(x = value)) +
-  geom_histogram() +
-  facet_wrap(~ name, scales = "free")
-```
 
 Hier kann man folgende Dinge erkennen:
 
@@ -150,8 +257,18 @@ salary_final <- salary
 
 Durch den Befehl "hist()" wird ein Histogramm erstellt . Es ermöglicht eine visuelle Darstellung der Häufigkeitsverteilung dieses GEhlatsdaten, indem es zeigt, wie oft bestimmte Gehaltsbereiche vorkommen.
 
+Verteilung des Gehalts
+
 ```{r}
-hist(salary_final$Salary)
+# Erstelle ein Histogramm für die Gehaltsverteilung
+ggplot(salary, aes(x = Salary)) +
+  geom_histogram(binwidth = 10000, fill = viridis(26), color = "black") +
+  labs(title = "Gehaltsverteilung",
+       x = "Gehalt",
+       y = "Häufigkeit") +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(labels = scales::comma) +
+  theme_minimal()
 ```
 
 Im folgenden wird eine neue Spalte "SalaryKat" erstellt die kategorische Werte basdierend auf den Gehältern enthält...
@@ -163,10 +280,16 @@ salary_final$SalaryKat <- cut(salary_final$Salary,
 
 ```
 
-........
-
 ```{r}
-explore(salary_final, SalaryKat)
+# Erstellen des Balkendiagramms für die 5 Gategorien des Gehalts
+ggplot(salary_final, aes(x = SalaryKat, fill = SalaryKat)) +
+  geom_bar() +
+  scale_fill_viridis(discrete = TRUE) +
+  ggtitle("Verteilung der Gehaltskategorien") +
+  xlab("Gehaltskategorie") +
+  ylab("Anzahl") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 ```
 
 ## 3.2 Korrelationen
@@ -248,26 +371,26 @@ cor(filtered_data_numeric)
 ```
 
 ```{r}
-filtered_data_numeric |>
-cor() |>
-corrplot(method = 'ellipse')
+#Erstellen des Korrelationplots
+corrplot(cor(filtered_data_numeric), method = "ellipse", col = viridis(200))
 ```
 
 ## 4.2 Streudiagramme
 
 ```{r}
+#Erstellen des Streudiagrammes
 ggplot(salary_final, aes(x = Years.Of.Experience, y = Salary)) +
-  geom_point(color = "blue", size = 3, shape = 16) +
-  labs(title = "Scatter Plot of Years of Experience vs Salary",
-       x = "Years of Experience",
-       y = "Salary")
+  geom_point(color = viridis(2)[1], size = 3, shape = 16) +
+  labs(title = "Streudiagramm von Berufserfahrung vs. Gehalt",
+       x = "Berufserfahrung",
+       y = "Gehalt")
 ```
 
 In diesem Streudiagramm ist erkennbar, das es einen eindeutigen Trend nach oben gibt je mehr "Years of Experience" vorliegen. So ist auch zu sehen, dass die Topgehälter von 250.000€ zwischen 20 bis 30 Erfahrungsjahren liegen.
 
 ```{r}
 ggplot(salary_final, aes(x = Education.Level, y = Salary)) +
-  geom_point(color = "blue", size = 3, shape = 16) +
+  geom_point(color = viridis(2)[1], size = 3, shape = 16) +
   labs(title = "Scatter Plot of Education Level vs Salary",
        x = "Years of Experience",
        y = "Salary")
@@ -276,19 +399,20 @@ ggplot(salary_final, aes(x = Education.Level, y = Salary)) +
 
 Die vorliegende Datenanalyse zeigt einen klaren Trend zu höheren Gehaltsklassen, der mit einem Anstieg des Bildungsniveaus einhergeht. Diese Tendenz wird durch eine höhere Dichte in den oberen Gehaltsgruppen für Personen mit dem dritten Bildungsgrad im Vergleich zum zweiten und ersten Bildungsgrad deutlich.
 
-## 4.3 Balkendiagramme
+## 4.3 Balkendiagramme mit 2 Variablen
 
 In diesem Abschnitt werden Balkendiagramme verwendet um den Datensatz auf Beziehungen zu analysieren.
 
 ### 4.3.1 Average Salary by Race
 
 ```{r}
-ggplot(salary_final, aes(x = Race, y = Salary)) +
-  geom_bar(stat = "summary", fun = "mean", fill = "blue") +
-  labs(title = "Average Salary by Race",
-       x = "Race",
-       y = "Average Salary")
-
+#Erstellen des Diagramms
+ggplot(salary_final, aes(x = Race, y = Salary, fill = Race)) +
+  stat_summary(fun = "mean", geom = "bar") +
+  scale_fill_viridis(discrete = TRUE) +
+  ggtitle("Durchschnittliches Gehalt nach Ethnizität") +
+  xlab("Rasse") +
+  ylab("Durchschnittliches Gehalt")
 ```
 
 Die Grafik macht deutlich, dass die Gruppen "Black, Korean, Mixed und White" im Durchschnitt am meisten verdienen.
@@ -297,10 +421,11 @@ Die Grafik macht deutlich, dass die Gruppen "Black, Korean, Mixed und White" im 
 
 ```{r}
 ggplot(salary_final, aes(x = Country, y = Salary, fill = Country)) +
-  geom_bar(stat = "summary", fun = "mean", position = "dodge", color = "black") +
-  labs(title = "Average Salary by Country",
-       x = "Country",
-       y = "Average Salary") +
+  stat_summary(fun = "mean", geom = "bar", position = "dodge", color = "black") +
+  scale_fill_viridis(discrete = TRUE) +
+  labs(title = "Durchschnittliches Gehalt nach Land",
+       x = "Land",
+       y = "Durchschnittliches Gehalt") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
@@ -313,6 +438,7 @@ In diesem Fall wird ein gestapeltes Balkendiagramm erstellt. Die Balken sind nac
 ```{r}
 ggplot(salary_final, aes(x = Country, y = Salary, fill = Gender)) +
   geom_bar(stat = "summary", fun = "mean", position = "stack", color = "black") +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Average Salary by Country and Gender",
        x = "Country",
        y = "Average Salary") +
@@ -331,6 +457,7 @@ Desweiteren sind zur besseren Veranschaulichung die Beschriftungen auf der X-Ach
 ```{r}
 ggplot(salary_final, aes(x = Country, y = Salary, fill = factor(Education.Level))) +
   geom_bar(stat = "summary", fun = "mean", position = "dodge", color = "black") +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Average Salary by Country and Education Level",
        x = "Country",
        y = "Average Salary") +
@@ -346,6 +473,7 @@ Auch hier wird zum Vergleich der durchschnittlichen Gehälter zwischen den Länd
 ```{r}
 ggplot(salary_final, aes(x = Country, y = Salary, fill = Race)) +
   geom_bar(stat = "summary", fun = "mean", position = "stack", color = "black") +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Average Salary by Country and Race",
        x = "Country",
        y = "Average Salary") +
@@ -360,7 +488,8 @@ Hier ist deutlich sichtbar, dass nicht in jedem Land logischerweise jede ethnisc
 
 ```{r}
 ggplot(salary_final, aes(x = Job.Title, y = Salary)) +
-  geom_bar(stat = "summary", fun = "mean", fill = "blue", color = "black") +
+  geom_bar(stat = "summary", fun = "mean", color = viridis(2)[1], color = viridis(2)[1]) +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Average Salary by Job Title",
        x = "Job Title",
        y = "Average Salary") +
@@ -381,20 +510,30 @@ job_title_count <- table(salary_final$Job.Title)
 job_title_df <- data.frame(Job_Title = names(job_title_count), Frequency = as.numeric(job_title_count))
 
 ggplot(job_title_df, aes(x = Job_Title, y = Frequency)) +
-  geom_bar(stat = "identity", fill = "blue", color = "black") +
+  geom_bar(stat = "identity", fill = viridis(2)[1], color = "black") +
   labs(title = "Frequency of Unique Job Titles",
        x = "Job Titles",
        y = "Frequency") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
 ```
 
-?????
+Jeder Job Dargestellt. Es ist zu notieren das es nicht möglich ist die Vielzahl der unterschiedlichen Jobs darzustellen.
+
+```{r}
+library(dplyr)
+
+# Zählen der Vorkommen für jeden Jobtitel
+job_title_count <- salary %>%
+  count(`Job.Title`, sort = TRUE)
+job_title_count
+```
 
 ## 4.4 Boxplots
 
 ```{r}
 ggplot(salary_final, aes(x = Country, y = Salary, fill = Race)) +
   geom_boxplot() +
+  scale_fill_viridis(discrete = TRUE) +
   stat_summary(fun = "median", geom = "point", shape = 18, size = 3, color = "red", position = position_dodge(width = 0.75)) +
   labs(title = "Salary Distribution by Country and Race",
        x = "Country",
@@ -431,11 +570,12 @@ job_title_count <- table(filtered_data$Job.Title)
 job_title_df <- data.frame(Job_Title = names(job_title_count), Frequency = as.numeric(job_title_count))
 
 ggplot(job_title_df, aes(x = Job_Title, y = Frequency)) +
-  geom_bar(stat = "identity", fill = "blue", color = "black") +
+  geom_bar(stat = "identity", fill = viridis(2)[1], color = "black") +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Frequency of Unique Job Titles",
        x = "Job Titles",
        y = "Frequency") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 Auf min 30 Jobhäufigkeiten angepasst.
@@ -616,6 +756,7 @@ Im folgenden werden einige Boxplots erstellt.
 ```{r}
 ggplot(filtered_data, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
   geom_boxplot(alpha = 0.7) +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Boxplot: Years of Experience vs. Gender",
        x = "Gender",
        y = "Years of Experience",
@@ -636,6 +777,7 @@ data_china <- subset(filtered_data, Country == "China")
 # Boxplot erstellen
 ggplot(data_china, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
   geom_boxplot(alpha = 0.7) +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Boxplot: Years of Experience vs. Gender (China)",
        x = "Gender",
        y = "Years of Experience",
@@ -656,6 +798,7 @@ data_usa <- subset(filtered_data, Country == "USA")
 # Boxplot erstellen
 ggplot(data_usa, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
   geom_boxplot(alpha = 0.7) +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Boxplot: Years of Experience vs. Gender (USA)",
        x = "Gender",
        y = "Years of Experience",
@@ -675,6 +818,7 @@ data_china <- subset(filtered_data, Country == "China")
 # Boxplot für Salary vs. Gender erstellen
 ggplot(data_china, aes(x = factor(Gender), y = Salary, fill = Gender)) +
   geom_boxplot(alpha = 0.7) +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Boxplot: Salary vs. Gender (China)",
        x = "Gender",
        y = "Salary",
@@ -695,6 +839,7 @@ data_usa <- subset(filtered_data, Country == "USA")
 # Boxplot für Salary vs. Gender erstellen
 ggplot(data_usa, aes(x = factor(Gender), y = Salary, fill = Gender)) +
   geom_boxplot(alpha = 0.7) +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Boxplot: Salary vs. Gender (USA)",
        x = "Gender",
        y = "Salary",
@@ -778,34 +923,6 @@ Stichprobengröße:
 
 Bei kleineren Stichproben können Korrelationswerte instabiler sein.
 
-\# Durchschnittliche Gehälter pro Jobtyp für technische_jobs2 berechnen
-
-average_salaries_technical \<- mean(technische_jobs2\$Salary)
-
-\# Durchschnittliche Gehälter pro Jobtyp für admin_jobs2 berechnen
-
-average_salaries_admin \<- mean(admin_jobs2\$Salary)
-
-\# Daten zusammenführen
-
-all_average_salaries \<- data.frame(Job.Type = c("technisch", "admin"),
-
-Average.Salary = c(average_salaries_technical, average_salaries_admin))
-
-\# Diagramm erstellen
-
-ggplot(all_average_salaries, aes(x = Job.Type, y = Average.Salary, fill = Job.Type)) +
-
-geom_bar(stat = "identity", position = "dodge", alpha = 0.7) +
-
-labs(title = "Durchschnittliche Gehälter nach Jobtyp",
-
-x = "Jobtyp",
-
-y = "Durchschnittliches Gehalt") +
-
-theme_minimal()
-
 ```{r}
 # Filtern der Daten für technische und administrative Jobs basierend auf den Kriterien
 technische_jobs <- subset(filtered_data, job_type == 0)
@@ -824,6 +941,7 @@ all_average_salaries <- data.frame(Job.Type = c("technisch", "admin"),
 # Erstellung des Diagramms mit angepasster Achsenbeschriftung
 ggplot(all_average_salaries, aes(x = Job.Type, y = Average.Salary, fill = Job.Type)) +
   geom_bar(stat = "identity", position = "dodge", alpha = 0.7) +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Durchschnittliche Gehälter nach Jobtyp",
        x = "Jobtyp",
        y = "Durchschnittliches Gehalt") +
@@ -845,6 +963,7 @@ Unterscheidet sich ein native und expat im jeweiligen Land? Welche Annahmen sind
 ```{r}
 ggplot(filtered_data, aes(x = Country, fill = Race)) +
   geom_bar(position = "dodge") +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Count of Races in Each Country",
        x = "Country",
        y = "Count") +
@@ -892,6 +1011,7 @@ Aus den überlegungen der Tests und der Vorarbeit wurden folgende Thesen formuli
 ```{r}
 ggplot(filtered_data, aes(x = factor(Gender), y = Salary, fill = Gender)) +
   geom_boxplot(alpha = 0.7) +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Boxplot: Salary vs. Gender",
        x = "Gender",
        y = "Salary",
@@ -910,6 +1030,7 @@ data_usa <- subset(filtered_data, Country == "USA")
 # Boxplot erstellen
 ggplot(data_usa, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
   geom_boxplot(alpha = 0.7) +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Boxplot: Years of Experience vs. Gender (USA)",
        x = "Gender",
        y = "Years of Experience",
@@ -924,6 +1045,7 @@ data_china <- subset(filtered_data, Country == "China")
 # Boxplot für Salary vs. Gender erstellen
 ggplot(data_china, aes(x = factor(Gender), y = Salary, fill = Gender)) +
   geom_boxplot(alpha = 0.7) +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Boxplot: Salary vs. Gender (China)",
        x = "Gender",
        y = "Salary",
@@ -938,6 +1060,7 @@ These Korrekt
 ```{r}
 ggplot(filtered_data, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
   geom_boxplot(alpha = 0.7) +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Boxplot: Years of Experience vs. Gender",
        x = "Gender",
        y = "Years of Experience",
@@ -952,6 +1075,7 @@ data_china <- subset(filtered_data, Country == "China")
 # Boxplot erstellen
 ggplot(data_china, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
   geom_boxplot(alpha = 0.7) +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Boxplot: Years of Experience vs. Gender (China)",
        x = "Gender",
        y = "Years of Experience",
@@ -966,6 +1090,7 @@ data_usa <- subset(filtered_data, Country == "USA")
 # Boxplot erstellen
 ggplot(data_usa, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
   geom_boxplot(alpha = 0.7) +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Boxplot: Years of Experience vs. Gender (USA)",
        x = "Gender",
        y = "Years of Experience",
@@ -999,6 +1124,7 @@ Dazu suchen wir: unterscheide ich einen native und expat im jeweiligen Land. Wel
 ```{r}
 ggplot(filtered_data, aes(x = Country, fill = Race)) +
   geom_bar(position = "dodge") +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Count of Races in Each Country",
        x = "Country",
        y = "Count") +
@@ -1013,6 +1139,7 @@ Daten für Analyse von Expats und Einheimischen bereits Aufbereitet. Bitte hier 
 # Erstellung des Boxplots für Expats und Einheimische
 ggplot(filtered_data, aes(x = as.factor(Expat), y = Salary, fill = factor(Expat))) +
   geom_boxplot() +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Vergleich der Gehälter von Expats und Einheimischen",
        x = "Expat",
        y = "Gehalt") +
@@ -1077,6 +1204,7 @@ salary_percentiles_long <- salary_percentiles %>%
 # Diagramm erstellen
 ggplot(salary_percentiles_long, aes(x = Education.Level, y = Salary, fill = Percentile)) +
   geom_bar(stat = "identity", position = "dodge", alpha = 0.7) +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Perzentile des Gehalts nach Bildungsniveau",
        x = "Bildungsniveau",
        y = "Gehalt",
@@ -1102,7 +1230,7 @@ filtered_data <- filtered_data %>%
 
 # Boxplot erstellen
 ggplot(filtered_data, aes(x = reorder(factor(Education.Level), Salary, FUN = median), y = Salary)) +
-  geom_boxplot(fill = "lightblue", color = "black") +
+  geom_boxplot(color = "black", fill = viridis(2)[2]) +
   labs(title = "Boxplot des Gehalts nach Bildungsniveau",
        x = "Bildungsniveau",
        y = "Gehalt") +
@@ -1119,6 +1247,7 @@ filtered_data <- filtered_data %>%
 # Scatterplot erstellen
 ggplot(filtered_data, aes(x = reorder(factor(Education.Level), Salary, FUN = median), y = Salary)) +
   geom_point() + 
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Gehalt nach Bildungslevel",
        x = "Bildungslevel",
        y = "Gehalt") +
@@ -1139,7 +1268,7 @@ ggplot(filtered_data, aes(x = Education.Level, y = Salary, group = 1)) +
   theme_minimal()
 ```
 
-hier diagramm erklären weil anderes aus vorlesung
+hier diagramm erklären weil anderes aus vorlesung (Liniendiagramm)
 
 These Korrekt: Ohne einen Hochschulabschluss gibt es eine Gehaltsgrenze. Die top 90% ohne Hochschulabschluss fangen bei den unteren 10% mit Hochschulabschluss an aus der Sicht des Gehalts.
 
@@ -1190,6 +1319,7 @@ all_average_salaries <- data.frame(Job.Type = c("technisch", "admin"),
 # Erstellung des Diagramms mit angepasster Achsenbeschriftung
 ggplot(all_average_salaries, aes(x = Job.Type, y = Average.Salary, fill = Job.Type)) +
   geom_bar(stat = "identity", position = "dodge", alpha = 0.7) +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Durchschnittliche Gehälter nach Jobtyp",
        x = "Jobtyp",
        y = "Durchschnittliches Gehalt") +
@@ -1225,6 +1355,7 @@ summary_data <- aggregate(Salary ~ Education.Level + Country, data = filtered_da
 #Balkendiagramm erstellen
 ggplot(summary_data, aes(x = Education.Level, y = Salary, fill = Country)) +
   geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Median Gehalt nach Bildungslevel und Land", 
        x = "Bildungslevel",
        y = "Median Gehalt",
@@ -1302,20 +1433,16 @@ Hierzu teilen wir noch die Arbeitserfahrung in Quartile ein für eine bessere Ü
 Ich weiß nicht warum aber ich muss das Paket neu laden.
 
 ```{r}
-# Laden des dplyr-Pakets
-library(dplyr)
-
 # Berechnung der Quartile der Berufserfahrung
 filtered_data4 <- filtered_data3 %>%
   mutate(Experience_Quartile = ntile(Years.Of.Experience, 4))
 
 # Balkendiagramm für data_job im Vergleich zum Gehalt
 ggplot(filtered_data4, aes(x = factor(data_job), y = Salary)) +
-  stat_summary(fun = "mean", geom = "bar", position = "dodge", fill = "skyblue") +
+  stat_summary(fun = "mean", geom = "bar", position = "dodge", fill = viridis(2)[1]) +
   labs(title = "Gehalt nach Data Job",
        x = "Data Job",
        y = "Gehalt (Mittelwert)")
-
 ```
 
 ```{r}
@@ -1325,7 +1452,8 @@ ggplot(filtered_data4, aes(y = Salary, x = factor(Experience_Quartile))) +
   labs(title = "Quartile der Berufserfahrung nach Gehalt und Jobtyp",
        x = "Quartile der Berufserfahrung",
        y = "Gehalt") +
-  theme_minimal()
+  theme_minimal() +
+  scale_fill_viridis(discrete = TRUE)
 
 ```
 
@@ -1343,6 +1471,7 @@ Bildungsniveau Codes:
 # Erstellung des Balkendiagramms für Education Level
 ggplot(filtered_data4, aes(y = Salary, x = factor(Education.Level))) +
   geom_bar(stat = "identity", position = "dodge", aes(fill = factor(data_job))) +
+  scale_fill_viridis(discrete = TRUE) +
   labs(title = "Quartile des Bildungsniveaus nach Gehalt und Jobtyp",
        x = "Quartile des Bildungsniveaus",
        y = "Gehalt") +
@@ -1398,7 +1527,8 @@ ggplot(filtered_data3, aes(x = BIP_Per_Person, y = Salary, color = Country)) +
   labs(title = "Vergleich von Gehalt und BIP pro Person nach Ländern",
        x = "BIP pro Person",
        y = "Gehalt",
-       color = "Land") 
+       color = "Land") +
+  scale_color_viridis(discrete = TRUE)
 ```
 
 ```{r}
@@ -1447,6 +1577,8 @@ count_china
 
 These nicht korrekt. Es scheint so als gibt es eine negative Korrelation zwischen dem Gehalt welches ein Arbeitnehmer erhält und dem BIP des jeweiligen Landes. Selbst wenn man China aus der Rechnung rausnimmt welches aufgrund der ungewöhnlich hohen Einwohnerzahl und diversen Wirtschaft (Sonderverwaltungszonen und Kommunismus\*) einen sehr niedrigen BIP hat aber trotzdem hohe Gehälter.
 
+Wurden eventuell im Datensatz eventuell bewusst Jobs mit hohem Gehalt gewählt? Oder Von Spezifischen Firmen die international Tätig sind und gut bezahlen?
+
 \*<https://de.wikipedia.org/wiki/Politisches_System_der_Volksrepublik_China>
 
 \*<https://de.wikipedia.org/wiki/Sonderverwaltungszone>
@@ -1455,26 +1587,42 @@ These nicht korrekt. Es scheint so als gibt es eine negative Korrelation zwische
 
 ## 7.1.: Gehalt und Arbeitserfahrung
 
+Die Z-Skalierung ist eine Methode zur Standardisierung von numerischen Variablen, die in der linearen Regression und Entscheidungsbaum-Modellierung verwendet wird. Bei der Z-Skalierung werden alle numerischen Werte mit Ausnahme des Vorhersagewerts skaliert, um die Auswirkungen von Ausreißern zu minimieren und die Konvergenzgeschwindigkeit des Gradientenabstiegs zu erhöhen. Die Funktion `aq_split` wird verwendet, um Trainings- und Testdaten zu generieren, während der `seed`-Parameter verwendet wird, um die Zufälligkeit der Datenpartitionierung zu steuern.
+
+QQ Plot der Residuen gibt extra Punkte DAML Folien 3 Seite 10. Hinweise 2.4 S.10
+
+Housing Beispiel für Z Skalierung
+
+Prüfung der Modellprämissen Punkt 5. Prüfung ist erklärt im Regressionsbeispiel im fall Umfangreiches Beispiel mit Prüfung des Modellprämissen
+
+summary der regression anzeigen lassen
+
+übung air quality regressionsvorlage
+
 Lineare Regression einer abhängigen Variable (Gehalt) anhand einer unabhängigen Variable (Jahre an Erfahrung)
 
 ```{r}
 # Z-Skalierung der Variable "Years.Of.Experience"
 filtered_data3_z <- filtered_data3
 filtered_data3_z$Years.Of.Experience <- scale(filtered_data3$Years.Of.Experience)
+```
 
+```{r}
 # Lineare Regression von "Salary" basierend auf "Years.Of.Experience"
 lm_model <- lm(Salary ~ Years.Of.Experience, data = filtered_data3_z)
+```
 
+```{r}
 # Zusammenfassung der Regression
 summary(lm_model)
-
 ```
 
 ```{r}
 #Scatterplot mit der Regressionslinie
 ggplot(filtered_data3_z, aes(x = Years.Of.Experience, y = Salary)) +
    geom_point() +
-   geom_smooth(method = "lm", se = FALSE, color = "blue") +
+   geom_smooth(method = "lm", se = FALSE, color = viridis(2)[1]) +
+  scale_fill_viridis(discrete = TRUE)
    labs(title = "Lineare Regression von Salary und Years of Experience (Z-Scale)",
         x = "Years of Experience (Z-Scale)",
         y = "Salary")
@@ -1511,3 +1659,9 @@ Dieses Ergebnis ist die Zusammenfassung einer linearen Regressionsanalyse zwisch
 Bitte komplett umschreiben in "einfach" Danke \<3. Referenz von den punkten (1., 2. usw auf die folien/skript nehmen)
 
 ## 7.2.:
+
+# 8. Abschluss
+
+## 8.1.: Kritik
+
+Hätte man alle Betrachtungen under der gleichstellung von Years of Experience und Education level betrachten sollen bei länder und geschlechter vergleichen?
