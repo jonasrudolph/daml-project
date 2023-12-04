@@ -30,10 +30,9 @@ library(dplyr)
 ```
 
 Häufig kommt:\
-WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding: https://cran.rstudio.com/bin/windows/Rtools/ Warning in install.packages : Paket \'dplyr\' wird gerade benutzt und deshab nicht installiert
+WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding: https://cran.rstudio.com/bin/windows/Rtools/ Warning in install.packages : Paket 'dplyr' wird gerade benutzt und deshab nicht installiert
 
-Installiere RTools nach Link:
-https://cran.rstudio.com/bin/windows/Rtools/rtools43/rtools.html
+Installiere RTools nach Link: https://cran.rstudio.com/bin/windows/Rtools/rtools43/rtools.html
 
 ## 1.2 Einlesen der zu Analysierenden Daten
 
@@ -1251,7 +1250,7 @@ Ich weiß nicht warum aber ich muss das Paket neu laden.
 library(dplyr)
 
 # Berechnung der Quartile der Berufserfahrung
-filtered_data4 <- filtered_data4 %>%
+filtered_data4 <- filtered_data3 %>%
   mutate(Experience_Quartile = ntile(Years.Of.Experience, 4))
 
 # Balkendiagramm für data_job im Vergleich zum Gehalt
@@ -1357,12 +1356,6 @@ mean_salaries_by_country
 ```
 
 ```{r}
-# Installation des dplyr-Pakets
-install.packages("dplyr")
-
-# Laden des dplyr-Pakets
-library(dplyr)
-
 # Berechnung der Mittelwerte nach Land
 mean_salaries_by_country <- filtered_data3 %>%
   group_by(Country) %>%
@@ -1422,32 +1415,15 @@ summary(lm_model)
 ```
 
 ```{r}
-# Scatterplot mit der Regressionslinie
-# ggplot(filtered_data3_z, aes(x = Years.Of.Experience, y = Salary)) +
-#   geom_point() +
-#   geom_smooth(method = "lm", se = FALSE, color = "blue") +
-#   labs(title = "Lineare Regression von Salary und Years of Experience (Z-Scale)",
-#        x = "Years of Experience (Z-Scale)",
-#        y = "Salary")
-
-```
-
-"Fehler in ggplot(filtered_data3_z, aes(x = Years.Of.Experience, y = Salary)) : konnte Funktion"ggplot" nicht finden"
-
-```{r}
-#Ich weiß nicht warum aber an dieser Stelle muss man die library ggplot2 erneut laden.
-library(ggplot2)
-# Scatterplot mit der Regressionslinie
+#Scatterplot mit der Regressionslinie
 ggplot(filtered_data3_z, aes(x = Years.Of.Experience, y = Salary)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  labs(title = "Lineare Regression von Salary und Years of Experience (Z-Scale)",
-       x = "Years of Experience (Z-Scale)",
-       y = "Salary")
+   geom_point() +
+   geom_smooth(method = "lm", se = FALSE, color = "blue") +
+   labs(title = "Lineare Regression von Salary und Years of Experience (Z-Scale)",
+        x = "Years of Experience (Z-Scale)",
+        y = "Salary")
 
 ```
-
-Bitte komplett umschreiben in "einfach" Danke \<3. Referenz von den punkten (1., 2. usw auf die folien/skript nehmen)
 
 \
 Dieses Ergebnis ist die Zusammenfassung einer linearen Regressionsanalyse zwischen dem Gehalt (Salary) und der Erfahrung in Jahren (Years.Of.Experience) basierend auf den vorher skalierten Daten. Hier sind einige wichtige Punkte:
@@ -1475,5 +1451,7 @@ Dieses Ergebnis ist die Zusammenfassung einer linearen Regressionsanalyse zwisch
 !Trainingsfehler:
 
 !Zur Einordnung der Fehler die Verteilung von Gehalt ansehen:
+
+Bitte komplett umschreiben in "einfach" Danke \<3. Referenz von den punkten (1., 2. usw auf die folien/skript nehmen)
 
 ## 7.2.:
