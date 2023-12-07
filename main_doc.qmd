@@ -33,6 +33,8 @@ Zusätzliche Quellen für die Methodik:
 
 <https://statologie.de/vorhergesagte-werte-plotten-r/>
 
+<https://cran.r-project.org/web/packages/yardstick/yardstick.pdf>
+
 Dieses Datenset bietet eine umfassende Sammlung von Gehaltsinformationen aus verschiedenen Branchen und Regionen weltweit. Es enthält Details zu Berufsbezeichnungen, Gehältern, Berufssektoren, geografischen Standorten und mehr, die von seriösen Beschäftigungswebsites und Umfragen stammen. Analysieren Sie diese Daten, um Einblicke in Trends auf dem Arbeitsmarkt zu gewinnen, Vergütungen in verschiedenen Berufen zu vergleichen und informierte Entscheidungen über Ihre Karriere oder Einstellungsstrategien zu treffen. Das Datenset ist zur einfachen Analyse bereinigt und vorverarbeitet und steht unter einer offenen Lizenz für Forschungs- und Datenanalysezwecke zur Verfügung.
 
 ## 1.1 Importieren der benötigten Packages
@@ -46,6 +48,8 @@ library(ggplot2)
 library(corrplot)
 library(dplyr)
 library(viridis)
+library(rpart.plot)
+library(yardstick)
 ```
 
 Häufig kommt:\
@@ -1383,7 +1387,7 @@ Data Scientist ist laut dem Harvard Business Review der "Sexiest Job of the 21st
 
 Bei dieser Aussage haben wir uns gefragt ob sich die Beschreibung auch auf die Gehälter des Data Scientists anwenden lässt.
 
-### 2.: Datenaufbereitung
+### 6.5.2.: Datenaufbereitung
 
 Rausfiltern aller Manager und Direktoren. Einengung nach Jobs mit dem Stichwort Data, Software, Developer und Engineer
 
@@ -1506,14 +1510,14 @@ USA 76.343 US-Dollar Quelle: [USA - BIP pro Kopf bis 2028 \| Statista](https://d
 
 ```{r}
 # Erstelle eine neue Spalte "BIP_Per_Person" mit NA-Werten
-filtered_data3$BIP_Per_Person <- NA
+filtered_data$BIP_Per_Person <- NA
 
 # Weise den genannten Ländern die entsprechenden BIP-Werte zu
-filtered_data3$BIP_Per_Person[filtered_data3$Country == "Australia"] <- 64813.85
-filtered_data3$BIP_Per_Person[filtered_data3$Country == "Canada"] <- 53246.98
-filtered_data3$BIP_Per_Person[filtered_data3$Country == "China"] <- 12541.40
-filtered_data3$BIP_Per_Person[filtered_data3$Country == "UK"] <- 48912.78
-filtered_data3$BIP_Per_Person[filtered_data3$Country == "USA"] <- 76343.00
+filtered_data$BIP_Per_Person[filtered_data$Country == "Australia"] <- 64813.85
+filtered_data$BIP_Per_Person[filtered_data$Country == "Canada"] <- 53246.98
+filtered_data$BIP_Per_Person[filtered_data$Country == "China"] <- 12541.40
+filtered_data$BIP_Per_Person[filtered_data$Country == "UK"] <- 48912.78
+filtered_data$BIP_Per_Person[filtered_data$Country == "USA"] <- 76343.00
 
 ```
 
@@ -1527,7 +1531,7 @@ Hat funktioniert.
 
 ```{r}
 # Scatterplot mit Farbgebung nach Ländern und Mittelwerten einzeichnen
-ggplot(filtered_data3, aes(x = BIP_Per_Person, y = Salary, color = Country)) +
+ggplot(filtered_data, aes(x = BIP_Per_Person, y = Salary, color = Country)) +
   geom_point() +
   stat_summary(fun = mean, geom = "point", shape = 23, size = 3, fill = "black") +
   labs(title = "Vergleich von Gehalt und BIP pro Person nach Ländern",
@@ -1549,7 +1553,7 @@ mean_salaries_by_country
 
 ```{r}
 # Berechnung der Mittelwerte nach Land
-mean_salaries_by_country <- filtered_data3 %>%
+mean_salaries_by_country <- filtered_data %>%
   group_by(Country) %>%
   summarise(mean_salary = mean(Salary, na.rm = TRUE),
             BIP_Per_Person = first(BIP_Per_Person))  # Annahme: BIP-Pro-Person-Werte sind konstant für jedes Land
@@ -1560,7 +1564,7 @@ mean_salaries_by_country
 ```
 
 ```{r}
-cor(filtered_data3$Salary, filtered_data3$BIP_Per_Person, use = "complete.obs")
+cor(filtered_data$Salary, filtered_data$BIP_Per_Person, use = "complete.obs")
 
 ```
 
@@ -1568,16 +1572,16 @@ Nun ohne China
 
 ```{r}
 # Erstellen des neuen Datensatzes ohne Einträge für China
-filtered_data3_no_china <- filtered_data3 %>% filter(Country != "China")
+filtered_data_no_china <- filtered_data %>% filter(Country != "China")
 ```
 
 ```{r}
-cor(filtered_data3_no_china$Salary, filtered_data3_no_china$BIP_Per_Person, use = "complete.obs")
+cor(filtered_data_no_china$Salary, filtered_data_no_china$BIP_Per_Person, use = "complete.obs")
 ```
 
 ```{r}
-# Anzahl der Datensätze mit dem Land "China" im Datensatz filtered_data3_no_china
-count_china <- filtered_data3_no_china %>% filter(Country == "China") %>% nrow()
+# Anzahl der Datensätze mit dem Land "China" im Datensatz filtered_data_no_china
+count_china <- filtered_data_no_china %>% filter(Country == "China") %>% nrow()
 count_china
 ```
 
@@ -1602,7 +1606,7 @@ Die Korrelation von Arbeitserfahtung und Gehalt liegt bei 0.81 weshalb wir uns e
 ### 7.1.1.: Korrelationsmatrix
 
 ```{r}
-filtered_data3 %>%
+filtered_data %>%
   ggplot() +
   aes(y = Salary, x = Years.Of.Experience) +
   geom_point(aes(color = Salary), alpha = 0.8) +
@@ -1617,7 +1621,7 @@ Rausnehmen aller nicht für die Regression relevanten Werte:
 
 ```{r}
 # Nur 'Salary' und 'Years.Of.Experience' behalten und den Rest entfernen
-filtered_data5 <- filtered_data3 %>%
+filtered_data5 <- filtered_data %>%
   select(Salary, Years.Of.Experience)
 ```
 
@@ -1740,6 +1744,8 @@ Testfehler:
 rmse(compare_test, Salary, pred_test)
 ```
 
+!Zur Einordnung der Fehler die Verteilung von Gehalt ansehen:
+
 Verteilung von Arbeitserfahrung:
 
 ```{r}
@@ -1773,6 +1779,10 @@ residuals_test <- augment(lm_fit, new_data = fd5_test) %>% select(.resid)
 print(residuals_train)
 
 # Ausgabe der Residuen für Testdaten
+
+```
+
+```{r}
 print(residuals_test)
 ```
 
@@ -1871,7 +1881,7 @@ Der Adjusted R-squared-Wert liegt zwischen 0 und 1. In diesem Fall bedeutet 0.57
 ```{r}
 # Beispiel für ein Streudiagramm und eine glättende Funktion
 library(ggplot2)
-ggplot(data = filtered_data3, aes(x = Years.Of.Experience, y = Salary)) +
+ggplot(data = filtered_data, aes(x = Years.Of.Experience, y = Salary)) +
   geom_point() +
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE)
 ```
@@ -1879,7 +1889,7 @@ ggplot(data = filtered_data3, aes(x = Years.Of.Experience, y = Salary)) +
 ```{r}
 # Beispiel für ein Streudiagramm und eine glättende Funktion
 library(ggplot2)
-ggplot(data = filtered_data3, aes(x = Years.Of.Experience, y = Salary)) +
+ggplot(data = filtered_data, aes(x = Years.Of.Experience, y = Salary)) +
   geom_point() +
   geom_smooth(method = "lm", formula = y ~ poly(x, 3), se = FALSE)
 ```
@@ -1887,7 +1897,7 @@ ggplot(data = filtered_data3, aes(x = Years.Of.Experience, y = Salary)) +
 ```{r}
 # Beispiel für ein Streudiagramm und eine glättende Funktion
 library(ggplot2)
-ggplot(data = filtered_data3, aes(x = Years.Of.Experience, y = Salary)) +
+ggplot(data = filtered_data, aes(x = Years.Of.Experience, y = Salary)) +
   geom_point() +
   geom_smooth(method = "lm", formula = y ~ poly(x, 4), se = FALSE)
 ```
@@ -1899,14 +1909,14 @@ Aufgrund dieser Kurve haben wir uns zu entschieden eine weitere Variable hinzuzu
 Education.Level von kategorisch in Numerische Werte transformieren.
 
 ```{r}
-filtered_data3$Education.Level <- as.numeric(as.character(filtered_data3$Education.Level))
+filtered_data$Education.Level <- as.numeric(as.character(filtered_data$Education.Level))
 
-str(filtered_data3$Education.Level)
+str(filtered_data$Education.Level)
 ```
 
 ```{r}
 # Berechnen Sie die Korrelationen
-correlations <- cor(filtered_data3[c("Salary", "Age", "Years.Of.Experience", "Education.Level")])
+correlations <- cor(filtered_data[c("Salary", "Age", "Years.Of.Experience", "Education.Level")])
 
 # Drucken Sie die Korrelationen
 print(correlations)
@@ -1918,7 +1928,7 @@ print(correlations)
 Rausnehmen aller nicht für die Regression relevanten Werte:
 
 ```{r}
-filtered_data6 <- filtered_data3 %>%
+filtered_data6 <- filtered_data %>%
   select(Salary, Years.Of.Experience, Education.Level)
 ```
 
@@ -2208,6 +2218,8 @@ rmse(compare_test4, Salary, pred_test4)
 
 Auch wenn alle Modelle nur geringe Unterschiede aufweisen, performt dieses auf Trainingsdaten gleich wie auf den Testdaten, daher ist es das genauste Modell und wird ab hier an als einziges weiter untersucht. Dies ließ sich bereits unter 7.2.1 Erkenne da das 3. polynom das Geom Smooth Grafisch die beste Linie abgebildet hat.
 
+!Zur Einordnung der Fehler die Verteilung von Gehalt ansehen:
+
 Verteilung von Gehalt:
 
 ```{r}
@@ -2241,6 +2253,9 @@ residuals_test2 <- augment(lm_fit4, new_data = fd6_test) %>% select(.resid)
 print(residuals_train2)
 
 # Ausgabe der Residuen für Testdaten
+```
+
+```{r}
 print(residuals_test2)
 ```
 
@@ -2310,20 +2325,333 @@ Analog zu 7.1.7:
 
 Der Plot Bildet die ausreißer vom Gehalt nach oben und unten ab welche wir im ersten Diagramm von 7.2.1 sehen, die Residuen sind nicht perfekt normalverteilt. Eventuell gibt es hier Datenpunkte welche die Residuen beeinflussen. Aufgrund der explorativen Datenanalyse wissen wir das Jobs mit hoher Arbeitserfahrung oft Führungsverantwortung beinhalten welche nochmal zusätzlich monetär honoriert wird. Die Flache Linie durch die Gerade oben durch deutet auf ein Gehaltscap hin. Die Ausreißer am unteren Ende lassen sich durch Einstiegsjobs so wie Niedriglohnjobs ohne Hochschulabchlüsse erklären. (Ausbildungsberufe werden hier nicht berücksichtigt).
 
-Der Testfehler in der einfachen Linearen Regression betrug 32154 während der in der mehrfachen Linearen Regression mit der 4er Potenz von Arbeitserfahrung 29483 welches eine verbesserung der Vorhersagen von 10% gegenüber der einfach Linearen regression aus 7.1 ergibt. Des weiteren gibt es hier auch kein Overfitting des Modells mehr da die Test und Trainingsfehler exakt die selben sind (32154) .
+Der Testfehler in der einfachen Linearen Regression betrug 30763 während der in der mehrfachen Linearen Regression mit der 4er Potenz von Arbeitserfahrung 27456 welches eine verbesserung der Vorhersagen von 10% gegenüber der einfach Linearen regression aus 7.1 ergibt. Des weiteren gibt es hier auch kein Overfitting des Modells mehr da die Test und Trainingsfehler exakt die selben sind (27456) .
 
 ## 7.3.: Entscheidungsbaum
 
 ### 7.3.1.: Vorbereitung
 
+Vorhersage des erreichens einer Managementsposition anhand von Fakotren mit der größten Korrelation.
+
+Dazu betrachten wir wieder Software Engineering Jobs und deren Führungsposition: Software Engineering Manager
+
+So wie Data Scientists und deren Führungsposition: Director of Data Science
+
+Beide wurden ausgewählt nach dem Kriterium einer Häufigkeitsverteilung von N\>30 zu haben (Siehe 5.1)
+
 ```{r}
+library(ggplot2)
+library(viridis)
+
+# Datenrahmen erstellen, der die Job-Titel und ihre Häufigkeit enthält
+jobs_count <- filtered_data %>%
+  filter(Job.Title %in% c("Software Engineer", "Software Engineer Manager", "Data Scientist", "Director of Data Science")) %>%
+  group_by(Job.Title) %>%
+  summarize(count = n())
+
+# Balkendiagramm erstellen
+ggplot(jobs_count, aes(x = Job.Title, y = count, fill = Job.Title)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = c(viridis(2), viridis(2))) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ```
+
+```{r}
+# Filtere die Daten für jeden Job und berechne den Durchschnitt des Gehalts
+filtered_data %>%
+  filter(Job.Title %in% c("Software Engineer", "Software Engineer Manager", "Data Scientist", "Director of Data Science")) %>%
+  group_by(Job.Title) %>%
+  summarise(Avg_Salary = mean(Salary, na.rm = TRUE))
+
+```
+
+### 7.3.2.: Datenaufbereitung
+
+Alle Job Ttitel aus die benötigten rausfiltern
+
+```{r}
+filtered_data7 <- filtered_data %>%
+  filter(Job.Title %in% c("Software Engineer", "Software Engineer Manager", "Data Scientist", "Director of Data Science"))
+```
+
+Den Führungsposition den Wert 1 bei Manager zuweisen
+
+```{r}
+# Füge die Spalte "Manager" hinzu
+filtered_data7 <- filtered_data7 %>%
+  mutate(Manager = ifelse(Job.Title %in% c("Director of Data Science", "Software Engineer Manager"), 1, 0))
+```
+
+Z-Skalierung
+
+Keine Z-Skalierung bei dieser Binären Vorhersage da sonst die Diagramme unübersichtlich werden.
+
+```{r}
+# Erstellen Sie eine Kopie von filtered_data6
+#filtered_data7_z <- filtered_data7
+
+# Z-Skalierung für Years.Of.Experience und Education.Level in filtered_data6_z durchführen
+#filtered_data7_z <- filtered_data7_z %>%
+  #mutate(
+    #Years.Of.Experience = scale(Years.Of.Experience),
+    #Education.Level = scale(Education.Level),
+    #Age = scale(Age),
+ # )
+```
+
+Aufteilung in Test- & Trainingsdaten:
+
+```{r}
+set.seed(007)  
+filtered_data7 <- initial_split(filtered_data7, prop = 0.8, strata = Years.Of.Experience)  
+
+fd7_train <- training(filtered_data7)
+fd7_test <- testing(filtered_data7)
+```
+
+### 7.3.3.: Modell Initialisieren
+
+Initialisierung
+
+```{r}
+tree_mod <- decision_tree(mode = "regression")
+```
+
+Modell trainieren
+
+```{r}
+tree_fit <- tree_mod %>% 
+  fit(Manager ~ Age + Gender + Education.Level + Years.Of.Experience + Senior + Expat + Country, data = fd7_train)
+```
+
+### 7.3.4.: Grafische Darstellung
+
+Mit den absoluten Zahlen:
+
+```{r}
+tree_fit |> 
+  extract_fit_engine() |> 
+  rpart.plot(digits = 1)
+```
+
+Mit Beschriftungen (Als Klassifizierung umgesetzt/ In Klassen umgewandelt)
+
+```{r}
+# Kopie von fd7_train erstellen
+fd7_train2 <- fd7_train
+
+# Umkehren der Konvertierung von Education.Level
+fd7_train2$Education.Level <- factor(fd7_train2$Education.Level, levels = c(0, 1, 2, 3), labels = c("Highschool", "Bachelor", "Master", "Doctor"))
+
+# Umkehren der Konvertierung von Manager
+fd7_train2$Manager <- factor(fd7_train2$Manager, levels = c(0, 1), labels = c("Employee", "Manager"))
+
+fd7_train2$Senior <- factor(fd7_train2$Senior, levels = c(0, 1), labels = c("Junior", "Senior"))
+
+# Erstellen des Entscheidungsbaummodells für Klassifikation
+tree_mod2 <- decision_tree(mode = "classification")
+
+# Fitting des Baumes
+tree_fit2 <- tree_mod2 %>% 
+  fit(as.factor(Manager) ~ Age + Gender + Education.Level + Years.Of.Experience + Senior + Expat + Country, data = fd7_train2)
+
+# Visualisierung des Baumes
+tree_fit |> 
+  extract_fit_engine() |> 
+  rpart.plot(digits = 1)
+
+```
+
+Es scheint so als hätten Expat & Country eine Schwache Vorhersagekraft und Mangelnde Bedeutung auf den Wert Manager weshalb sie nicht im Entscheidungsbaum auftauchen.
+
+!!! Umschreiben\
+Ja, Sie können durchaus einen Entscheidungsbaum-Algorithmus zur Regression auf eine Variable anwenden, die nur Werte von 0 und 1 aufweist. In diesem Fall würde der Baum versuchen, auf Basis der gegebenen Eingabevariablen (Features) eine Regression durchzuführen, um die kontinuierliche numerische Variable vorherzusagen.
+
+Es gibt jedoch einige wichtige Aspekte zu beachten:
+
+1.  **Ausgabe als Kategorie interpretieren:** Wenn Ihre Zielvariable tatsächlich binär ist und Sie eine Klassifizierung (0 oder 1) vornehmen wollen, dann sollten Sie einen Klassifikationsalgorithmus verwenden, nicht eine Regressionsmethode. Ein Entscheidungsbaum für die Klassifikation würde besser geeignet sein, um Vorhersagen in Form von Kategorien (hier: 0 oder 1) zu treffen.
+
+2.  **Interpretation der Vorhersagen:** Wenn Sie den Entscheidungsbaum für die Regression auf eine binäre Variable anwenden, werden die Vorhersagen des Modells als kontinuierliche Werte zwischen 0 und 1 liegen. Diese Vorhersagen können dann als Wahrscheinlichkeiten interpretiert werden, z.B. als die Wahrscheinlichkeit, dass eine bestimmte Beobachtung den Wert 1 annimmt. Um Klassen vorherzusagen, müssten Sie normalerweise einen Schwellenwert festlegen (zum Beispiel 0,5), um diese Wahrscheinlichkeiten in Klassen umzuwandeln.
+
+Vorhersage auf Test- und Trainingsdaten:
+
+```{r}
+head(fd7_train)
+```
+
+```{r}
+pred_train7 <- predict(tree_fit, new_data = fd7_train) |> rename("pred_train" = ".pred")
+pred_test7 <- predict(tree_fit, new_data = fd7_test) |>  rename("pred_test" = ".pred")
+
+compare_train7 <- fd7_train |> 
+  select(Manager) |> 
+  bind_cols(pred_train7)
+head(compare_train7)
+
+compare_test7 <- fd7_test |> 
+  select(Manager) |> 
+  bind_cols(pred_test7)
+head(compare_test7)
+```
+
+### 7.3.5.: Fehler
+
+Trainingsfehler
+
+```{r}
+library(yardstick)  # Laden des Pakets yardstick für die RMSE-Berechnung
+
+# Trainingsdaten: Vergleich zwischen Manager und den Vorhersagen
+rmse_train <- compare_train7 %>%
+  mutate(Manager = as.numeric(Manager)) %>%  # Stellen Sie sicher, dass Manager numerisch ist
+  yardstick::rmse(truth = Manager, estimate = pred_train)
+
+# Testdaten: Vergleich zwischen Manager und den Vorhersagen
+rmse_test <- compare_test7 %>%
+  mutate(Manager = as.numeric(Manager)) %>%  # Stellen Sie sicher, dass Manager numerisch ist
+  yardstick::rmse(truth = Manager, estimate = pred_test)
+
+# Ausgabe der RMSE für Trainings- und Testdaten
+print(rmse_train)
+```
+
+```{r}
+print(rmse_test)
+```
+
+Der Trainingsfehler ist geringer als der Testfehler -\> Das Modell ist leicht overfittet
+
+### 7.3.6.: Residuen
+
+!! Umschreiben
+
+Obwohl das abhängige Merkmal ('Manager') binär ist, kann die Anpassung eines Entscheidungsbaummodells (wie in Ihrem Fall) immer noch zur Vorhersage von Wahrscheinlichkeiten verwendet werden. Das Modell wird Wahrscheinlichkeiten für das Eintreten oder Nicht-Eintreten des Ereignisses (hier: Manager oder nicht Manager) vorhersagen.
+
+Die Residuen in einem solchen Fall geben die Abweichung zwischen den tatsächlichen beobachteten Werten (0 und 1 in Ihrem Fall) und den vorhergesagten Wahrscheinlichkeiten wieder. Sie ermöglichen eine Überprüfung, wie gut das Modell die Beobachtungen anpasst. Obwohl sie nicht direkt die Vorhersage von 0 oder 1 zeigen, reflektieren sie immer noch, wie gut das Modell die Wahrscheinlichkeiten, dass ein bestimmtes Ereignis eintritt oder nicht, schätzt.
+
+```{r}
+# Annahme: lm_fit ist das lineare Regressionsmodell für fd7-Daten
+
+# Residuen mit augment() auf den Trainingsdaten abrufen
+residuals_train7 <- augment(tree_fit, new_data = fd7_train) %>% select(.resid)
+
+# Residuen mit augment() auf den Testdaten abrufen
+residuals_test7 <- augment(tree_fit, new_data = fd7_test) %>% select(.resid)
+
+# Ausgabe der Residuen für Trainingsdaten
+print(residuals_train7)
+```
+
+```{r}
+# Ausgabe der Residuen für Testdaten
+print(residuals_test7)
+```
+
+```{r}
+# Standardisierung/Z-Skalierung der Residuen der Residuen
+residuals_train7$standardized_resid7 <- scale(residuals_train7$.resid)
+
+# Histogramm der standardisierten Residuen mit Viridis-Farbschema
+ggplot(data = residuals_train7, aes(x = standardized_resid7)) +
+  geom_histogram(binwidth = 0.5, fill = viridis(1), color = "black", alpha = 0.7) +
+  labs(title = "Histogramm der standardisierten Residuen",
+       x = "Standardisierte Residuen",
+       y = "Häufigkeit") +
+  scale_fill_viridis() +  # Fügt das Viridis-Farbschema hinzu
+  theme_minimal()
+```
+
+```{r}
+# Standardisierung/Z-Skalierung der Residuen der Residuen
+residuals_test7$standardized_resid7 <- scale(residuals_test7$.resid)
+
+# Histogramm der standardisierten Residuen mit Viridis-Farbschema
+ggplot(data = residuals_test7, aes(x = standardized_resid7)) +
+  geom_histogram(binwidth = 0.5, fill = viridis(1), color = "black", alpha = 0.7) +
+  labs(title = "Histogramm der standardisierten Residuen",
+       x = "Standardisierte Residuen",
+       y = "Häufigkeit") +
+  scale_fill_viridis() +  # Fügt das Viridis-Farbschema hinzu
+  theme_minimal()
+```
+
+### 7.3.7.: Q-Q-Plot / Accuracy test
+
+Für ein Modell, das binäre Vorhersagen trifft (wie in diesem Fall mit einem Baummodell, das eine binäre Zielvariable vorhersagt), könnte ein QQ-Plot in Bezug auf die Residuen weniger sinnvoll sein. Der QQ-Plot wird üblicherweise verwendet, um die Normalität der Residuen in einem Modell zu überprüfen. Da bei binären Vorhersagen die Residuen nicht unbedingt einer Normalverteilung folgen müssen, kann ein QQ-Plot möglicherweise weniger aufschlussreich sein.
+
+Insbesondere bei Klassifikationsmodellen, die binäre Kategorien vorhersagen, sind die Residuen möglicherweise nicht so interpretierbar wie bei Modellen mit kontinuierlichen Variablen.
+
+Die Residuen bei binären Modellen können diskrete Werte oder eine Art von Klassifizierungsfehler (beispielsweise für binäre Klassifikationsmodelle) widerspiegeln. Ein QQ-Plot ist normalerweise dann sinnvoll, wenn die Residuen einer Normalverteilung folgen sollten, was jedoch bei binären Vorhersagen nicht zwangsläufig der Fall ist.
+
+In solchen Fällen ist es oft wichtiger, andere Metriken wie Genauigkeit, Precision, Recall, ROC-Kurven oder AUC zu verwenden, um die Leistung des Modells zu bewerten und zu verstehen, wie gut es die binären Vorhersagen macht.
+
+[24 Evaluation Metrics for Binary Classification (And When to Use Them) (neptune.ai)](https://neptune.ai/blog/evaluation-metrics-binary-classification)
+
+<https://topepo.github.io/caret/measuring-performance.html>
+
+```{r}
+library(caret)
+# Konvertiere zu Faktoren und setze Levels für compare_train7$pred_train
+compare_train7$pred_train <- factor(compare_train7$pred_train, levels = levels(compare_train7$Manager))
+
+# Berechnung der Accuracy für Trainingsdaten
+accuracy_train <- confusionMatrix(compare_train7$Manager, compare_train7$pred_train)
+print(accuracy_train)
+
+# Konvertiere zu Faktoren und setze Levels für compare_test7$pred_test
+compare_test7$pred_test <- factor(compare_test7$pred_test, levels = levels(compare_test7$Manager))
+
+# Berechnung der Accuracy für Testdaten
+accuracy_test <- confusionMatrix(compare_test7$Manager, compare_test7$pred_test)
+print(accuracy_test)
+
+```
+
+Die Confusion Matrix und die Statistiken werden verwendet, um die Leistung eines Klassifikationsmodells zu bewerten. In diesem Fall handelt es sich um eine binäre Klassifikation mit den Klassen 0 und 1.
+
+Für die Confusion Matrix:
+
+#### Trainingsdaten:
+
+-   Es gibt insgesamt 373 Beobachtungen in den Trainingsdaten.
+
+-   Von diesen wurden 199 korrekt als Klasse 0 und 174 korrekt als Klasse 1 vorhergesagt.
+
+-   Es gab keine falsch vorhergesagten Werte für Klasse 0 oder Klasse 1.
+
+-   Die Genauigkeit (Accuracy) beträgt 100%, was bedeutet, dass alle Vorhersagen korrekt waren.
+
+-   Sensitivität, Spezifität, Positiver und Negativer Vorhersagewert sind alle 1, was bedeutet, dass alle Metriken perfekt sind.
+
+#### Testdaten:
+
+-   Es gibt insgesamt 100 Beobachtungen in den Testdaten.
+
+-   Von diesen wurden 60 korrekt als Klasse 0 und 40 korrekt als Klasse 1 vorhergesagt.
+
+-   Es gab keine falsch vorhergesagten Werte für Klasse 0 oder Klasse 1.
+
+-   Auch hier beträgt die Genauigkeit 100%, was bedeutet, dass alle Vorhersagen korrekt waren.
+
+-   Sensitivität, Spezifität, Positiver und Negativer Vorhersagewert sind alle 1, was auf perfekte Metriken hinweist.
+
+In beiden Trainings- und Testdaten zeigt das Modell eine perfekte Vorhersagegenauigkeit und erzielt in allen Metriken (Sensitivität, Spezifität, etc.) die bestmöglichen Werte. Dies könnte darauf hindeuten, dass das Modell möglicherweise überangepasst (overfitted) ist, da es sowohl auf den Trainings- als auch auf den Testdaten perfekt funktioniert. Es ist wichtig, das Modell auf Daten zu bewerten, die es bisher nicht gesehen hat, um sicherzustellen, dass es generalisiert und nicht überangepasst ist.
 
 # 8. Abschluss
 
 ## 8.1.: Kritik
 
-Hätte man alle Betrachtungen under der gleichstellung von Years of Experience und Education level betrachten sollen bei länder und geschlechter vergleichen?
+Hätte man alle Betrachtungen under der gleichstellung von Years of Experience und Education level betrachten sollen bei länder und geschlechter vergleichen? Oder generell bei allen daten? Dies in die Datenaufbereitung mit aufnehemen? Dies bedarf genaueren untersuchungen
 
 Hätte man alle nicht numerischen Werte numerisch transformieren können um andere Korrelationen und damit andere Regressionen herauszufinden?
+
+Gibt es in China nur berichte von Westlichen Firmen die auch dort hohe Gehälter Zahlen (Niedriger BIP pro Person)
+
+Hätte man den Entscheidungsbaum als reine klassifikation angehen sollen?
+
+Hätte man sich in der gesamten analyse nur auf einige wenige jobs beschränken sollen um genauere ergebnisse mit weniger außreißern zu erzielen?
+
+gibt es weitere methoden um die zuverlässigkeit des entscheidungsbaumes zu prüfen? wenn ja hätte man alle anwenden sollen um mehrere Faktoren zu beurteilen
+
+Mit mehr Zeit hätten wir gerne die Data Frames übersichtlicher und einheitlicher transformiert. So haben wir ca 10 verschiedene dataframes mit teilweise ünübersichtlicher bennennung was nicht nur die durchlaufzeit erhöht sondern auch manchmal zu Problemen beim coden geführt hat.
