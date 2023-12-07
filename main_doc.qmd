@@ -1008,7 +1008,9 @@ Ausgabe hier sind nun die ersten Zeilen der aktualisierten Version von "filtered
 
 # 6. Thesen
 
-Aus den überlegungen der Tests und der Vorarbeit wurden folgende Thesen formuliert. Dieser Abschnitt wird in unterschiedliche Teilabschnitte geteilt.
+Aus den überlegungen der Tests und der Vorarbeit wurden folgende Thesen formuliert.
+
+Der folgende Absatz wird in unterschiedliche Teilabschnitte geteilt, um eine gute Leserlichkeit zu erreichen.
 
 ## 6.1 Genderpaygap
 
@@ -1016,7 +1018,9 @@ Aus den überlegungen der Tests und der Vorarbeit wurden folgende Thesen formuli
 2.  Die Differenz der Salary zwischen den Geschlechtern ist in China höher als in den westlichen Ländern.
 3.  Männer haben im Durchschnitt mehr Yrs of Experience als Frauen -\> Lässt sich die Genderpaygap auf die Yrs of Exp übertragen? Und gilt dies auch für China
 
-### 6.1.1.: Männer verdienen mehr als Frauen
+### 6.1.1 Männer verdienen mehr als Frauen
+
+Zunächst stellt sich die Frage, ob Männer mehr verdienen als Frauen. Hierzu wird ein Boxplot verwendet.
 
 ```{r}
 ggplot(filtered_data, aes(x = factor(Gender), y = Salary, fill = Gender)) +
@@ -1029,9 +1033,13 @@ ggplot(filtered_data, aes(x = factor(Gender), y = Salary, fill = Gender)) +
   theme_minimal()
 ```
 
-Mithilfe des Boxplots ist zu erkennen, das der Median deutlich höher bei den Männer ist. Daraus lässt sich Schlussfolgern, dass die These Korrekt ist.
+Anhand des Boxplots ist zu erkennen, dass der Median der Männer deutlich höher, als der Median der Frauen ist. Aufgrund dieser Tatsache, lässt sich sagen, dass diese Aussage korrekt ist.
 
 ### 6.1.2.: Die Differenz der Salary zwischen den Geschlechtern ist in China höher als in den westlichen Ländern. Hier alle westlichen Länder hinzufügen
+
+Um diese These zu beantworten werrden zunächst Die Erfahrungsjahre zwischen China und der USA verglichen. Anschließend werden die Gehälter verglichen. Nebenbei haben die Boxplots immer eine Differenzierung zwischen Männern und Frauen um den Unterschied darzustellen.
+
+Zu Beantwortung dieser These werden Boxplots verwendet.
 
 ```{r}
 # Daten für USA filtern
@@ -1039,6 +1047,38 @@ data_usa <- subset(filtered_data, Country == "USA")
 
 # Boxplot erstellen
 ggplot(data_usa, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
+  geom_boxplot(alpha = 0.7) +
+  scale_fill_viridis(discrete = TRUE) +
+  labs(title = "Boxplot: Years of Experience vs. Gender (USA)",
+       x = "Gender",
+       y = "Years of Experience",
+       fill = "Gender") +
+  theme_minimal()
+```
+
+```{r}
+# Daten für China filtern
+data_china <- subset(filtered_data, Country == "China")
+
+# Boxplot für Salary vs. Gender erstellen
+ggplot(data_china, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
+  geom_boxplot(alpha = 0.7) +
+  scale_fill_viridis(discrete = TRUE) +
+  labs(title = "Boxplot: Years of Experience vs. Gender (China)",
+       x = "Gender",
+       y = "Salary",
+       fill = "Gender") +
+  theme_minimal()
+```
+
+Anhand der ersten beiden Boxplots ist zu erkennen, dass Männer in der USA deutlich mehr Berufserfahrung haben als Frauen. Wohin gegen der Unterschied in China kaum zu erkennen ist.
+
+```{r}
+# Daten für USA filtern
+data_usa <- subset(filtered_data, Country == "USA")
+
+# Boxplot erstellen
+ggplot(data_usa, aes(x = factor(Gender), y = Salary, fill = Gender)) +
   geom_boxplot(alpha = 0.7) +
   scale_fill_viridis(discrete = TRUE) +
   labs(title = "Boxplot: Years of Experience vs. Gender (USA)",
@@ -1063,9 +1103,22 @@ ggplot(data_china, aes(x = factor(Gender), y = Salary, fill = Gender)) +
   theme_minimal()
 ```
 
-These Korrekt
+Durch die letzen beiden Boxplots ist zu erkennen, dass der Unterschied im durchschnittlichen Gehalt in China und der USA mit dem bloßen Auge nicht zu erkennen ist. \
+Unter Anbetracht der oberen beiden Boxplots ist jedoch, wie bereits erwähnt, ein deutlicher Unterschied zwischen den Geschlechtern im Bezug auf die Berufsaerfahrung zu erkennen.
 
-### 6.1.3.: Männer haben im Durchschnitt mehr Yrs of Experience als Frauen -\> Lässt sich die Genderpaygap auf die Yrs of Exp übertragen? Und gilt dies auch für China
+```{r}
+# Korrelation zwischen Salary und Years.Of.Experience berechnen
+correlation_salary_experience <- cor(filtered_data$Salary, filtered_data$Years.Of.Experience)
+
+# Ausgabe des Ergebnisses
+cat("Die Korrelation zwischen Salary und Years.Of.Experience ist:", correlation_salary_experience, "\n")
+```
+
+Aus den obigen Test ist außerdem hervor gegangen, dass die Berufserfahrung eine hohe Korrelation zu dem Gehalt hat.
+
+Deswegen lässt sich trotzdem sagen, dass diese These korrekt ist.
+
+### 6.1.3.: Männer haben im Durchschnitt mehr Berufserfahrung als Frauen 
 
 ```{r}
 ggplot(filtered_data, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
@@ -1078,52 +1131,9 @@ ggplot(filtered_data, aes(x = factor(Gender), y = Years.Of.Experience, fill = Ge
   theme_minimal()
 ```
 
-```{r}
-# Daten für China filtern
-data_china <- subset(filtered_data, Country == "China")
+Die These ist korrekt, wie anhand des obigen Boxplots zu erkennen ist. Der Median liegt bei den Männern höher, als bei den Frauen.
 
-# Boxplot erstellen
-ggplot(data_china, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
-  geom_boxplot(alpha = 0.7) +
-  scale_fill_viridis(discrete = TRUE) +
-  labs(title = "Boxplot: Years of Experience vs. Gender (China)",
-       x = "Gender",
-       y = "Years of Experience",
-       fill = "Gender") +
-  theme_minimal()
-```
-
-```{r}
-# Daten für USA filtern
-data_usa <- subset(filtered_data, Country == "USA")
-
-# Boxplot erstellen
-ggplot(data_usa, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
-  geom_boxplot(alpha = 0.7) +
-  scale_fill_viridis(discrete = TRUE) +
-  labs(title = "Boxplot: Years of Experience vs. Gender (USA)",
-       x = "Gender",
-       y = "Years of Experience",
-       fill = "Gender") +
-  theme_minimal()
-
-```
-
-ist jetzt der gender pay gap in china doch größer da der größte faktor für salary years of experience ist?
-
-Dafür schauen wir uns an: Korrelation von years of experience und salary
-
-```{r}
-# Korrelation zwischen Salary und Years.Of.Experience berechnen
-correlation_salary_experience <- cor(filtered_data$Salary, filtered_data$Years.Of.Experience)
-
-# Ausgabe des Ergebnisses
-cat("Die Korrelation zwischen Salary und Years.Of.Experience ist:", correlation_salary_experience, "\n")
-```
-
-These Korrekt da es im gleichen Verhältnis steht. Nicht desto trotz gibt es einen Unterschied zwischen den Geschlechtern bei gleichbleibender Arbeitderfahrung was auf einen kleinen Gender Pay gap schließen lässt.
-
-## 6.2 Expats verdienen mehr als Einheimisch
+## 6.2 Zugewanderte Menschen verdienen mehr als einheimische Menschen
 
 Unsere Untersuchungen haben Ergeben das wir die Daten für unsere Explorative Datenanalyse aber auch die Regression neu aufbereiten müssen.
 
@@ -1141,7 +1151,7 @@ ggplot(filtered_data, aes(x = Country, fill = Race)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Daten für Analyse von Expats und Einheimischen bereits Aufbereitet. Bitte hier nochmal beschrieben
+Hier ist ist zu erkennen. welche Ethnizitäten wir in den unterschiedlichen Ländern haben. So ist zu erkennen, dass wir nie mehr als vier Ethnizitäten pro Land haben.
 
 ### 6.2.2.: Gesamtbetrachtung
 
@@ -1150,13 +1160,15 @@ Daten für Analyse von Expats und Einheimischen bereits Aufbereitet. Bitte hier 
 ggplot(filtered_data, aes(x = as.factor(Expat), y = Salary, fill = factor(Expat))) +
   geom_boxplot() +
   scale_fill_viridis(discrete = TRUE) +
-  labs(title = "Vergleich der Gehälter von Expats und Einheimischen",
+  labs(title = "Vergleich der Gehälter von Zugewanderten und Einheimischen",
        x = "Expat",
        y = "Gehalt") +
-  scale_x_discrete(labels = c("Einheimische (0)", "Expats (1)")) +
+  scale_x_discrete(labels = c("Einheimische (0)", "Zugewanderte (1)")) +
   theme_minimal()
 
 ```
+
+Aus diesem Diagramm geht hervor, dass kein Unterschied vorerst zu erkennen ist.
 
 ```{r}
 # Mittelwert der Gehälter für Expats (Expat = 1)
@@ -1169,13 +1181,15 @@ mean_salary_native
 
 ```
 
-These verworfen. Da es offensichtlich keine Unterschiede gibt. Ggf. noch einzelne Ethnizitäten betrachten
+Auch nach Darstellung der Mittelwerte istr kein wirklicher Unterschied zu erkennen.
 
-## 6.3 Gehaltscap education level vorhanden?
+Deswegen wird die These verworfen, da es offensichtlich keine Unterschiede gibt.
 
-Ohne ein Mindestmaß ein Bildung ist keine weitere Gehaltsentwicklung möglich
+## 6.3 Gibt es einen Unterschied im Gehalt zwischen den verschiedenen Bildungsniveaus?
 
-Bildungsniveau Codes:
+Vorab muss erwähnt werden, dass ohne ein Mindestmaß an Bildung keine weitere Gehaltsentwicklung möglich ist.
+
+Das sind die Bedeutungen der verschiedenen Bildungsniveaus:
 
 0 = High School Abschluss
 
@@ -1185,11 +1199,13 @@ Bildungsniveau Codes:
 
 3 = Doctor
 
-1.  **Deskriptive Statistiken:** Man könnte Quantile oder Perzentile des Gehalts für jedes Bildungsniveau berechnen. Dies bietet einen Überblick über die Verteilung der Gehälter und zeigt potenzielle Grenzwerte auf.
+Um diese These zu beantworten sind wir auf verschiedene Lösungsansätze gekommen, die uns helfen könnten:
 
-2.  **Boxplots pro Bildungsniveau:** Man könnte Boxplots für jedes Bildungsniveau erstellen, um die Verteilung der Gehälter visuell zu vergleichen. Dies kann helfen, Ausreißer und Unterschiede zwischen den Bildungsniveaus zu identifizieren.
+1.  **Deskriptive Statistiken:** Es könnten Quantile oder Perzentile des Gehalts für jeden Bildungsniveau berechnet berechnet werden. Dies könnte einen Überblick über die Verteilung der Gehälter bieten und zeigt potenzielle Grenzwerte.
 
-3.  **Visualisierungen:** Verschiedene Visualisierungen wie Scatterplots oder Liniendiagramme könnten erstellt werden, um Trends oder Muster zwischen Gehalt und Bildungsniveau zu erkennen.
+2.  **Boxplots pro Bildungsniveau:** Es könnten Boxplots für jeden Bildungsniveau erstellt werden, um die Verteilung der Gehälter visuell zu vergleichen. Dies könnte unterstützend wirken, um Ausreißer und Unterschiede im Bildungsniveau zu identifizieren.
+
+3.  **Visualisierungen:** Es besteht die Möglichkeit verschiedene Visualiersierungen, wie Scatterplots oder Liniendiagramme zu erstellen, um Trends oder Muster zwischen Gehalt und Bildungsniveau zu erkennen.
 
 ### 6.3.1.: Desktiptive Statistiken:
 
@@ -1223,6 +1239,8 @@ ggplot(salary_percentiles_long, aes(x = Education.Level, y = Salary, fill = Perc
 
 ```
 
+In dem gruppierten Balkendiagramm kann erkannt werden, dass die unterschiedlichen Perzentile stets mit dem Bildungsniveau zusammen ansteigen.
+
 ```{r}
 # Berechnung der Durchschnittsgehälter pro Bildungsniveau
 average_salary_education <- aggregate(Salary ~ Education.Level, data = filtered_data, FUN = mean, na.rm = TRUE)
@@ -1230,6 +1248,8 @@ average_salary_education <- aggregate(Salary ~ Education.Level, data = filtered_
 # Anzeige der Durchschnittsgehälter pro Bildungsniveau
 average_salary_education
 ```
+
+Die oben gestellte Aussage wird auch nochmal bestätigt, durch die Ausgabe der "avarage Salary". Hier ist zu erkennen, dass das durchschnittliche Gehalt höher ist, je höher das Bildungsniveau ist.
 
 ### 6.3.2.: **Boxplots pro Bildungsniveau:**
 
