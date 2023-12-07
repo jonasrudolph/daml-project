@@ -1308,11 +1308,13 @@ Ohne einen Hochschulabschluss gibt es eine Gehaltsgrenze. Die top 90% ohne Hochs
 
 Die These kann als Korrekt angesehen werden, da alle Lösungsansätze i m allgemeinen, das gleiche Ergebnis liefern.
 
-## 6.4 Technische Jobs haben ein höheres Gehalt als Administrative Jobs
+## 6.4 Die technischen Jobs haben ein höheres Gehalt als die administrativen Jobs
 
 ### 6.4.1.: Daten Aufbereiten
 
-Unter dem Punkt Datenaufbereitung wurden zu diesem Zweck alle Jobs in Administrativ und Technisch eingeteilt. Zudem filtern wir noch zusätzlich alle Datensätze raus welche "Director" im Jobtitel enthalten da diese sich nicht auf eine der Kategorisieren eindeutig zuordnen lassen. (z.B. Engineering Director)
+Unter dem Punkt "Daten aufbereiten 2" wurden bereits alle Jobs in administrativ und technisch unterteilt.
+
+Zudem werden noch im folgenden alle Werte aus dem Datensatz gefiltert, die den jobtitel "Director" enthalten, da dieser Job nicht eindeutig einer Gruppe zugeordnet werden kann (z.B "Engineering Director")
 
 ```{r}
 # Kopie von filtered_data als filtered_data2 erstellen
@@ -1335,7 +1337,7 @@ nrow(filtered_data2)
 
 ### 6.4.2.: Insgesamt
 
-Eine Übersicht der durchschnittlichen Gehälter nach der Sortierung von Jobs technischer und adminsitrativer Natur.
+In diesem Abschnitt wird eine Übersicht der durchschnittlichen Gehälter nach der Sortierung der Jobs nach technisch oder administrativ, erstellt. Dafür werden zunächst die Daten gefiltert. Danch werden die durchschnittlichen Gehälter der beiden Jobtypen berechnet. Anschließend werden dann die durchscnittlichen Gehälter in einen Datenrahmen zusammengeführt. Zum Schluss wird dann das Balkendiagramm erstellt.
 
 ```{r}
 # Filtern der Daten für technische und administrative Jobs basierend auf den Kriterien
@@ -1363,6 +1365,10 @@ ggplot(all_average_salaries, aes(x = Job.Type, y = Average.Salary, fill = Job.Ty
   scale_y_continuous(labels = scales::comma)  # Verwendung von scales::comma für die Achsenbeschriftung in Tausenden
 ```
 
+In dem Balkendiagramm ist deutlich zu erkennen, dass das durchscnittliche Gehalt bei technischen Jobs höher ist.
+
+Anschließend werden die Werte der durchschnittlichen Gehälter auch nochmal seperat ohne Grafik ausgegeben:
+
 ```{r}
 # Filtern der Daten für technische und administrative Jobs basierend auf den Kriterien
 technische_jobs <- subset(filtered_data, job_type == 0)
@@ -1380,9 +1386,11 @@ cat("Durchschnittliches Gehalt für administrative Jobs:", average_salaries_admi
 
 ```
 
+Auch hier ist zu erennen, das das dcurchschnittliche Gehalt bei technischen Jobs um rund 20.000 GE höher ist.
+
 ### 6.4.3.: Je Land
 
-Eine Übersicht der durchschnittlichen Gehälter nach der Sortierung von Jobs technischer und adminsitrativer Natur aller Länder.
+Nun wird eine Übersicht der durchschnittlichen Gehälter nach der Sortierung der Jobs, je Land erstellt.
 
 ```{r}
 #Daten nach Bildungsniveau, Land und Median des Gehalts gruppieren
