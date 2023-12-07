@@ -31,6 +31,8 @@ Zusätzliche Quellen für die Methodik:
 
 <https://statologie.de/daten-standardisieren-r/>
 
+<https://statologie.de/vorhergesagte-werte-plotten-r/>
+
 Dieses Datenset bietet eine umfassende Sammlung von Gehaltsinformationen aus verschiedenen Branchen und Regionen weltweit. Es enthält Details zu Berufsbezeichnungen, Gehältern, Berufssektoren, geografischen Standorten und mehr, die von seriösen Beschäftigungswebsites und Umfragen stammen. Analysieren Sie diese Daten, um Einblicke in Trends auf dem Arbeitsmarkt zu gewinnen, Vergütungen in verschiedenen Berufen zu vergleichen und informierte Entscheidungen über Ihre Karriere oder Einstellungsstrategien zu treffen. Das Datenset ist zur einfachen Analyse bereinigt und vorverarbeitet und steht unter einer offenen Lizenz für Forschungs- und Datenanalysezwecke zur Verfügung.
 
 ## 1.1 Importieren der benötigten Packages
@@ -1602,10 +1604,11 @@ Die Korrelation von Arbeitserfahtung und Gehalt liegt bei 0.81 weshalb wir uns e
 ```{r}
 filtered_data3 %>%
   ggplot() +
-  aes(x = Salary, y = Years.Of.Experience) +
+  aes(y = Salary, x = Years.Of.Experience) +
   geom_point(aes(color = Salary), alpha = 0.8) +
   geom_smooth(method = lm, color = "orange") +
-  scale_color_viridis(option = "D")
+  scale_color_viridis(option = "D") +
+  scale_y_continuous(labels = scales::comma)
 ```
 
 ### 7.1.2.: Datenaufbereitung
@@ -1674,8 +1677,6 @@ Zusammenfassung des Ergebnis:
 summary <- lm_fit |> extract_fit_engine() |> summary()
 summary
 ```
-
-Hier alles umschreibene danke.
 
 Vorhersagen auf Trainings- und Testdatensatz:
 
@@ -1777,6 +1778,8 @@ print(residuals_test)
 
 Histogramm der Residuen
 
+Trainingsdaten
+
 ```{r}
 # Standardisierung/Z-Skalierung der Residuen der Residuen
 residuals_train$standardized_resid <- scale(residuals_train$.resid)
@@ -1790,6 +1793,8 @@ ggplot(data = residuals_train, aes(x = standardized_resid)) +
   scale_fill_viridis() +  # Fügt das Viridis-Farbschema hinzu
   theme_minimal()
 ```
+
+Testdaten
 
 ```{r}
 # Standardisierung/Z-Skalierung der Residuen der Residuen
@@ -1838,7 +1843,7 @@ ggplot(data = residuals_test, aes(sample = standardized_resid)) +
   theme_minimal()
 ```
 
-Bildet die ausreißer vom Gehalt nach oben und unten ab welche wir im ersten Diagramm von 7.1 sehen, die Residuen sind nicht perfekt normalverteilt. Eventuell gibt es hier Datenpunkte welche die Residuen beeinflussen. Aufgrund der explorativen Datenanalyse wissen wir das Jobs mit hoher Arbeitserfahrung oft Führungsverantwortung beinhalten welche nochmal zusätzlich monetär honoriert wird. Die Flache Linie durch die Gerade durch deutet auf ein Gehaltscap hin. Die Ausreißer am unteren Ende lassen sich durch Einstiegsjobs so wie Niedriglohnjobs ohne Hochschulabchlüsse erklären. (Ausbildungsberufe werden hier nicht berücksichtigt). Hier wird noch eine erweiterte Untersuchung folgen.
+Bildet die ausreißer vom Gehalt nach oben und unten ab welche wir im ersten Diagramm von 7.1 sehen, die Residuen sind nicht perfekt normalverteilt. Eventuell gibt es hier Datenpunkte welche die Residuen beeinflussen. Aufgrund der explorativen Datenanalyse wissen wir das Jobs mit hoher Arbeitserfahrung oft Führungsverantwortung beinhalten welche nochmal zusätzlich monetär honoriert wird. Die Flache Linie durch die Gerade oben durch deutet auf ein Gehaltscap hin. Die Ausreißer am unteren Ende lassen sich durch Einstiegsjobs so wie Niedriglohnjobs ohne Hochschulabchlüsse erklären. (Ausbildungsberufe werden hier nicht berücksichtigt).
 
 ## 7.2.: Mehrfache Lineare Regression
 
@@ -1871,15 +1876,33 @@ ggplot(data = filtered_data3, aes(x = Years.Of.Experience, y = Salary)) +
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE)
 ```
 
-Aufgrund dieser Kurve haben wir uns dzu entschieden eine weitere Variable hinzuzufügen so wie die Quadrierte Zahl von Years.Of.Experience. Da Age zwar einen hohen Korrelationswert hat aber auch mit den Years.Of.Experience einhergeht nehmen wir diesen wert nicht sondern stattdessen das Education.Level.
+```{r}
+# Beispiel für ein Streudiagramm und eine glättende Funktion
+library(ggplot2)
+ggplot(data = filtered_data3, aes(x = Years.Of.Experience, y = Salary)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 3), se = FALSE)
+```
+
+```{r}
+# Beispiel für ein Streudiagramm und eine glättende Funktion
+library(ggplot2)
+ggplot(data = filtered_data3, aes(x = Years.Of.Experience, y = Salary)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 4), se = FALSE)
+```
+
+Aufgrund dieser Kurve haben wir uns zu entschieden eine weitere Variable hinzuzufügen so wie die Potenzen 2, 3 und 4 von Years.Of.Experience zu verwenden in je 3 unterschiedlichen Regressionen und um anschließend zu schauen wie Akkurat sich das Modell auf den testdaten mit der jeweiligen potenz verhält. Da Age zwar einen hohen Korrelationswert hat aber auch mit den Years.Of.Experience einhergeht nehmen wir diesen wert nicht sondern stattdessen das Education.Level.
+
+### 7.2.2.: Korrelationen
+
+Education.Level von kategorisch in Numerische Werte transformieren.
 
 ```{r}
 filtered_data3$Education.Level <- as.numeric(as.character(filtered_data3$Education.Level))
 
 str(filtered_data3$Education.Level)
 ```
-
-### 7.2.2.: Korrelationen
 
 ```{r}
 # Berechnen Sie die Korrelationen
@@ -1899,12 +1922,15 @@ filtered_data6 <- filtered_data3 %>%
   select(Salary, Years.Of.Experience, Education.Level)
 ```
 
-Hinzufügen von Years.Of.Experience\^2
+Hinzufügen von den potenzen Years.Of.Experience
 
 ```{r}
 # Fügen Sie die zusätzliche Spalte mit dem quadrierten Wert hinzu
 filtered_data6 <- filtered_data6 %>%
-  mutate(Years.Of.Experience_Squared = Years.Of.Experience^2)
+  mutate(Years.Of.Experience_Squared = Years.Of.Experience^2) %>%
+  mutate(Years.Of.Experience_Cubed = Years.Of.Experience^3) %>%
+  mutate(Years.Of.Experience_Quartic = Years.Of.Experience^4)
+
 ```
 
 ```{r}
@@ -1913,7 +1939,7 @@ head(filtered_data6)
 
 Zunächst führen wir dazu eine Z-Skalierung von filtered_data_6 durch.
 
-Die Z-Skalierung ist eine Methode zur Standardisierung von numerischen Variablen. Bei der Z-Skalierung werden alle numerischen Werte mit Ausnahme des Vorhersagewerts (Salary) skaliert, um die Auswirkungen von Ausreißern zu minimieren. (Salary und Years.Of.Experience\^2 ausgenommen):
+Die Z-Skalierung ist eine Methode zur Standardisierung von numerischen Variablen. Bei der Z-Skalierung werden alle numerischen Werte mit Ausnahme des Vorhersagewerts (Salary) skaliert, um die Auswirkungen von Ausreißern zu minimieren. (Salary und Potenzen von Years.Of.Experience ausgenommen):
 
 ```{r}
 # Erstellen Sie eine Kopie von filtered_data6
@@ -1931,6 +1957,367 @@ Ergebnis der Z-Skalierung:
 
 ```{r}
 head(filtered_data6_z)
+```
+
+Überprüfung der Standardabweichung für Arbeitserfahrung
+
+```{r}
+sd(filtered_data6_z$Years.Of.Experience)
+sd(filtered_data6_z$Education.Level)
+```
+
+Aufteilung in Test- und Trainingsdaten:
+
+```{r}
+set.seed(007)  
+filtered_data6_z <- initial_split(filtered_data6_z, prop = 0.8, strata = Years.Of.Experience)  
+
+fd6_train <- training(filtered_data6_z)
+fd6_test <- testing(filtered_data6_z)
+```
+
+Dieser Code teilt den Datensatz filtered_data5_z in Trainings- und Testdaten auf, um eine lineare Regression durchzuführen. Die Funktion set.seed(007) initialisiert den Zufallszahlengenerator mit einer festen Zahl, um sicherzustellen, dass die Ergebnisse bei jedem Durchlauf reproduzierbar sind. Die Funktion initial_split() aus dem Paket rsample teilt den Datensatz in Trainings- und Testdaten auf. Der Parameter prop = 0,8 gibt an, dass 80% der Daten für das Training verwendet werden sollen, während die restlichen 20% für das Testen verwendet werden. Der Parameter strata = Years.Of.Experience sorgt dafür, dass die Daten nach dem Gehalts-Wert stratifiziert werden, um sicherzustellen, dass die Trainings- und Testdaten eine ähnliche Verteilung von Gehalts-Werten aufweisen. Da die Potenzen dieser Variable alle in der selben Reihe stehen muss hier nichts verändert werden. Die Funktion training() extrahiert die Trainingsdaten aus dem aufgeteilten Datensatz, während testing() die Testdaten extrahiert.
+
+### 7.2.3.: Modell Initialisieren
+
+```{r}
+# Modell initialisieren 
+lm_model2 <- linear_reg() |> set_engine("lm")
+```
+
+Lineare Regression mit 2er Potenz:
+
+```{r}
+# Lineare Regression von "Salary" basierend auf "Years.Of.Experience" 
+lm_fit2 <- lm_model2 |> fit(Salary ~ Years.Of.Experience + Education.Level + Years.Of.Experience_Squared, data = fd6_train)
+```
+
+Lineare Regression mit 3er Potenz:
+
+```{r}
+lm_fit3 <- lm_model2 |> fit(Salary ~ Years.Of.Experience + Education.Level + Years.Of.Experience_Cubed, data = fd6_train)
+```
+
+Lineare Regression mit 3er Potenz:
+
+```{r}
+lm_fit4 <- lm_model2 |> fit(Salary ~ Years.Of.Experience + Education.Level + Years.Of.Experience_Quartic, data = fd6_train)
+```
+
+Zusammenfassung des Ergebnis (2er Potenz):
+
+```{r}
+# Zusammenfassung der Regression
+summary <- lm_fit2 |> extract_fit_engine() |> summary()
+summary
+```
+
+Zusammenfassung des Ergebnis (3er Potenz):
+
+```{r}
+# Zusammenfassung der Regression
+summary <- lm_fit3 |> extract_fit_engine() |> summary()
+summary
+```
+
+Zusammenfassung des Ergebnis (4er Potenz):
+
+```{r}
+# Zusammenfassung der Regression
+summary <- lm_fit4 |> extract_fit_engine() |> summary()
+summary
+```
+
+Vorhersagen auf Trainings- und Testdatensatz (2er Potenz):
+
+```{r}
+pred_train2 <- predict(lm_fit2, new_data = fd6_train) |> rename("pred_train2" = ".pred")
+pred_test2 <- predict(lm_fit2, new_data = fd6_test) |>  rename("pred_test2" = ".pred")
+
+compare_train2 <- fd5_train |> 
+  select(Salary) |> 
+  bind_cols(pred_train2)
+head(compare_train2)
+
+compare_test2 <- fd5_test |> 
+  select(Salary) |> 
+  bind_cols(pred_test2)
+head(compare_test2)
+```
+
+Vorhersagen auf Trainings- und Testdatensatz (3er Potenz):
+
+```{r}
+pred_train3 <- predict(lm_fit3, new_data = fd6_train) |> rename("pred_train3" = ".pred")
+pred_test3 <- predict(lm_fit3, new_data = fd6_test) |>  rename("pred_test3" = ".pred")
+
+compare_train3 <- fd6_train |> 
+  select(Salary) |> 
+  bind_cols(pred_train3)
+head(compare_train3)
+
+compare_test3 <- fd6_test |> 
+  select(Salary) |> 
+  bind_cols(pred_test3)
+head(compare_test3)
+```
+
+Vorhersagen auf Trainings- und Testdatensatz (4er Potenz):
+
+```{r}
+pred_train4 <- predict(lm_fit4, new_data = fd6_train) |> rename("pred_train4" = ".pred")
+pred_test4 <- predict(lm_fit4, new_data = fd6_test) |>  rename("pred_test4" = ".pred")
+
+compare_train4 <- fd6_train |> 
+  select(Salary) |> 
+  bind_cols(pred_train4)
+head(compare_train4)
+
+compare_test4 <- fd6_test |> 
+  select(Salary) |> 
+  bind_cols(pred_test4)
+head(compare_test4)
+```
+
+### 7.2.4.: Grafische Darstellung
+
+(Zusätzliche Quelle: <https://statologie.de/vorhergesagte-werte-plotten-r/>)
+
+2er Potenz
+
+```{r}
+# Erstellen des Vorhersage-Plots für den Trainingsdatensatz
+ggplot(compare_train2, aes(x = Salary, y = pred_train2)) +
+  geom_point(color = viridis(0.50)) +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 3), se = FALSE) +
+  labs(title = "Vorhersage-Plot für Trainingsdatensatz",
+       x = "Echte Salary-Werte",
+       y = "Vorhergesagte Salary-Werte") +
+  theme_minimal()
+
+# Erstellen des Vorhersage-Plots für den Testdatensatz
+ggplot(compare_test2, aes(x = Salary, y = pred_test2)) +
+  geom_point(color = viridis(0.50)) +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE) +
+  labs(title = "Vorhersage-Plot für Testdatensatz",
+       x = "Echte Salary-Werte",
+       y = "Vorhergesagte Salary-Werte") +
+  theme_minimal()
+```
+
+3er Potenz
+
+```{r}
+# Erstellen des Vorhersage-Plots für den Trainingsdatensatz
+ggplot(compare_train3, aes(x = Salary, y = pred_train3)) +
+  geom_point(color = viridis(0.50)) +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 3), se = FALSE) +
+  labs(title = "Vorhersage-Plot für Trainingsdatensatz",
+       x = "Echte Salary-Werte",
+       y = "Vorhergesagte Salary-Werte") +
+  theme_minimal()
+
+# Erstellen des Vorhersage-Plots für den Testdatensatz
+ggplot(compare_test3, aes(x = Salary, y = pred_test3)) +
+  geom_point(color = viridis(0.50)) +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 3), se = FALSE) +
+  labs(title = "Vorhersage-Plot für Testdatensatz",
+       x = "Echte Salary-Werte",
+       y = "Vorhergesagte Salary-Werte") +
+  theme_minimal()
+
+```
+
+4er Potenz
+
+```{r}
+# Erstellen des Vorhersage-Plots für den Trainingsdatensatz
+ggplot(compare_train4, aes(x = Salary, y = pred_train4)) +
+  geom_point(color = viridis(0.50)) +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 3), se = FALSE) +
+  labs(title = "Vorhersage-Plot für Trainingsdatensatz",
+       x = "Echte Salary-Werte",
+       y = "Vorhergesagte Salary-Werte") +
+  theme_minimal()
+
+# Erstellen des Vorhersage-Plots für den Testdatensatz
+ggplot(compare_test4, aes(x = Salary, y = pred_test4)) +
+  geom_point(color = viridis(0.50)) +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 4), se = FALSE) +
+  labs(title = "Vorhersage-Plot für Testdatensatz",
+       x = "Echte Salary-Werte",
+       y = "Vorhergesagte Salary-Werte") +
+  theme_minimal()
+```
+
+Es lässt sich bereits die leichte Tendenz erkenne das die 4er Potenz der Arbeitserfahrung auf eine Minimal genauere Prognose bei den Testdaten resultiert ím vergleich zur 2er und 3er Potenz.
+
+### 7.1.5.: Fehler
+
+2er Potenz
+
+Trainingsfehler:
+
+```{r}
+rmse(compare_train2, Salary, pred_train2)
+```
+
+Testfehler:
+
+```{r}
+rmse(compare_test2, Salary, pred_test2)
+```
+
+Das Modell performt auf Trainingsdaten besser als auf Testdaten -\> Overfitting
+
+3er Potenz
+
+Trainingsfehler:
+
+```{r}
+rmse(compare_train3, Salary, pred_train3)
+```
+
+Testfehler:
+
+```{r}
+rmse(compare_test3, Salary, pred_test3)
+```
+
+Das Modell performt auf Trainingsdaten besser als auf Testdaten -\> Overfitting
+
+4er Potenz
+
+Trainingsfehler:
+
+```{r}
+rmse(compare_test4, Salary, pred_test4)
+```
+
+Testfehler:
+
+```{r}
+rmse(compare_test4, Salary, pred_test4)
+```
+
+Auch wenn alle Modelle nur geringe Unterschiede aufweisen, performt dieses auf Trainingsdaten gleich wie auf den Testdaten, daher ist es das genauste Modell und wird ab hier an als einziges weiter untersucht. Dies ließ sich bereits unter 7.2.1 Erkenne da das 3. polynom das Geom Smooth Grafisch die beste Linie abgebildet hat.
+
+Verteilung von Gehalt:
+
+```{r}
+describe(filtered_data5, Salary)
+```
+
+### 7.1.6.: Residuen
+
+Residuen (auch als Fehler oder Residuals bezeichnet) sind die Differenzen zwischen den beobachteten Werten und den vorhergesagten Werten in einem Regressionsmodell. Sie repräsentieren die Abweichungen zwischen den tatsächlichen Daten und den Werten, die das Modell vorhersagt. Idealerweise sollten die Residuen normalverteilt sein, um sicherzustellen, dass das Regressionsmodell angemessen ist.
+
+Es ist üblich, die Residuen sowohl für Trainingsdaten als auch für Testdaten zu überprüfen, um die Leistung des Modells auf beiden Datensätzen zu evaluieren.
+
+1.  **Trainingsdaten:**
+
+    -   Die Residuen der Trainingsdaten geben einen Einblick in die Leistung des Modells auf den Daten, auf denen es trainiert wurde. Wenn die Residuen auf den Trainingsdaten ungewöhnliche Muster aufweisen, kann dies auf Modellprobleme oder Overfitting hinweisen.
+
+2.  **Testdaten:**
+
+    -   Die Residuen der Testdaten ermöglichen es , die Generalisierungsfähigkeit des Modells auf neuen, nicht trainierten Daten zu überprüfen. Ein Modell kann auf den Trainingsdaten gut funktionieren, aber die Residuen auf den Testdaten können Ihnen sagen, wie gut es sich auf unbekannte Daten (Realität) verallgemeinert.
+
+In dieser speziellen Situation betrachtret man die Residuen für beide Datensätze, indem man die **`augment()`**-Funktion für Trainings- und Testdaten separat aufruft.
+
+```{r}
+# Residuen mit augment() auf den Trainingsdaten abrufen
+residuals_train2 <- augment(lm_fit4, new_data = fd6_train) %>% select(.resid)
+
+# Residuen mit augment() auf den Testdaten abrufen
+residuals_test2 <- augment(lm_fit4, new_data = fd6_test) %>% select(.resid)
+
+# Ausgabe der Residuen für Trainingsdaten
+print(residuals_train2)
+
+# Ausgabe der Residuen für Testdaten
+print(residuals_test2)
+```
+
+Histogramm der Residuen
+
+```{r}
+# Standardisierung/Z-Skalierung der Residuen der Residuen
+residuals_train2$standardized_resid2 <- scale(residuals_train2$.resid)
+
+# Histogramm der standardisierten Residuen mit Viridis-Farbschema
+ggplot(data = residuals_train2, aes(x = standardized_resid2)) +
+  geom_histogram(binwidth = 0.5, fill = viridis(1), color = "black", alpha = 0.7) +
+  labs(title = "Histogramm der standardisierten Residuen",
+       x = "Standardisierte Residuen",
+       y = "Häufigkeit") +
+  scale_fill_viridis() +  # Fügt das Viridis-Farbschema hinzu
+  theme_minimal()
+```
+
+```{r}
+# Standardisierung/Z-Skalierung der Residuen der Residuen
+residuals_test2$standardized_resid2 <- scale(residuals_test2$.resid)
+
+# Histogramm der standardisierten Residuen mit Viridis-Farbschema
+ggplot(data = residuals_test2, aes(x = standardized_resid2)) +
+  geom_histogram(binwidth = 0.5, fill = viridis(1), color = "black", alpha = 0.7) +
+  labs(title = "Histogramm der standardisierten Residuen",
+       x = "Standardisierte Residuen",
+       y = "Häufigkeit") +
+  scale_fill_viridis() +  # Fügt das Viridis-Farbschema hinzu
+  theme_minimal()
+```
+
+### 7.1.7.: Q-Q-Plot
+
+(Quantil-Quantil-Diagramm): überprüft die Residuen auf Normalverteilung. Die Quantile der standardisierten Residuen werden gegen die Quantile der Normalverteilung geplottet. Unter der Normalitätsannahme sollten die Punkte zufällig entlang der Diagonale (x=y) streuen (Umschreiben)
+
+Trainingsdaten
+
+```{r}
+# QQ-Plot erstellen
+ggplot(data = residuals_train2, aes(sample = standardized_resid2)) +
+  stat_qq(distribution = qnorm, dparams = list(mean = 0, sd = 1), color = viridis(1)) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +
+  labs(title = "QQ-Plot der standardisierten Residuen",
+       x = "Quantile der Normalverteilung",
+       y = "Quantile der Residuen") +
+  scale_color_viridis() +  # Fügt das Viridis-Farbschema hinzu
+  theme_minimal()
+```
+
+Testdaten
+
+```{r}
+# QQ-Plot erstellen
+ggplot(data = residuals_test2, aes(sample = standardized_resid2)) +
+  stat_qq(distribution = qnorm, dparams = list(mean = 0, sd = 1), color = viridis(1)) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +
+  labs(title = "QQ-Plot der standardisierten Residuen",
+       x = "Quantile der Normalverteilung",
+       y = "Quantile der Residuen") +
+  scale_color_viridis() +  # Fügt das Viridis-Farbschema hinzu
+  theme_minimal()
+```
+
+Analog zu 7.1.7:
+
+Der Plot Bildet die ausreißer vom Gehalt nach oben und unten ab welche wir im ersten Diagramm von 7.2.1 sehen, die Residuen sind nicht perfekt normalverteilt. Eventuell gibt es hier Datenpunkte welche die Residuen beeinflussen. Aufgrund der explorativen Datenanalyse wissen wir das Jobs mit hoher Arbeitserfahrung oft Führungsverantwortung beinhalten welche nochmal zusätzlich monetär honoriert wird. Die Flache Linie durch die Gerade oben durch deutet auf ein Gehaltscap hin. Die Ausreißer am unteren Ende lassen sich durch Einstiegsjobs so wie Niedriglohnjobs ohne Hochschulabchlüsse erklären. (Ausbildungsberufe werden hier nicht berücksichtigt).
+
+Der Testfehler in der einfachen Linearen Regression betrug 32154 während der in der mehrfachen Linearen Regression mit der 4er Potenz von Arbeitserfahrung 29483 welches eine verbesserung der Vorhersagen von 10% gegenüber der einfach Linearen regression aus 7.1 ergibt. Des weiteren gibt es hier auch kein Overfitting des Modells mehr da die Test und Trainingsfehler exakt die selben sind (32154) .
+
+## 7.3.: Entscheidungsbaum
+
+### 7.3.1.: Vorbereitung
+
+```{r}
+
 ```
 
 # 8. Abschluss
