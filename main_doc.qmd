@@ -1103,7 +1103,7 @@ ggplot(data_china, aes(x = factor(Gender), y = Salary, fill = Gender)) +
   theme_minimal()
 ```
 
-Durch die letzen beiden Boxplots ist zu erkennen, dass der Unterschied im durchschnittlichen Gehalt in China und der USA mit dem bloßen Auge nicht zu erkennen ist. \
+Durch die letzen beiden Boxplots ist zu erkennen, dass der Unterschied im durchschnittlichen Gehalt in China und der USA mit dem bloßen Auge nicht zu erkennen ist.\
 Unter Anbetracht der oberen beiden Boxplots ist jedoch, wie bereits erwähnt, ein deutlicher Unterschied zwischen den Geschlechtern im Bezug auf die Berufsaerfahrung zu erkennen.
 
 ```{r}
@@ -1118,7 +1118,7 @@ Aus den obigen Test ist außerdem hervor gegangen, dass die Berufserfahrung eine
 
 Deswegen lässt sich trotzdem sagen, dass diese These korrekt ist.
 
-### 6.1.3.: Männer haben im Durchschnitt mehr Berufserfahrung als Frauen 
+### 6.1.3.: Männer haben im Durchschnitt mehr Berufserfahrung als Frauen
 
 ```{r}
 ggplot(filtered_data, aes(x = factor(Gender), y = Years.Of.Experience, fill = Gender)) +
@@ -1267,6 +1267,8 @@ ggplot(filtered_data, aes(x = reorder(factor(Education.Level), Salary, FUN = med
   theme_minimal()
 ```
 
+Auch in dem Balkendiagramm ist, genau wie oben, zu erkennen, dass der Median stets höher ist, je höher das Bildungsniveau geht.
+
 ### 6.3.3.: **Visualisierungen:**
 
 ```{r}
@@ -1284,6 +1286,8 @@ ggplot(filtered_data, aes(x = reorder(factor(Education.Level), Salary, FUN = med
   theme_minimal()
 ```
 
+Der folgende Code erstellt ein Liniendiagramm, dass das Gehalt in Abhängigkeit vom Bildungsniveau darstellt. Zunächst wird das Bildungsniveau neu angeordnet und danach das Liniendiagramm erstellt.
+
 ```{r}
 # Bildungslevel neu ordnen
 filtered_data$Education.Level <- factor(filtered_data$Education.Level, levels = c("0", "1", "2", "3"))
@@ -1298,9 +1302,11 @@ ggplot(filtered_data, aes(x = Education.Level, y = Salary, group = 1)) +
   theme_minimal()
 ```
 
-hier diagramm erklären weil anderes aus vorlesung (Liniendiagramm)
+Die roten Punkte zeigen den Medianwert des Gehalts je nach Bildungsniveau. ( bitte jonas nochmal fragen, verstehe ich nicht).
 
-These Korrekt: Ohne einen Hochschulabschluss gibt es eine Gehaltsgrenze. Die top 90% ohne Hochschulabschluss fangen bei den unteren 10% mit Hochschulabschluss an aus der Sicht des Gehalts.
+Ohne einen Hochschulabschluss gibt es eine Gehaltsgrenze. Die top 90% ohne Hochschulabschluss fangen bei den unteren 10% mit Hochschulabschluss an aus der Sicht des Gehalts.
+
+Die These kann als Korrekt angesehen werden, da alle Lösungsansätze i m allgemeinen, das gleiche Ergebnis liefern.
 
 ## 6.4 Technische Jobs haben ein höheres Gehalt als Administrative Jobs
 
