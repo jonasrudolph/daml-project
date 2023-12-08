@@ -1653,13 +1653,15 @@ In dem folgenden Absatz werden die Regressionen durchfegührt.
 
 ## 7.1.: Einfache Lineare Regression Gehalt und Arbeitserfahrung
 
-QQ Plot der Residuen gibt extra Punkte DAML Folien 3 Seite 10. Hinweise 2.4 S.10
-
-Prüfung der Modellprämissen Punkt 5. Prüfung ist erklärt im Regressionsbeispiel im fall Umfangreiches Beispiel mit Prüfung des Modellprämissen
+Als erstes wird eine einfache lineare Regression mit dem Gehalt und der Arbeitserfahrung durchgeführt
 
 Die Korrelation von Arbeitserfahtung und Gehalt liegt bei 0.81 weshalb wir uns entscheiden haben diese als Regression zu verwenden. Des weiteren nutzen wir auch das Alter so wie das Bildungsniveau.
 
+Die Korrelation zwischen der Arbeitserfahrung und Gehalt liegt bei 0.81. Deshalb wurde entschieden diese als Regression zu verwenden. Des Weiteren wird auch das Alter, so wie das Bildungsniveau verwendet.
+
 ### 7.1.1.: Korrelationsmatrix
+
+Zunächst wird ein Streudiagramm über die Beziehung zwischen dem Gehalt und der Berufserfahrung erstellt. Außerdem wird eine lineare Regressionsgerade eingefügt, um den Trend besser analysieren zu können.
 
 ```{r}
 filtered_data %>%
@@ -1671,9 +1673,13 @@ filtered_data %>%
   scale_y_continuous(labels = scales::comma)
 ```
 
+Anhand dieser Grafik kann gesagt werden, das der Trend deutlich nach oben geht, je mehr Berufserfahrung eine Person hat.
+
 ### 7.1.2.: Datenaufbereitung
 
-Rausnehmen aller nicht für die Regression relevanten Werte:
+Es muss noch etwas an dem Datensatz geändert werden.
+
+Zunächst mpüssen alle Werte, die nicht für die Regression relevant sind, rausgenommen werden. Deswegen werden nur "Salary" und "Years of Experience" behalten.
 
 ```{r}
 # Nur 'Salary' und 'Years.Of.Experience' behalten und den Rest entfernen
@@ -1681,7 +1687,9 @@ filtered_data5 <- filtered_data %>%
   select(Salary, Years.Of.Experience)
 ```
 
-Zuerst führen wir dazu eine Z-Skalierung von filtered_data_5 durch.
+#### 7.1.2.1 Z-Skalierung
+
+Zuerst wird eine Z-Skalierung von filtered_data_5 durchgeführt.
 
 Die Z-Skalierung ist eine Methode zur Standardisierung von numerischen Variablen. Bei der Z-Skalierung werden alle numerischen Werte mit Ausnahme des Vorhersagewerts (Salary) skaliert, um die Auswirkungen von Ausreißern zu minimieren.
 
@@ -1723,7 +1731,7 @@ Dieser Code teilt den Datensatz filtered_data5_z in Trainings- und Testdaten auf
 lm_model <- linear_reg() |> set_engine("lm")
 ```
 
-Lineare Regression:
+Lineare Regression von Salary (basierend auf der Berufserfahrung):
 
 ```{r}
 # Lineare Regression von "Salary" basierend auf "Years.Of.Experience"
@@ -1739,6 +1747,8 @@ summary
 ```
 
 Vorhersagen auf Trainings- und Testdatensatz:
+
+Nun werden Vorhersagen für die Tranings-, sowie Testdaten erstellt. Anaschließend werden die tatsächlichen "Salary"-Werte mit den Vorhersagen kombiniert. Dies geschieht um zwei seperate Datenrahmen zu erstellen.
 
 ```{r}
 pred_train <- predict(lm_fit, new_data = fd5_train) |> rename("pred_train" = ".pred")
@@ -1756,6 +1766,8 @@ head(compare_test)
 ```
 
 ### 7.1.4.: Grafische Darstellung
+
+Im folgenden Codechunk, werden zwei Grafiken, zum Einen für die Testendaten und zum anderen für die Traiingsdaten erstellt.
 
 ```{r}
 # Daten für Training und Test
@@ -1786,7 +1798,11 @@ ggplot(test_data, aes(x = Years.Of.Experience, y = Salary)) +
 
 ```
 
+Anhand der zwei Grafiken ist zu erkennen, dass die unterschiedlichen Werte bei der Vorhersage der Trainingsdaten deutlich dichter zusammen liegen, als bei den Testdaten. Trotzdem sind die beiden Grafiken gleich was den Trend angeht. Dies ist Mithilfe der Regressionsgerade zu erkennen.
+
 ### 7.1.5.: Fehler
+
+Mithilfe der "rmse"-Funktion, wird die Quadratwurzel aus dem Durchschnitt der quadrierten Differenzen zwischen den vorhergesagten und den tatsächlichen Werten.
 
 Trainingsfehler:
 
@@ -1794,23 +1810,31 @@ Trainingsfehler:
 rmse(compare_train, Salary, pred_train)
 ```
 
+Die durchschnittliche Abweichung beträgt rund 31.000.
+
 Testfehler:
 
 ```{r}
 rmse(compare_test, Salary, pred_test)
 ```
 
-!Zur Einordnung der Fehler die Verteilung von Gehalt ansehen:
+Auch hier beträgt die durchschnittliche Abweichung rund 31.000.
 
-Verteilung von Arbeitserfahrung:
+Zur Einordnung der Fehler wird die Verteilung von Gehalt angesehen:
 
 ```{r}
 describe(filtered_data5, Salary)
 ```
 
+Verteilung von Arbeitserfahrung:
+
+```{r}
+describe(filtered_data5, Years.Of.Experience)
+```
+
 ### 7.1.6.: Residuen
 
-Residuen (auch als Fehler oder Residuals bezeichnet) sind die Differenzen zwischen den beobachteten Werten und den vorhergesagten Werten in einem Regressionsmodell. Sie repräsentieren die Abweichungen zwischen den tatsächlichen Daten und den Werten, die das Modell vorhersagt. Idealerweise sollten die Residuen normalverteilt sein, um sicherzustellen, dass das Regressionsmodell angemessen ist.
+Residuen (auch Fehler oder Residuen genannt) sind die Unterschiede zwischen den beobachteten Werten und den vorhergesagten Werten in einem Regressionsmodell. Sie stellen die Abweichungen zwischen den tatsächlichen Daten und den durch das Modell vorhergesagten Werten dar. Idealerweise sollten die Residuen normalverteilt sein, um sicherzustellen, dass das Regressionsmodell angemessen ist.
 
 Es ist üblich, die Residuen sowohl für Trainingsdaten als auch für Testdaten zu überprüfen, um die Leistung des Modells auf beiden Datensätzen zu evaluieren. Hier sind einige Gründe, warum es wichtig ist, die Residuen auf beiden Datensätzen zu betrachten:
 
@@ -1822,7 +1846,7 @@ Es ist üblich, die Residuen sowohl für Trainingsdaten als auch für Testdaten 
 
     -   Die Residuen der Testdaten ermöglichen es Ihnen, die Generalisierungsfähigkeit des Modells auf neuen, nicht trainierten Daten zu überprüfen. Ein Modell kann auf den Trainingsdaten gut funktionieren, aber die Residuen auf den Testdaten können Ihnen sagen, wie gut es sich auf unbekannte Daten verallgemeinert.
 
-In Ihrer speziellen Situation könnten Sie die Residuen für beide Datensätze betrachten, indem Sie die **`augment()`**-Funktion für Trainings- und Testdaten separat aufrufen, wie im vorherigen Beispiel gezeigt.
+Nun werden die Risiduen mit der "augment()"-Funktion auf die Trainings-, sowie Testdaten abgerufen. Anschließend werden Sie ausgegeben.
 
 ```{r}
 # Residuen mit augment() auf den Trainingsdaten abrufen
@@ -1842,9 +1866,9 @@ print(residuals_train)
 print(residuals_test)
 ```
 
-Histogramm der Residuen
+Anschließend werden nun die Risiduen in einem Histogramm ausgegeben, nachdem Sie z-skaliert wurden.
 
-Trainingsdaten
+Histogramm der Risiduen der Trainingsdaten:
 
 ```{r}
 # Standardisierung/Z-Skalierung der Residuen der Residuen
@@ -1860,7 +1884,9 @@ ggplot(data = residuals_train, aes(x = standardized_resid)) +
   theme_minimal()
 ```
 
-Testdaten
+Zu erkennen ist, dass die Werte zwischen 2 und -2 am häufigsten vertreten sind.
+
+Histogramm der Risiduen der Testdaten:
 
 ```{r}
 # Standardisierung/Z-Skalierung der Residuen der Residuen
@@ -1876,11 +1902,15 @@ ggplot(data = residuals_test, aes(x = standardized_resid)) +
   theme_minimal()
 ```
 
+Auch hier sind die Risiduen zwischen 2 und -2 am häufigsten.
+
+Aus den beiden Histogrammen geht also hervor, dass die Abweichungen zwischen den vorhergesagten Werten und tatsächlichen Werten nicht wirklich groß sind.
+
 ### 7.1.7.: Q-Q-Plot
 
-(Quantil-Quantil-Diagramm): überprüft die Residuen auf Normalverteilung. Die Quantile der standardisierten Residuen werden gegen die Quantile der Normalverteilung geplottet. Unter der Normalitätsannahme sollten die Punkte zufällig entlang der Diagonale (x=y) streuen (Umschreiben)
+Das "Quantil-Quantil-Diagramm" überprüft Risiduen auf Ihre Normalverteilung. Hierbei werden die Quantile der standartisierten Risiduen gegen die QUantile der Normalverteilung gestellt. Im Normalfall sollten die Punkte entlang der Diagonale (x=y) streuen.
 
-Trainingsdaten
+QQ-Plot für der Risiduen für die Trainingsdaten:
 
 ```{r}
 # QQ-Plot erstellen
@@ -1894,7 +1924,7 @@ ggplot(data = residuals_train, aes(sample = standardized_resid)) +
   theme_minimal()
 ```
 
-Testdaten
+QQ-Plot für der Risiduen für die Testdaten:
 
 ```{r}
 residuals_test$standardized_resid <- scale(residuals_test$.resid)
@@ -1909,7 +1939,7 @@ ggplot(data = residuals_test, aes(sample = standardized_resid)) +
   theme_minimal()
 ```
 
-Bildet die ausreißer vom Gehalt nach oben und unten ab welche wir im ersten Diagramm von 7.1 sehen, die Residuen sind nicht perfekt normalverteilt. Eventuell gibt es hier Datenpunkte welche die Residuen beeinflussen. Aufgrund der explorativen Datenanalyse wissen wir das Jobs mit hoher Arbeitserfahrung oft Führungsverantwortung beinhalten welche nochmal zusätzlich monetär honoriert wird. Die Flache Linie durch die Gerade oben durch deutet auf ein Gehaltscap hin. Die Ausreißer am unteren Ende lassen sich durch Einstiegsjobs so wie Niedriglohnjobs ohne Hochschulabchlüsse erklären. (Ausbildungsberufe werden hier nicht berücksichtigt).
+Die beiden Q-Q-Plots bilden die "Ausreißer" vom Gehalt nach oben oder unten, entlang der 45-Grad-Linie ab, welche bereits im ersten Diagramm von 7.1 zu sehen sind. Es ist zu erkennen, dass die Risiduen nicht perfekt normalverteilt sind. Es besteht die Möglichkeit, dass esDatenpunkte gibt, welche die Risiduen beeinflussen. Aufgrund der explorativen Datenanalyse ist bereits bekannt, das Jobs mit hoher Berufserfahrung oft Führungsverantwortung beinhalten, welche nochmals zusätzlich monetär honoriert wird. Rechts oben im Graph ist eine flache Linie zu erkennen. Diese deutet auf einen Gehaltscap hin. Die "Ausreißer" am unteren Ende lassen sichh durch z.B Einstiegsjobs, sowie Niedriglohnjobs ohne Hochschulabschluss erläutern. Desweiteren ist noch anzumerken, dass Ausbildungsberufe nicht beachtet werden.
 
 ## 7.2.: Mehrfache Lineare Regression
 
