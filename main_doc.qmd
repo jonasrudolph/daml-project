@@ -1411,19 +1411,23 @@ These Korrekt, und das Obwohl in den Admin Jobs auch in seltenen Fällen Manager
 
 Es lässt sich zudem beobachten das Doktoren in Australien ein höheres Gehalt verdienen als in anderen Ländern.
 
-## 6.5 Data Scientist verdienen aufgrund der hohen Nachfrage der Berufsgruppe im Schnitt mehr Geld als andere Jobgruppen bei gleichbleibender Erfahrung und Abschlussniveau.
+## 6.5 Data Scientist verdienen aufgrund der hohen Nachfrage der Berufsgruppe im Schnitt mehr als andere Jobgruppen bei gleichbleibender Erfahrung und Abschlussniveau.
 
 ### 6.5.1.: Begründung
 
-Data Scientist ist laut dem Harvard Business Review der "Sexiest Job of the 21st Century"\*
+Der Beruf des Data Scientist ist laut dem Harvard Business Review der "Sexiest Job of the 21st Century".
+
+Siehe link:
 
 \*<https://hbr.org/2012/10/data-scientist-the-sexiest-job-of-the-21st-century>
 
-Bei dieser Aussage haben wir uns gefragt ob sich die Beschreibung auch auf die Gehälter des Data Scientists anwenden lässt.
+Nach Anbetracht dieser Aussage, stellt sich die Frage, ob gerade das Gehalt von Data Scientisten, zu dieser Aussage führt.
 
 ### 6.5.2.: Datenaufbereitung
 
-Rausfiltern aller Manager und Direktoren. Einengung nach Jobs mit dem Stichwort Data, Software, Developer und Engineer
+Um die These beantworten zu können müssen als erstes ein paar Anpassungen an den Datensatz vorgenommen werden.
+
+Zunächst wird eine Einengung nach Jobs, nach den Stichworten Data, Software, Developer und Egineer durchgeführt. Anschließend werden alle Manager und Direktoren rausgefiltert.
 
 ```{r}
 # Filtern der Daten für Jobs mit spezifischen Schlüsselwörtern im Jobtitel
@@ -1452,7 +1456,7 @@ job_title_df <- data.frame(Job_Title = names(job_title_count), Frequency = as.nu
 job_title_df
 ```
 
-Aufteilen der Jobs in die Sparte Data & Software
+Anchließend wird um die Leserlichkeit zu verbessern eine Aufteilung der Jobs durchgeführt. Hierzu werden die Jobs in eine neue Spalte "data_job" aufgeteilt.
 
 ```{r}
 # Erstellen der neuen Spalte 'data_job'
@@ -1472,9 +1476,9 @@ cat("Anzahl der Zeilen mit dem Wert 1 bei data_job (Software Engineers & Co):", 
 
 ### 6.5.3.: Balkendiagramm
 
-Hierzu teilen wir noch die Arbeitserfahrung in Quartile ein für eine bessere Übersicht. Die Bildungsniveaus sind ja bereits in 4 Werte Unterteilt.
+Um die Übersicht zu verbessern, wird die Berufserfahrung in Quantile eingeteilt. Die Bildungsniveaus hingegen sind ja ebreits in Vier Werte eingeteilt.
 
-Ich weiß nicht warum aber ich muss das Paket neu laden.
+Als erstes werden die Quantile der Berufserfahrung berechnet und anschließend ein Balkendiagramm für den Datensatz "data_job" erstellt, um das Gehalt zu vergleichen.
 
 ```{r}
 # Berechnung der Quartile der Berufserfahrung
@@ -1501,7 +1505,7 @@ ggplot(filtered_data4, aes(y = Salary, x = factor(Experience_Quartile))) +
 
 ```
 
-Bildungsniveau Codes:
+Zum Verständnis hier noch einmal die Codes des Bidlungsniveaus
 
 0 = High School Abschluss
 
@@ -1522,13 +1526,13 @@ ggplot(filtered_data4, aes(y = Salary, x = factor(Education.Level))) +
   theme_minimal()
 ```
 
-Im Mittel verdienen Data Scientists mehr als Arbeitnehmer aus der Software Engineering & Co Gruppe. Wobei man beobachten kann das die Gruppe Data mindestens einen Bachelor bestitzt und erst ab dem Master mehr verdient als ihr counterpart. Bezüglich der Berufserfahrung lässt sich feststellen das es in jedem Quartil ein höheres Gehaltsniveau bei der Gruppe Data gibt.
+Hier ist zu erkennen, dass Data Scientists mehr als Arbeitnehmer aus der Software Enginnering % Co Gruppe. Es muss jedoch beachtet werden, dass die "data- Gruppe" mindetens einen Bachelor besitzt und erst nach einem Master mehr verdient, als ihr Counterpart. Im Bezug auf die Berufserfahrung lässt sich feststellen, dass es in jedem Quantil einen höheres Gehaltsniveau bei der "data-Gruppe" gibt.
 
-## 6.6 Die Gehälter sind höher in Ländern mit höheren BIP pro Kopf
+Trotzdem lässt sich sagen, dass die These korrekt ist.
 
-Da dieses Land staistisch mehr Geld pro Einwohner erwirtschaftet.
+## 6.6 Die Gehälter sind in Ländern mit einem höheren BIP pro Kopf höher
 
-BIP pro Kopf (2023):
+Zum Verständnis sind hier einmal die BIP's pro Kopf aufgelistet:
 
 Australien 64.813,85 US-Dollar Quelle: [Australien - BIP pro Kopf bis 2028 \| Statista](https://de.statista.com/statistik/daten/studie/14425/umfrage/bruttoinlandsprodukt-pro-kopf-in-australien/#:~:text=Im%20Jahr%202022%20hat%20das%20Bruttoinlandsprodukt%20pro%20Kopf,Kopf%20in%20Australien%20auf%20rund%2063.487%2C05%20US-Dollar%20prognostiziert. "https://de.statista.com/statistik/daten/studie/14425/umfrage/bruttoinlandsprodukt-pro-kopf-in-australien/#:~:text=im%20jahr%202022%20hat%20das%20bruttoinlandsprodukt%20pro%20kopf,kopf%20in%20australien%20auf%20rund%2063.487%2c05%20us-dollar%20prognostiziert.")
 
@@ -1541,6 +1545,10 @@ UK 48.912,78 US-Dollar Quelle: [Großbritannien - BIP pro Kopf bis 2028 \| Stati
 USA 76.343 US-Dollar Quelle: [USA - BIP pro Kopf bis 2028 \| Statista](https://de.statista.com/statistik/daten/studie/14454/umfrage/bruttoinlandsprodukt-pro-kopf-in-den-usa/ "https://de.statista.com/statistik/daten/studie/14454/umfrage/bruttoinlandsprodukt-pro-kopf-in-den-usa/")
 
 ### 6.6.1.: Aufbereitung
+
+Vorab muss ein wenig Vorarbeit geleistet werden.
+
+Zunächst werden die BIP-Werte den entsprechend Ländern zugewiesen.
 
 ```{r}
 # Erstelle eine neue Spalte "BIP_Per_Person" mit NA-Werten
@@ -1559,9 +1567,9 @@ filtered_data$BIP_Per_Person[filtered_data$Country == "USA"] <- 76343.00
 head(filtered_data3)
 ```
 
-Hat funktioniert.
+### 6.6.2.: Visualisierung und Berechnung
 
-### 6.6.2.: Scatterplot
+Mithilfe von Streudiagrammen und Berechnungen wird nun versucht die These zu wiederlegen oder als richtig markieren zu können.
 
 ```{r}
 # Scatterplot mit Farbgebung nach Ländern und Mittelwerten einzeichnen
@@ -1574,6 +1582,10 @@ ggplot(filtered_data, aes(x = BIP_Per_Person, y = Salary, color = Country)) +
        color = "Land") +
   scale_color_viridis(discrete = TRUE)
 ```
+
+Mithilfe dieses Streudiagramm ist wirklich viel zu erkennen. Deswegen werden weitere BErechnungen angestellt.
+
+Zunächst werden die Mittelwerte nach Land berechnet. und anschließend die Mittelwerte nach Land nach Betracht auf das BIP.
 
 ```{r}
 # Berechnung der Mittelwerte nach Land
@@ -1597,12 +1609,18 @@ mean_salaries_by_country
 
 ```
 
+Außerdem wird noch die Korrelation zwischen der Salary und dem Bip Berechnet.
+
 ```{r}
 cor(filtered_data$Salary, filtered_data$BIP_Per_Person, use = "complete.obs")
 
 ```
 
-Nun ohne China
+Es geht hervor, dass es keine große Korrelation ziwschen dem Gehalt und dem BIP gibt.
+
+Nun wird das ganze noch ohne China druchgeführt:
+
+Zunächst wird ein Datensatz ohne China erstellt und anschließend wird die Korrelation erneut berechnet. Zudem wird noch die Anzahl der Datensätze mit dem land "China" in dem neuen Datensatz.
 
 ```{r}
 # Erstellen des neuen Datensatzes ohne Einträge für China
@@ -1619,15 +1637,19 @@ count_china <- filtered_data_no_china %>% filter(Country == "China") %>% nrow()
 count_china
 ```
 
-These nicht korrekt. Es scheint so als gibt es eine negative Korrelation zwischen dem Gehalt welches ein Arbeitnehmer erhält und dem BIP des jeweiligen Landes. Selbst wenn man China aus der Rechnung rausnimmt welches aufgrund der ungewöhnlich hohen Einwohnerzahl und diversen Wirtschaft (Sonderverwaltungszonen und Kommunismus\*) einen sehr niedrigen BIP hat aber trotzdem hohe Gehälter.
+Anhand der Berechnung und des Streudiagramms lässt sich die These als nicht korrekt beantworten. Es gibt eine negative Korrelation zwischen dem Gehalt, welches ein Arbeitnehmer erhält und dem BIP des jeweiligen Landes. Selbst wenn China aus der Berechnung rausgenommen wird, welches aufgrund der hohen Einwohnerzahl und diversen Wirtschaft ( Sonderverwaltungszonen und Kommunismus) einen sehr niedrigen BIP hat.
 
-Wurden eventuell im Datensatz eventuell bewusst Jobs mit hohem Gehalt gewählt? Oder Von Spezifischen Firmen die international Tätig sind und gut bezahlen?
+Nun stellt sich die Frage, ob eventuell in dem Datensatz bwusst Jobs mit hohem Gehalt gewählt wurden. Oder wurden Werte von spezifischen Firmen, die international tätig sind und gut bezahlen, genommen?
+
+Siehe folgende Links:
 
 \*<https://de.wikipedia.org/wiki/Politisches_System_der_Volksrepublik_China>
 
 \*<https://de.wikipedia.org/wiki/Sonderverwaltungszone>
 
 # 7. Regressionen
+
+In dem folgenden Absatz werden die Regressionen durchfegührt.
 
 ## 7.1.: Einfache Lineare Regression Gehalt und Arbeitserfahrung
 
