@@ -1943,10 +1943,13 @@ Die beiden Q-Q-Plots bilden die "Ausreißer" vom Gehalt nach oben oder unten, en
 
 ## 7.2.: Mehrfache Lineare Regression
 
+In dem folgenden Absatz wird eine lineare mehrfache Regression durchgeführt.
+
 ### 7.2.1.: Vorbereitung
 
-\
-Der Adjusted R-squared-Wert von 0.5713572 gibt an, wie gut die unabhängige Variable "Years.Of.Experience" die Variationen in der abhängigen Variable "Salary" in Ihrem Modell erklärt, unter Berücksichtigung der Anzahl der unabhängigen Variablen.
+Zunächst muss eine gewisse Vorbereitung getroffen werden.
+
+In diesem Fall wird einmal der Adjusted R-Squad-Wert berechnet. Dieser gibt an wie gut eine Variable, in diesem Fall "Years of Experience" die Variationen in der abhängigen Variable " Salary" in Ihrem Modell erklärt. Dies geschieht unter der Berücksichtigung der Anzahl von unabhängigen Variablen.
 
 ```{r}
 # Annahme: Sie haben ein DataFrame namens filtered_data3
@@ -1963,6 +1966,8 @@ cat("Adjusted R-squared:", adjusted_r_squared, "\n")
 ```
 
 Der Adjusted R-squared-Wert liegt zwischen 0 und 1. In diesem Fall bedeutet 0.5713572, dass etwa 57,14% der Variationen in der abhängigen Variable "Salary" durch die unabhängige Variable "Years.Of.Experience" im Modell erklärt werden können. Ein höherer Wert wäre Wünschenswert.
+
+Nun werden Streudiagramme mit einer glättenden Funktion erstellt. Hierbei werden 3 Diagramme erstellt, wobei mit unterschiedlichen Potenzen gerechnet wird.
 
 ```{r}
 # Beispiel für ein Streudiagramm und eine glättende Funktion
@@ -1988,11 +1993,13 @@ ggplot(data = filtered_data, aes(x = Years.Of.Experience, y = Salary)) +
   geom_smooth(method = "lm", formula = y ~ poly(x, 4), se = FALSE)
 ```
 
-Aufgrund dieser Kurve haben wir uns zu entschieden eine weitere Variable hinzuzufügen so wie die Potenzen 2, 3 und 4 von Years.Of.Experience zu verwenden in je 3 unterschiedlichen Regressionen und um anschließend zu schauen wie Akkurat sich das Modell auf den testdaten mit der jeweiligen potenz verhält. Da Age zwar einen hohen Korrelationswert hat aber auch mit den Years.Of.Experience einhergeht nehmen wir diesen wert nicht sondern stattdessen das Education.Level.
+Aufgrund der Kurve wurde sich entschieden eine weitere Variable, sowie die Potenzen 2, 3 und 4 von " Years of Experience" hinzuzufügen und anschließend je 3 unterschiedliche Regressionen durchzuführen. Anschließend wird dann geschaut, wie akkurat sich das Modell auf die Testdaten mit der jeweiligen Potenz verhält.
+
+Da Age zwar einen hohen Korrelationswert hat aber auch mit den Years.Of.Experience einhergeht nehmen wir diesen wert nicht sondern stattdessen das Education.Level. Dies wird in den nächsten Absätzen behandelt.
 
 ### 7.2.2.: Korrelationen
 
-Education.Level von kategorisch in Numerische Werte transformieren.
+Um die Korrelation von dem "Education Level" zu berechnen müssen die Werte erst von kategorisch zu nummerisch transformiert werden.
 
 ```{r}
 filtered_data$Education.Level <- as.numeric(as.character(filtered_data$Education.Level))
@@ -2009,16 +2016,20 @@ print(correlations)
 
 ```
 
+Nun ist zu erkennen, dass zwischen dem Education Level und Salary eine Korrelation von 0.63 vorliegt. Zwischen dem Alter und den Bildungsniveau liegt dann eine Korrelation von 0.59. und dem " Years of Experience" eine Korrelation von 0.61.
+
+Es ist also zu erkennen, dass Die Korrelationen zischen den bildungsniveau und den anderen stets relativ hoch ist.
+
 ### 7.2.3.: Datenaufbereitung
 
-Rausnehmen aller nicht für die Regression relevanten Werte:
+Für die Regressionen sind nur die "Salary, Years of Experience, Education Level" relevant, also werden nur sie in den nen Datensatz geschrieben:
 
 ```{r}
 filtered_data6 <- filtered_data %>%
   select(Salary, Years.Of.Experience, Education.Level)
 ```
 
-Hinzufügen von den potenzen Years.Of.Experience
+Anschließend werden die "Years of Experience" potenziert und ausgegeben:
 
 ```{r}
 # Fügen Sie die zusätzliche Spalte mit dem quadrierten Wert hinzu
@@ -2033,9 +2044,9 @@ filtered_data6 <- filtered_data6 %>%
 head(filtered_data6)
 ```
 
-Zunächst führen wir dazu eine Z-Skalierung von filtered_data_6 durch.
+Nun wird wieder eine Z-Skalierung von "filtered_data6" durchgeführt.
 
-Die Z-Skalierung ist eine Methode zur Standardisierung von numerischen Variablen. Bei der Z-Skalierung werden alle numerischen Werte mit Ausnahme des Vorhersagewerts (Salary) skaliert, um die Auswirkungen von Ausreißern zu minimieren. (Salary und Potenzen von Years.Of.Experience ausgenommen):
+Hierzu wird zunächst eine Kopie des Datensatzes erstellt. Anschließend werden dann die "Years of Experience" und das "Education Level" z-skaliert.
 
 ```{r}
 # Erstellen Sie eine Kopie von filtered_data6
@@ -2055,14 +2066,16 @@ Ergebnis der Z-Skalierung:
 head(filtered_data6_z)
 ```
 
-Überprüfung der Standardabweichung für Arbeitserfahrung
+Nun wird die Standardabweichung der Berufserfahrung überprüft.
 
 ```{r}
 sd(filtered_data6_z$Years.Of.Experience)
 sd(filtered_data6_z$Education.Level)
 ```
 
-Aufteilung in Test- und Trainingsdaten:
+Bei beiden liegt eine Abweichung von 1 vor.
+
+Um eine lineare Regression durchzuführen wird der Datensatz filtered_data_z in trainings und Testdaten eingeteilt. Mithilfe der Funktion "set.seed(007)" initialisiert den Zufallsgenerator mit einer festen Zahl, um sicherzustellen, dass die Ergebnisse bei jedem Durchlauf reproduzierbar sind. "initial_split" teilt dann den Datensatz in Tranings- und Testdaten. Der Parameter strata = Years.Of.Experience sorgt dafür, dass die Daten nach dem Gehalts-Wert stratifiziert werden, um sicherzustellen, dass die Trainings- und Testdaten eine ähnliche Verteilung von Gehalts-Werten aufweisen. Da die Potenzen dieser Variable alle in der selben Reihe stehen muss hier nichts verändert werden. Die Funktion training() extrahiert die Trainingsdaten aus dem aufgeteilten Datensatz, während testing() die Testdaten extrahiert.
 
 ```{r}
 set.seed(007)  
@@ -2072,9 +2085,9 @@ fd6_train <- training(filtered_data6_z)
 fd6_test <- testing(filtered_data6_z)
 ```
 
-Dieser Code teilt den Datensatz filtered_data5_z in Trainings- und Testdaten auf, um eine lineare Regression durchzuführen. Die Funktion set.seed(007) initialisiert den Zufallszahlengenerator mit einer festen Zahl, um sicherzustellen, dass die Ergebnisse bei jedem Durchlauf reproduzierbar sind. Die Funktion initial_split() aus dem Paket rsample teilt den Datensatz in Trainings- und Testdaten auf. Der Parameter prop = 0,8 gibt an, dass 80% der Daten für das Training verwendet werden sollen, während die restlichen 20% für das Testen verwendet werden. Der Parameter strata = Years.Of.Experience sorgt dafür, dass die Daten nach dem Gehalts-Wert stratifiziert werden, um sicherzustellen, dass die Trainings- und Testdaten eine ähnliche Verteilung von Gehalts-Werten aufweisen. Da die Potenzen dieser Variable alle in der selben Reihe stehen muss hier nichts verändert werden. Die Funktion training() extrahiert die Trainingsdaten aus dem aufgeteilten Datensatz, während testing() die Testdaten extrahiert.
-
 ### 7.2.3.: Modell Initialisieren
+
+Nun muss das Modell initialisert werden.
 
 ```{r}
 # Modell initialisieren 
