@@ -2190,9 +2190,13 @@ head(compare_test4)
 
 ### 7.2.4.: Grafische Darstellung
 
-(Zusätzliche Quelle: <https://statologie.de/vorhergesagte-werte-plotten-r/>)
+In dem folgenden Absatz werden die unterschiedlichen Potenzen mithilfe eines Vorhersage Plots grafiosch dargestellt.
 
-2er Potenz
+Hierzu wurde eine zusätzliche Quelle verwendet: ( <https://statologie.de/vorhergesagte-werte-plotten-r/>)
+
+Die folgenden Codechunks wird immer der gleiche Aufbau verwendet. Bloß stets mit den unterschiedlichen Potenzen. Zunächst wird der Graph für den Trainingdatensatz und anschließend für den Testdtaensatz erstellt.
+
+2er Potenz:
 
 ```{r}
 # Erstellen des Vorhersage-Plots für den Trainingsdatensatz
@@ -2216,7 +2220,7 @@ ggplot(compare_test2, aes(x = Salary, y = pred_test2)) +
   theme_minimal()
 ```
 
-3er Potenz
+3er Potenz:
 
 ```{r}
 # Erstellen des Vorhersage-Plots für den Trainingsdatensatz
@@ -2241,7 +2245,7 @@ ggplot(compare_test3, aes(x = Salary, y = pred_test3)) +
 
 ```
 
-4er Potenz
+4er Potenz:
 
 ```{r}
 # Erstellen des Vorhersage-Plots für den Trainingsdatensatz
@@ -2265,9 +2269,11 @@ ggplot(compare_test4, aes(x = Salary, y = pred_test4)) +
   theme_minimal()
 ```
 
-Es lässt sich bereits die leichte Tendenz erkenne das die 4er Potenz der Arbeitserfahrung auf eine Minimal genauere Prognose bei den Testdaten resultiert ím vergleich zur 2er und 3er Potenz.
+Es ist bereits eine Tendenz zu erkennen. Die 4er Potenz der Berufserfahrung auf einer minimal genaueren Prognose bei den Testdaten, im Vergleich zu der 2er und 3er Potenz, resultiert.
 
-### 7.1.5.: Fehler
+### 7.2.5.: Fehler
+
+AUch hier werden die Potenzen einzeln und hintereinander mit dem "rmse" untersucht.
 
 2er Potenz
 
@@ -2283,9 +2289,11 @@ Testfehler:
 rmse(compare_test2, Salary, pred_test2)
 ```
 
-Das Modell performt auf Trainingsdaten besser als auf Testdaten -\> Overfitting
+Es geht hervor, dass das Modell auf den den Trainingsdaten besser perfomt als auf den Testdaten
 
-3er Potenz
+Diese Tatsache weißt auf Overfitting hin.
+
+3er Potenz:
 
 Trainingsfehler:
 
@@ -2299,9 +2307,9 @@ Testfehler:
 rmse(compare_test3, Salary, pred_test3)
 ```
 
-Das Modell performt auf Trainingsdaten besser als auf Testdaten -\> Overfitting
+Auch hier performt das Modell besser auf den Trainingsdaten. Dies weist ebenfalls auf Overfitting hin.
 
-4er Potenz
+4er Potenz:
 
 Trainingsfehler:
 
@@ -2315,7 +2323,9 @@ Testfehler:
 rmse(compare_test4, Salary, pred_test4)
 ```
 
-Auch wenn alle Modelle nur geringe Unterschiede aufweisen, performt dieses auf Trainingsdaten gleich wie auf den Testdaten, daher ist es das genauste Modell und wird ab hier an als einziges weiter untersucht. Dies ließ sich bereits unter 7.2.1 Erkenne da das 3. polynom das Geom Smooth Grafisch die beste Linie abgebildet hat.
+Auch wenn alle Modelle nur geringe Unterschiede aufweisen, performt dieses auf den Trainingsdaten gleich wie auf den Testdaten. Demnach ist es das präziseste Modell und wird als einzigstes weiter verwendet und weiter verwendet.
+
+Dies ließ sich bereits unter 7.2.1 Erkenne da das 3. polynom das Geom Smooth Grafisch die beste Linie abgebildet hat.
 
 !Zur Einordnung der Fehler die Verteilung von Gehalt ansehen:
 
@@ -2325,21 +2335,13 @@ Verteilung von Gehalt:
 describe(filtered_data5, Salary)
 ```
 
-### 7.1.6.: Residuen
+### 7.2.6.: Residuen
 
-Residuen (auch als Fehler oder Residuals bezeichnet) sind die Differenzen zwischen den beobachteten Werten und den vorhergesagten Werten in einem Regressionsmodell. Sie repräsentieren die Abweichungen zwischen den tatsächlichen Daten und den Werten, die das Modell vorhersagt. Idealerweise sollten die Residuen normalverteilt sein, um sicherzustellen, dass das Regressionsmodell angemessen ist.
+Der Aufbau, sowie die Definiton zu den Risiduen wurden bereits unter 7.1.6 aufgeführt.
 
-Es ist üblich, die Residuen sowohl für Trainingsdaten als auch für Testdaten zu überprüfen, um die Leistung des Modells auf beiden Datensätzen zu evaluieren.
+Deswegen werden die Funtkionen ebenfalls nicht erneut erklärt.
 
-1.  **Trainingsdaten:**
-
-    -   Die Residuen der Trainingsdaten geben einen Einblick in die Leistung des Modells auf den Daten, auf denen es trainiert wurde. Wenn die Residuen auf den Trainingsdaten ungewöhnliche Muster aufweisen, kann dies auf Modellprobleme oder Overfitting hinweisen.
-
-2.  **Testdaten:**
-
-    -   Die Residuen der Testdaten ermöglichen es , die Generalisierungsfähigkeit des Modells auf neuen, nicht trainierten Daten zu überprüfen. Ein Modell kann auf den Trainingsdaten gut funktionieren, aber die Residuen auf den Testdaten können Ihnen sagen, wie gut es sich auf unbekannte Daten (Realität) verallgemeinert.
-
-In dieser speziellen Situation betrachtret man die Residuen für beide Datensätze, indem man die **`augment()`**-Funktion für Trainings- und Testdaten separat aufruft.
+Es wird sich jediglich nur um die Ausgabe gekümmert, und anschließend beschrieben.
 
 ```{r}
 # Residuen mit augment() auf den Trainingsdaten abrufen
@@ -2358,7 +2360,7 @@ print(residuals_train2)
 print(residuals_test2)
 ```
 
-Histogramm der Residuen
+Histogramm der standardisierten Residuen der Trainingsdaten:
 
 ```{r}
 # Standardisierung/Z-Skalierung der Residuen der Residuen
@@ -2374,6 +2376,10 @@ ggplot(data = residuals_train2, aes(x = standardized_resid2)) +
   theme_minimal()
 ```
 
+Zu erkennen ist, dass die Werte zwischen 2 und -2 am häufigsten vertreten sind.
+
+Histogramm der standardisierten Residuen der Testdaten:
+
 ```{r}
 # Standardisierung/Z-Skalierung der Residuen der Residuen
 residuals_test2$standardized_resid2 <- scale(residuals_test2$.resid)
@@ -2388,9 +2394,13 @@ ggplot(data = residuals_test2, aes(x = standardized_resid2)) +
   theme_minimal()
 ```
 
-### 7.1.7.: Q-Q-Plot
+Auch hier sind die Risiduen zwischen 2 und -2 am häufigsten.
 
-(Quantil-Quantil-Diagramm): überprüft die Residuen auf Normalverteilung. Die Quantile der standardisierten Residuen werden gegen die Quantile der Normalverteilung geplottet. Unter der Normalitätsannahme sollten die Punkte zufällig entlang der Diagonale (x=y) streuen (Umschreiben)
+Aus den beiden Histogrammen geht also hervor, dass die Abweichungen zwischen den vorhergesagten Werten und tatsächlichen Werten nicht wirklich groß sind.
+
+### 7.2.7.: Q-Q-Plot
+
+Wie auch bei den Risiduen
 
 Trainingsdaten
 
