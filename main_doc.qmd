@@ -162,10 +162,9 @@ ggplot(salary, aes(x = `Years.Of.Experience`)) +
   theme_minimal()
 ```
 
-Verteilung der Geschlechter
+Verteilung der Geschlechter:
 
 ```{r}
-# Erstellen des Diagramms
 ggplot(salary, aes(x=Gender)) +
   geom_bar(fill=viridis(2)) +
   ggtitle("Gender Distribution") +
@@ -2691,6 +2690,8 @@ Insbesondere bei Klassifikationsmodellen, die binäre Kategorien vorhersagen, si
 Die Residuen bei binären Modellen können diskrete Werte oder eine Art von Klassifizierungsfehler (beispielsweise für binäre Klassifikationsmodelle) widerspiegeln. Ein QQ-Plot ist normalerweise dann sinnvoll, wenn die Residuen einer Normalverteilung folgen sollten, was jedoch bei binären Vorhersagen nicht zwangsläufig der Fall ist.
 
 In solchen Fällen ist es oft wichtiger, andere Metriken wie Genauigkeit, Precision, Recall, ROC-Kurven oder AUC zu verwenden, um die Leistung des Modells zu bewerten und zu verstehen, wie gut es die binären Vorhersagen macht.
+
+Siehe folgende links:
 
 [24 Evaluation Metrics for Binary Classification (And When to Use Them) (neptune.ai)](https://neptune.ai/blog/evaluation-metrics-binary-classification)
 
