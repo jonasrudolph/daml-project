@@ -2400,9 +2400,11 @@ Aus den beiden Histogrammen geht also hervor, dass die Abweichungen zwischen den
 
 ### 7.2.7.: Q-Q-Plot
 
-Wie auch bei den Risiduen
+Wie auch bei den Risiduen bleibt hier der Aufbau gleich wie in 7.1.7.
 
-Trainingsdaten
+Jediglich die Aussagen sind erneut anders.
+
+Trainingsdaten:
 
 ```{r}
 # QQ-Plot erstellen
@@ -2430,23 +2432,25 @@ ggplot(data = residuals_test2, aes(sample = standardized_resid2)) +
   theme_minimal()
 ```
 
-Analog zu 7.1.7:
-
 Der Plot Bildet die ausreißer vom Gehalt nach oben und unten ab welche wir im ersten Diagramm von 7.2.1 sehen, die Residuen sind nicht perfekt normalverteilt. Eventuell gibt es hier Datenpunkte welche die Residuen beeinflussen. Aufgrund der explorativen Datenanalyse wissen wir das Jobs mit hoher Arbeitserfahrung oft Führungsverantwortung beinhalten welche nochmal zusätzlich monetär honoriert wird. Die Flache Linie durch die Gerade oben durch deutet auf ein Gehaltscap hin. Die Ausreißer am unteren Ende lassen sich durch Einstiegsjobs so wie Niedriglohnjobs ohne Hochschulabchlüsse erklären. (Ausbildungsberufe werden hier nicht berücksichtigt).
 
 Der Testfehler in der einfachen Linearen Regression betrug 30763 während der in der mehrfachen Linearen Regression mit der 4er Potenz von Arbeitserfahrung 27456 welches eine verbesserung der Vorhersagen von 10% gegenüber der einfach Linearen regression aus 7.1 ergibt. Des weiteren gibt es hier auch kein Overfitting des Modells mehr da die Test und Trainingsfehler exakt die selben sind (27456) .
 
 ## 7.3.: Entscheidungsbaum
 
+Mithilfe dieses Entscheidungsproblems soll eine Vorhersage, des Erreichens einer Managementsposition anhand von Faktoren mit der größten Korrelation, getroffen werden.
+
+Hierzu werden die Software Engineering Jobs und deren Führungsposition bertrachtet. Die Führungsposition heißt "Software Engineering Manager".
+
 ### 7.3.1.: Vorbereitung
 
-Vorhersage des erreichens einer Managementsposition anhand von Fakotren mit der größten Korrelation.
+Zunächst wurden beide Jobs nach dem Kriterium einer Häufigkeitsverteilung von N\>30 ausgewählt.
 
-Dazu betrachten wir wieder Software Engineering Jobs und deren Führungsposition: Software Engineering Manager
+Die Gründe sind in 5.1 aufgezählt.
 
-So wie Data Scientists und deren Führungsposition: Director of Data Science
+Hierzu wird zunächst einen Datenrahmen erstellt, der die Job-Titel und Ihre Häufigkeit enthält.
 
-Beide wurden ausgewählt nach dem Kriterium einer Häufigkeitsverteilung von N\>30 zu haben (Siehe 5.1)
+Anschließend wird dann ein Balkendiagramm erstellt.
 
 ```{r}
 library(ggplot2)
@@ -2466,6 +2470,10 @@ ggplot(jobs_count, aes(x = Job.Title, y = count, fill = Job.Title)) +
 
 ```
 
+Hier ist zu erkennen, dass es natürlich deutlich weniger Director und Manager gibt.
+
+Nun wird noch einmal, das Durchschnittsgehalt der verschiedenen Jobs berechnet.
+
 ```{r}
 # Filtere die Daten für jeden Job und berechne den Durchschnitt des Gehalts
 filtered_data %>%
@@ -2477,36 +2485,21 @@ filtered_data %>%
 
 ### 7.3.2.: Datenaufbereitung
 
-Alle Job Ttitel aus die benötigten rausfiltern
+Vorab ist es wichtig zu erwähnen, dass keine Z-Skalierung der Daten durchgeführt wird. Dies liegt daran, da sonst die Diagramme unübersichtlich werden.
+
+Zunächst werden alle benötigten Jobtitel aus dem Datenrahmen rausgefiltert.
 
 ```{r}
 filtered_data7 <- filtered_data %>%
   filter(Job.Title %in% c("Software Engineer", "Software Engineer Manager", "Data Scientist", "Director of Data Science"))
 ```
 
-Den Führungsposition den Wert 1 bei Manager zuweisen
+Asnchließend werden den Managern und Director der Wert 1 zugewiesen.
 
 ```{r}
 # Füge die Spalte "Manager" hinzu
 filtered_data7 <- filtered_data7 %>%
   mutate(Manager = ifelse(Job.Title %in% c("Director of Data Science", "Software Engineer Manager"), 1, 0))
-```
-
-Z-Skalierung
-
-Keine Z-Skalierung bei dieser Binären Vorhersage da sonst die Diagramme unübersichtlich werden.
-
-```{r}
-# Erstellen Sie eine Kopie von filtered_data6
-#filtered_data7_z <- filtered_data7
-
-# Z-Skalierung für Years.Of.Experience und Education.Level in filtered_data6_z durchführen
-#filtered_data7_z <- filtered_data7_z %>%
-  #mutate(
-    #Years.Of.Experience = scale(Years.Of.Experience),
-    #Education.Level = scale(Education.Level),
-    #Age = scale(Age),
- # )
 ```
 
 Aufteilung in Test- & Trainingsdaten:
@@ -2521,13 +2514,13 @@ fd7_test <- testing(filtered_data7)
 
 ### 7.3.3.: Modell Initialisieren
 
-Initialisierung
+Initialisierung:
 
 ```{r}
 tree_mod <- decision_tree(mode = "regression")
 ```
 
-Modell trainieren
+Modell trainieren:
 
 ```{r}
 tree_fit <- tree_mod %>% 
@@ -2536,7 +2529,7 @@ tree_fit <- tree_mod %>%
 
 ### 7.3.4.: Grafische Darstellung
 
-Mit den absoluten Zahlen:
+Vorab eine grafische Darstellung mit den absoluten Zahlen:
 
 ```{r}
 tree_fit |> 
@@ -2544,7 +2537,11 @@ tree_fit |>
   rpart.plot(digits = 1)
 ```
 
-Mit Beschriftungen (Als Klassifizierung umgesetzt/ In Klassen umgewandelt)
+Mit Beschriftungen (Als Klassifizierung umgesetzt/ In Klassen umgewandelt).
+
+Nun wird das ganze als Klassifikation umgesetzt. Hierbei wird in Klassen umgewandelt.
+
+Hierzu wird zunächst eine Kopie des Trainingsatzes erstellt. Anschließend wird die Konvertierung von "Education Level" und "Manager" umgekehrt. Folgend wird dann das Baumodell erstellt, gefittet und zum Schluss visualisiert.
 
 ```{r}
 # Kopie von fd7_train erstellen
@@ -2572,10 +2569,12 @@ tree_fit |>
 
 ```
 
-Es scheint so als hätten Expat & Country eine Schwache Vorhersagekraft und Mangelnde Bedeutung auf den Wert Manager weshalb sie nicht im Entscheidungsbaum auftauchen.
+Nach Ansehen des Entscheidungsbaumes, scheint es als hätten "Expat", sowie "Country" eine schwache Vorhersagekraft und Mangelnde Bedeutung auf den Wert Manager. Deswegen tauchen sie nicht im Entscheidungsbaum auf.
 
-!!! Umschreiben\
-Ja, Sie können durchaus einen Entscheidungsbaum-Algorithmus zur Regression auf eine Variable anwenden, die nur Werte von 0 und 1 aufweist. In diesem Fall würde der Baum versuchen, auf Basis der gegebenen Eingabevariablen (Features) eine Regression durchzuführen, um die kontinuierliche numerische Variable vorherzusagen.
+Es gibt durchaus die Möglichkeit einen Entscheidungsbaum-Algorithmus Zur Regression auf eine Variable anzuwenden, die nur die Werte 0 und 1 aufweist. Ist dies der Fall, würde der Baum versuchen eine Regression, auf Basis der gegebenen Eingabevariable ( Features ) durchzuführen. Dadurch würde die kontinuierliche numerische Variable vorherzusagen.
+
+(!!! Umschreiben\
+Ja, Sie können durchaus einen Entscheidungsbaum-Algorithmus zur Regression auf eine Variable anwenden, die nur Werte von 0 und 1 aufweist. In diesem Fall würde der Baum versuchen, auf Basis der gegebenen Eingabevariablen (Features) eine Regression durchzuführen, um die kontinuierliche numerische Variable vorherzusagen. )
 
 Es gibt jedoch einige wichtige Aspekte zu beachten:
 
@@ -2606,7 +2605,7 @@ head(compare_test7)
 
 ### 7.3.5.: Fehler
 
-Trainingsfehler
+Trainings- und Testfehler:
 
 ```{r}
 library(yardstick)  # Laden des Pakets yardstick für die RMSE-Berechnung
@@ -2623,13 +2622,11 @@ rmse_test <- compare_test7 %>%
 
 # Ausgabe der RMSE für Trainings- und Testdaten
 print(rmse_train)
-```
 
-```{r}
 print(rmse_test)
 ```
 
-Der Trainingsfehler ist geringer als der Testfehler -\> Das Modell ist leicht overfittet
+Der Trainingsfehler ist geringer als der Testfehler. Dies weist darauf hin, dass das Modell leicht overfittet ist.
 
 ### 7.3.6.: Residuen
 
