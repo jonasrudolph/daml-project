@@ -876,9 +876,9 @@ cat("Die Korrelation zwischen Seniority und Years.Of.Experience ist:", correlati
 
 Das Ergebnis der Korrelationen:
 
--    Von Salary und Years.of.experience ist es 0.81.
+-   Von Salary und Years.of.experience ist es 0.81.
 
--    Von Salary und Age ist es 0.73 und die
+-   Von Salary und Age ist es 0.73 und die
 
 -   von Age und Years.Of.Experience ist es 0.93.
 
@@ -1287,7 +1287,7 @@ ggplot(all_average_salaries, aes(x = Job.Type, y = Average.Salary, fill = Job.Ty
        x = "Jobtyp",
        y = "Durchschnittliches Gehalt") +
   theme_minimal() +
-  scale_y_continuous(labels = scales::comma
+  scale_y_continuous(labels = scales::comma)
 ```
 
 In dem Balkendiagramm ist deutlich zu erkennen, dass das durchscnittliche Gehalt bei technischen Jobs höher ist.
