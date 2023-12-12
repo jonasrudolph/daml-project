@@ -2526,17 +2526,42 @@ Nun werden zunächst die Faktoren kovertiert und levels gesetzt. Anschließend w
 
 ```{r}
 library(caret)
+
+compare_train7$Manager <- factor(compare_train7$Manager)
 compare_train7$pred_train <- factor(compare_train7$pred_train, levels = levels(compare_train7$Manager))
+
+compare_test7$Manager <- factor(compare_test7$Manager)
+compare_test7$pred_test <- factor(compare_test7$pred_test, levels = levels(compare_test7$Manager))
 
 accuracy_train <- confusionMatrix(compare_train7$Manager, compare_train7$pred_train)
 print(accuracy_train)
 
-compare_test7$pred_test <- factor(compare_test7$pred_test, levels = levels(compare_test7$Manager))
+compare_test7$pred_test <- factor(compare_test7$pred_test, levels = levels(compare_train7$Manager)) 
 
 accuracy_test <- confusionMatrix(compare_test7$Manager, compare_test7$pred_test)
 print(accuracy_test)
 
 ```
+
+```{r}
+# library(caret)
+# compare_train7$pred_train <- factor(compare_train7$pred_train, levels = levels(compare_train7$Manager))
+# 
+# accuracy_train <- confusionMatrix(compare_train7$Manager, compare_train7$pred_train)
+# print(accuracy_train)
+# 
+# compare_test7$pred_test <- factor(compare_test7$pred_test, levels = levels(compare_test7$Manager))
+# 
+# accuracy_test <- confusionMatrix(compare_test7$Manager, compare_test7$pred_test)
+# print(accuracy_test)
+
+```
+
+Zusatz: Zuvor wurde der obrige Codechunk verwendet. Zum 7.12.2023 hat dieser Problemlos funktioniert. Zum 11.12.2023 hat dieser trotz identischen Codes (Gesamte Datei unverändert laut Github) nicht mehr funktioniert. Evtl. wurde die Library Caret in seiner Funktion geupdated (Und vorher eine veraltete Version genutzt) (Quelle 1). Es musste zusätzlich der Factor des "wahren" Werts von Manager auf sich selbst angepasst werden. Also von Char zu Faktor. Wobei ein Faktor hier den Zustand Manager abbildet mit dem Level = 1 = Manager (Quelle 2).
+
+Quelle 1: <https://stackoverflow.com/questions/51548908/error-data-and-reference-should-be-factors-with-the-same-levels>
+
+Quelle 2: <https://bjoernwalther.com/variablen-in-r-als-faktor-definieren/>
 
 Die Confusion Matrix und die Statistiken werden verwendet, um die Leistung eines Klassifikationsmodells zu bewerten. In diesem Fall handelt es sich um eine binäre Klassifikation mit den Klassen 0 und 1.
 
