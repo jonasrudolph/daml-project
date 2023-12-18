@@ -15,13 +15,17 @@ format:
 date: 2023-11-13
 ---
 
+Die Analyse von Gehaltsdaten spielt eine entscheidende Rolle in der Forschung zur Entwicklung des Arbeitsmarktes. In dieser Arbeit wird der Datensatz "Salary by Job Title and Country" von der Website Kaggle als Grundlage für die Untersuchung von Gehältern unter verschiedenen Gesichtspunkten, wie beispielsweise Berufsfeld oder Geschlecht, genutzt. Der Datensatz wird vor der Analyse aufbereitet und anschließend eingehend analysiert.
+
 # 1. Vorbereitung
 
-Im folgenden Teil dieser Arbeit werden die Vorbereitungen getroffen, die notwendig sind um die Durchführung des Projekts zu ermöglichen.
+In diesem Teil der Arbeit werden die erforderlichen Vorbereitungen getroffen, um die Durchführung des Projekts zu ermöglichen. Hierzu liegt ein Datensatz mit dem Titel "Salary by Job Title and Country" unter folgendem Link zur Verfügung:
 
 <https://www.kaggle.com/datasets/amirmahdiabbootalebi/salary-by-job-title-and-country>
 
-Zusätzliche Quellen für die Methodik:
+Dieser Datensatz stellt eine umfassende Sammlung von Gehaltsinformationen aus unterschiedlichen Branchen und Regionen bereit. Er enthält Angaben zu Berufsbezeichnungen, Gehältern, Berufserfahrungen, geografischen Standorten und weiteren Aspekten, die in Umfragen gesammelt wurden. Die Analyse dieser Daten ermöglicht es, Einblicke in Arbeitsmarkttrends zu gewinnen und beispielsweise die Höhe der Gehälter in Abhängigkeit von unterschiedlichen Kriterien zu untersuchen.
+
+Zusätzliche Quellen die für die Arbeit verwendet wurden befinden sich unter folgenden Links:
 
 <https://www.datanovia.com/en/blog/top-r-color-palettes-to-know-for-great-data-visualization/>
 
@@ -35,9 +39,9 @@ Zusätzliche Quellen für die Methodik:
 
 <https://cran.r-project.org/web/packages/yardstick/yardstick.pdf>
 
-Dieses Datenset bietet eine umfassende Sammlung von Gehaltsinformationen aus verschiedenen Branchen und Regionen weltweit. Es enthält Details zu Berufsbezeichnungen, Gehältern, Berufssektoren, geografischen Standorten und mehr, die von seriösen Beschäftigungswebsites und Umfragen stammen. Analysieren Sie diese Daten, um Einblicke in Trends auf dem Arbeitsmarkt zu gewinnen, Vergütungen in verschiedenen Berufen zu vergleichen und informierte Entscheidungen über Ihre Karriere oder Einstellungsstrategien zu treffen. Das Datenset ist zur einfachen Analyse bereinigt und vorverarbeitet und steht unter einer offenen Lizenz für Forschungs- und Datenanalysezwecke zur Verfügung.
-
 ## 1.1 Importieren der benötigten Packages
+
+Zuerst werden alle benötigten Packages für die Datenanalyse heruntergeladen.
 
 ```{r, warning=FALSE, message=FALSE}
 library(tidyverse)
@@ -53,13 +57,13 @@ library(yardstick)
 ```
 
 Häufig kommt:\
-WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding: https://cran.rstudio.com/bin/windows/Rtools/ Warning in install.packages : Paket 'dplyr' wird gerade benutzt und deshab nicht installiert
+WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding: https://cran.rstudio.com/bin/windows/Rtools/ Warning in install.packages : Paket 'dplyr' wird gerade benutzt und deshalb nicht installiert.
 
 Installiere RTools nach Link: https://cran.rstudio.com/bin/windows/Rtools/rtools43/rtools.html
 
 ## 1.2 Einlesen der zu Analysierenden Daten
 
-Der Datensatz, der in diesem Projekt analysiert wird, stammt von der website "Kaggle" und beschreibt das Gehalt nach Job und Land in dem gearbeitet wird.
+Daraufhin wird der Datensatz "Salary by Job Title and Country" eingelesen.
 
 ```{r}
 salary <- read_csv("Salary.csv")
@@ -67,7 +71,7 @@ salary <- read_csv("Salary.csv")
 
 # 2. Erster Überblick der Daten
 
-Um einen ersten Überblick zu erhalten, werden die ersten 10 Zeilen der Tabelle ausgelesen:
+Um einen ersten Überblick über die Daten zu erhalten, werden die ersten 10 Zeilen der Tabelle ausgelesen:
 
 ```{r}
 head(salary, 10)
@@ -79,7 +83,7 @@ Mithilfe der "describe_tbl"- Funktion können die generellen Informationen über
 describe_tbl(salary)
 ```
 
-Wie oben zu erkennen, enthält der Datensatz 6684 Instanzen, wovon keine einen Wert ohne Angabe (NA's) besitzt.
+Hier lässt sich erkennen, dass der Datensatz 6684 Instanzen enthält, wovon keine Instanz einen Wert ohne Angabe (NA's) besitzt.
 
 Nun wird ein kurzer Blick auf die Art der Merkmale geholfen. Gibt es kategorische oder nummerische Merkmale innerhalb des Datensatzes?
 
@@ -99,7 +103,7 @@ describe(salary)
 | Race                | Kategorisch | Ethnizität                    |
 | Senior              | Numerisch   | Senior position ja(1)/nein(0) |
 
-: Wie bereits oben in der Tabelle zu erkennen gibt es Innerhalb des Datensatzes nur zwei verschiedene Datentypen. Die Felder \*Age, Education Level, Years of Experience, Salary, Senior\* sind nummerische Merkmale. Die Felder *Gender, Job Title, Country, Race* sind kategorische Merkmale.
+: Wie bereits in der Tabelle zu erkennen gibt es innerhalb des Datensatzes nur zwei verschiedene Datentypen. Die Felder \*Age, Education Level, Years of Experience, Salary, Senior\* sind numerische Merkmale. Bei den Feldern *Gender, Job Title, Country, Race* handelt es sich um kategorische Merkmale.
 
 ## 2.1 Bedeutung von Spalten und Datentypen
 
@@ -114,9 +118,9 @@ salary <- salary |>
     )
 ```
 
-Hier werden die Spaltennamen der Spalten verändert, welche ein Leerzeichen im Namen haben. Es handelt sich hierbei um die Spalten "Job Title", "Years of Experience" und "Education level". Das Leerzeichen wird einfach durch einen Punkt ersetzt. Da noch häufig im Laufe des Projektes auf die Spaltennamen zugegriffen werdne muss, wird Uns das in der Zukunft noch Zeit sparen.
+Hier werden die Spaltennamen derjenigen Spalten angepasst, die Leerzeichen enthalten. Konkret handelt es sich um die Spalten "Job Title", "Years of Experience" und "Education level". Das Leerzeichen wird durch einen Punkt ersetzt. Diese Anpassung erleichtert den zukünftigen Zugriff auf die Spaltennamen im Verlauf des Projektes und spart somit Zeit.
 
-Nun werfen verschaffen Wir uns einen Überblick über die prozentuale Verteilung der Jobtitel. Aus der Grafik geht hervor, dass der Beruf des "Data Scientist" der meist ausgeführte Beruf ist. Außerdem gibt es innerhalb des Datensatzes auch viele "Data Analsysten" , sowie auch "Backend Devolper".
+Im Anschluss verschaffen wir uns einen Überblick über die prozentuale Verteilung der Jobtitel. Die Grafik verdeutlicht, dass der Beruf des "Data Scientist" am häufigsten vertreten ist. Zudem zeigt sich innerhalb des Datensatzes eine signifikante Anzahl von "Data Analysten" sowie "Backend Developern".
 
 ```{r}
 explore (salary, Job.Title)
@@ -134,7 +138,7 @@ ggplot(salary, aes(x = Age)) +
 
 Verteilung des Bildungsniveaus:
 
-Zunächst wird hier eine Farbpalette mit verschiedenen Farben definiert. Danach wird ein Blakendiagramm mit den unterschiedlichen Farben für jede Stange, basierend auf dem Bildungsniveau, erstellt.
+Zunächst wird eine Farbpalette mit verschiedenen Farben definiert. Anschließend wird ein Balkendiagramm erstellt, wobei unterschiedliche Farben für jede Balkenstange verwendet werden, basierend auf dem Bildungsniveau.
 
 ```{r}
 my_colors <- c("skyblue", "lightgreen", "salmon", "gold") 
@@ -146,9 +150,9 @@ ggplot(salary, aes(x = factor(`Education.Level`))) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Verteilung der Arbeitserfahrung in Jahren
+Verteilung der Arbeitserfahrung in Jahren:
 
-Ab hier wurde Teilweise das Paket "Viridis" für die farbliche Darstellung verwendet um eine Alternative zur Manuellen Deklaration der Farben aufzuzeigen.
+Ab diesem Punkt wurde teilweise das Paket "Viridis" für die farbliche Darstellung verwendet, um eine Alternative zur manuellen Deklaration der Farben aufzuzeigen.
 
 ```{r}
 ggplot(salary, aes(x = `Years.Of.Experience`)) +
@@ -196,7 +200,7 @@ ggplot(salary, aes(x = Race, fill = Race)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Verteilung der 10 Häufigsten Job Titel:
+Verteilung der 10 häufigsten Job Titel:
 
 ```{r}
 # Die Top 10 Jobtitel auswählen
@@ -218,19 +222,17 @@ ggplot(salary[salary$Job.Title %in% top_job_titles, ], aes(x = factor(Job.Title,
 
 ## 2.2 Grundlegende Statistische Merkmale des Datensatzes
 
-Zunächst wird mithilfe der Funktion "summary( )" ein allgemeiner Überblick über die wichtigsten charackteristeischen Merkmale der einzelnen Splaten gegeben.
+Zunächst wird mithilfe der Funktion "summary()" ein allgemeiner Überblick über die wichtigsten charakteristischen Merkmale der einzelnen Spalten gegeben.
 
 ```{r}
 summary(salary)
 ```
 
-Hier alles genauer beschreiben
+In einer ersten Analyse zeigt sich, dass der durchschnittliche Alterswert im Datensatz bei 32 Jahren liegt. Die Altersspanne erstreckt sich dabei von 21 bis 62 Jahren. Bezüglich des "Education-Level" variieren die Werte zwischen 1, 2 und 3, wobei der Durchschnitt bei 1 liegt. In Bezug auf die Berufserfahrung ("Years of Experience") reichen die Werte von 0 bis zu 34 Jahren, wobei der Median hier bei 7 liegt. Bei Auswertung der Gehaltsdaten ("Salary") ergibt sich, dass das Mindestgehalt bei 350 Dollar, das Höchstgehalt bei 250.000 Dollar und der Median bei 115.000 Dollar liegt.
 
-Erkennbar hier ist es, dass es innerhalb des Datensatzes ein durchschnittliches Alter von 32 Jahren vorliegt. Das Alter streckt sich von 21 Jahren bis zu 62 Jahren. Außerdem gibt es beim "Education-Level" Werte zwischen 1, 2 und 3, wobei der Durchschnitt jedoch bei 1 liegt. Außerdem gibt es bei der Berufserfahrung ( Years of Experience) Werte zwischen 0 bis zu 34 Jahren. Der Median hier beträgt 7.
+# 3. Umstrukturierung des Datensatzes für eine verbesserte Visualisierung
 
-# 3. Umstrukturierung des Datensatzes zwecks Visualisierung
-
-Im folgenden wird der Datensatz temporär umstrukturiert um den Datensatz besser analysieren und visualieren zu können.
+Im folgenden wird der Datensatz temporär umstrukturiert, um den Datensatz besser analysieren und visualieren zu können.
 
 Ein neuer Wert Namens "Value" wird erschaffen.
 
@@ -241,7 +243,7 @@ Salary <- as.data.frame(Salary_long)
 head(Salary_long)
 ```
 
-Insgesamt werden in diesem Codechunk die Spalten die nicht nummerische Merkmale sind entfernt und der verbleibende Datensatz wird von einem breiten in ein längeres Format umgewandelt.
+In diesem Codeabschnitt werden sämtliche Spalten, die keine numerischen Merkmale repräsentieren, entfernt. Der verbleibende Datensatz wird anschließend von einem breiten Format in ein längeres umgewandelt. Diese Transformation ermöglicht eine effizientere Analyse und Visualisierung der numerischen Daten, indem sie sie in einer strukturierteren und leichter interpretierbaren Form darstellt.
 
 Hier kann man folgende Dinge erkennen:
 
@@ -249,7 +251,7 @@ Hier kann man folgende Dinge erkennen:
 
 -   Age und Years of Experience haben Extrempunkte im oberen Wertebereich, während Salary einer gleichmäßigen Verteilung folgt
 
-Aufgrund der guten Strukturierung der Daten ,eignen sie sich dem ersten Anschein nach gut für eine Ausführliche Explorative Analyse.
+Aufgrund der sorgfältigen Strukturierung der Daten, scheinen sie auf den ersten Blick gut für eine umfassende explorative Analyse geeignet zu sein.
 
 ## 3.1 Kategorisierung von Gehalt
 
@@ -259,7 +261,7 @@ Zunächst werden die Daten aus dem Ausgangsdatensatz in einen finalen Datensatz 
 salary_final <- salary
 ```
 
-Durch den Befehl "hist()" wird ein Histogramm erstellt . Es ermöglicht eine visuelle Darstellung der Häufigkeitsverteilung dieses Gehaltsdaten, indem es zeigt, wie oft bestimmte Gehaltsbereiche vorkommen.
+Durch den Befehl "hist()" wird ein Histogramm erstellt. Es ermöglicht eine visuelle Darstellung der Häufigkeitsverteilung dieser Gehaltsdaten, indem es zeigt, wie oft bestimmte Gehaltsbereiche vorkommen.
 
 Verteilung des Gehalts:
 
@@ -274,7 +276,7 @@ ggplot(salary, aes(x = Salary)) +
   theme_minimal()
 ```
 
-Im folgenden wird eine neue Spalte "SalaryKat" erstellt die kategorische Werte basierend auf den Gehältern enthält. Anschließend wird ein Balkendiagramm für die 5 Kategorien des Gehalts erstellt.
+Im weiteren Verlauf wird eine neue Spalte namens "SalaryKat" erstellt, die kategorische Werte basierend auf den Gehältern enthält. Darauf aufbauend wird ein Balkendiagramm für die 5 Gehaltskategorien erstellt. Diese visuelle Darstellung ermöglicht eine effektive Einsicht in die Verteilung der Gehälter und erleichtert die Interpretation der Daten in übersichtlicher Form.
 
 ```{r}
 salary_final$SalaryKat <- cut(salary_final$Salary, 
@@ -293,15 +295,15 @@ ggplot(salary_final, aes(x = SalaryKat, fill = SalaryKat)) +
 
 ```
 
-Die Kategorie mit einem Gehalt von 100.000 ist am häufigsten verteten.
+Die Analyse der erstellten Gehaltskategorie zeigt, dass die Kategorie mit einem Gehalt von 100.000 am häufigsten vertreten ist.
 
 ## 3.2 Korrelationen
 
-Im Folgenden werden die Korrelationen zwischen den verschiedenen Spalten errechnet.
+Im weiteren Verlauf erfolgt die Berechnung der Korrelationen zwischen den verschiedenen Spalten.
 
-Die Berechnung von Korrelationen ermöglicht es, die Stärke und Richtung des Zusammenhangs zwischen zwei Variablen zu quantifizieren. Dies hilft bei der Modellvalisierung, um potenzielle Probleme, wie zum Beispiel die Multikollinearität zu erkennen.
+Diese Vorgehensweise ermöglicht es, die Stärke und Richtung des Zusammenhangs zwischen zwei Variablen zu quantifizieren. Die Anwendung von Korrelationsanalysen spielt eine entscheidende Rolle bei der Modellvalidierung, da sie dabei hilft, potenzielle Probleme wie beispielsweise Multikollinearität zu identifizieren.
 
-Nun werden verschiedene Korrelationen errechnet:
+Die folgenden Korrelationen werden nun berechnet:
 
 ```{r}
 # Korrelation zwischen Salary und Years.Of.Experience berechnen
@@ -311,8 +313,6 @@ correlation_salary_experience <- cor(salary_final$Salary, salary_final$Years.Of.
 cat("Die Korrelation zwischen Salary und Years.Of.Experience ist:", correlation_salary_experience, "\n")
 ```
 
-"Hier würde Ich keinen Text vorschreiben, Ausgabe aussagekräftig genug"
-
 ```{r}
 # Korrelation zwischen Salary und Age berechnen
 correlation_salary_age <- cor(salary_final$Salary, salary_final$Age, use = "complete.obs")
@@ -321,8 +321,6 @@ correlation_salary_age <- cor(salary_final$Salary, salary_final$Age, use = "comp
 cat("Die Korrelation zwischen Salary und Age ist:", correlation_salary_age, "\n")
 ```
 
-"Hier würde Ich keinen Text vorschreiben, Ausgabe aussagekräftig genug"
-
 ```{r}
 # Korrelation zwischen Years.Of.Experience und Age berechnen
 correlation_experience_age <- cor(salary_final$Years.Of.Experience, salary_final$Age, use = "complete.obs")
@@ -330,8 +328,6 @@ correlation_experience_age <- cor(salary_final$Years.Of.Experience, salary_final
 # Ausgabe des Ergebnisses
 cat("Die Korrelation zwischen Years.Of.Experience und Age ist:", correlation_experience_age, "\n")
 ```
-
-"Hier würde Ich keinen Text vorschreiben, Ausgabe aussagekräftig genug"
 
 ```{r}
 # Korrelation zwischen Seniority und Years.Of.Experience berechnen
@@ -349,7 +345,9 @@ Die Ergebnisse der Korrelationen:
 
 -   von Age und Years of Experience st es 0.93.
 
-Nun stellt sich folgende Frage, wie kommt bei den Werten so ein starker Unterschied, im Vergleich zu Salary, zustande, obwohl sie doch eine so hohe Korrelation zueinander haben.
+Nun stellt sich folgende Frage:
+
+Wie entsteht bei den Werten so ein starker Unterschied, im Vergleich zu Salary, obwohl eine so hohe Korrelation zueinander besteht?
 
 Lösungsansätze:
 
@@ -363,7 +361,7 @@ Stichprobengröße: Bei kleineren Stichproben können Korrelationswerte instabil
 
 # 4. Tests für die Thesen
 
-Im folgenden werden anhand der Daten ein paar Tests durchgeführt um Aussagen für die Thesen heruaszufiltern. Dies geschieht mithilfe einer Visualisierung der Beziehungen zwischen den verschiedenen Spalten, sowie mitihilfe von Korrelationen.
+Im weiteren Verlauf werden anhand der vorliegenden Daten verschiedene Tests durchgeführt, um Aussagen für die aufgestellten Thesen herauszufiltern. Dieser Prozess wird sowohl durch die Visualisierung der Beziehungen zwischen den verschiedenen Spalten als auch durch die Berechnung von Korrelationen unterstützt. Die Kombination dieser Methoden ermöglicht eine umfassende Analyse, die dazu beiträgt, Muster, Trends und potenzielle Zusammenhänge zwischen den betrachteten Variablen zu erkennen.
 
 ## 4.1 Korrelationen
 
@@ -375,7 +373,7 @@ correlations <- cor(salary_final[, c("Age", "Education.Level", "Years.Of.Experie
 print(correlations)
 ```
 
-Erkennbar hier ist eine starke Korrelation zwischen dem Alter und den "Years of Experience". Desweiteren liegt auch eine starke Korrelation zwischnem den Years of Experience und dem entgültigen Gehalt. Eine nicht so starke Korrelation liegt zwischen dem Alter und dem Education Level mit einem Wert von ungefähr 0,6.
+Erkennbar ist eine starke Korrelation zwischen dem Alter und den "Years of Experience". Des Weiteren besteht ebenfalls eine ausgeprägte Korrelation zwischen den Years of Experience und dem endgültigen Gehalt. Hingegen liegt die Korrelation zwischen dem Alter und dem Bildungsniveau mit einem Wert von ungefähr 0,6 nicht ganz so stark vor.
 
 ```{r}
 filtered_data_numeric <- select(salary, Salary, Age, Years.Of.Experience, Education.Level)
@@ -399,7 +397,7 @@ ggplot(salary_final, aes(x = Years.Of.Experience, y = Salary)) +
        y = "Gehalt")
 ```
 
-In diesem Streudiagramm ist erkennbar, das es einen eindeutigen Trend nach oben gibt je mehr "Years of Experience" vorliegen. So ist auch zu sehen, dass die Topgehälter von 250.000€ zwischen 20 bis 30 Erfahrungsjahren liegen.
+Das Streudiagramm visualisiert deutlich einen eindeutigen aufsteigenden Trend, der mit einer zunehmenden Anzahl von "Years of Experience" einhergeht. Es wird ebenfalls sichtbar, dass die Höchstgehälter von 250.000€ im Bereich von 20 bis 30 Jahren Berufserfahrung konzentriert sind.
 
 ```{r}
 ggplot(salary_final, aes(x = Education.Level, y = Salary)) +
@@ -410,11 +408,11 @@ ggplot(salary_final, aes(x = Education.Level, y = Salary)) +
 
 ```
 
-Die vorliegende Datenanalyse zeigt einen klaren Trend zu höheren Gehaltsklassen, der mit einem Anstieg des Bildungsniveaus einhergeht. Diese Tendenz wird durch eine höhere Dichte in den oberen Gehaltsgruppen für Personen mit dem dritten Bildungsgrad im Vergleich zum zweiten und ersten Bildungsgrad deutlich.
+Die vorliegende Datenanalyse verdeutlicht einen klaren Trend zu höheren Gehaltsklassen, der mit einem Anstieg des Bildungsniveaus einhergeht. Diese Tendenz wird durch eine erhöhte Dichte in den oberen Gehaltsgruppen für Personen mit dem dritten Bildungsgrad im Vergleich zum zweiten und ersten Bildungsgrad deutlich.
 
 ## 4.3 Balkendiagramme mit 2 Variablen
 
-In diesem Abschnitt werden Balkendiagramme verwendet um den Datensatz auf Beziehungen zu analysieren.
+In diesem Abschnitt werden Balkendiagramme verwendet, um den Datensatz auf Beziehungen zu analysieren. Die visuelle Darstellung durch Balkendiagramme ermöglicht uns eine anschauliche Interpretation der Daten.
 
 ### 4.3.1 Average Salary by Race
 
@@ -427,7 +425,7 @@ ggplot(salary_final, aes(x = Race, y = Salary, fill = Race)) +
   ylab("Durchschnittliches Gehalt")
 ```
 
-Die Grafik macht deutlich, dass die Gruppen "Black, Korean, Mixed und White" im Durchschnitt am meisten verdienen.
+Die Grafik macht deutlich, dass die Gruppen "Black, Korean, Mixed und White" im Durchschnitt am das höchste Einkommen erzielen.
 
 ### 4.3.2 Average Salary by Country
 
@@ -443,9 +441,11 @@ ggplot(salary_final, aes(x = Country, y = Salary, fill = Country)) +
 
 Es ist ersichtlich, dass in den Ländern "Canada und China" das durchschnittliche Gehalt am größten ist. Jedochg ist zu erwähnen, dass alle Länder nah bei einander liegen.
 
+Es ist ersichtlich, dass in den Ländern "Canada und China" das durchschnittliche Gehalt am höchsten ist. Es ist jedoch zu betonen, dass die durchschnittlichen Gehälter in allen Ländern nahe beieinander liegen.
+
 ### 4.3.3 Average Salary by Country and Gender
 
-In diesem Fall wird ein gestapeltes Balkendiagramm erstellt. Die Balken sind nach Geschlecht gruppiert und gestapelt. DIes ermöglicht einen Vergleich der durchschnittlichen Gehälter zwischen den Ländern und Geschlechtern
+Die Erstellung eines gestapelten Balkendiagramms ermöglicht uns einen detaillierten Vergleich der durchschnittlichen Gehälter zwischen verschiedenen Ländern und Geschlechtern. Die Balken sind entsprechend nach Geschlecht gruppiert und gestapelt, was eine übersichtliche Darstellung der Unterschiede in den Gehaltsstrukturen zwischen den betrachteten Gruppen ermöglicht.
 
 ```{r}
 ggplot(salary_final, aes(x = Country, y = Salary, fill = Gender)) +
@@ -458,13 +458,13 @@ ggplot(salary_final, aes(x = Country, y = Salary, fill = Gender)) +
 
 ```
 
-Hier ist zu erkennen, das alle Länder ungefähr die gleiche Verteilung zwischen "Male" und "Female" haben.
+Hier ist zu erkennen, dass alle Länder eine ähnliche Verteilung zwischen den Geschlechtern "Male" und "Female" aufweisen.
 
 ### 4.3.4 Average Salary by Country and Education Level
 
-Zur Visualisierung der durchnittlichen Bezahlung für Länder und Bildungsniveau wird ein gruppiertes Balkendiagramm verwendet. DIe Balken sind nach Bildungsniveau und nebeneinander gruppiert.
+Zur Visualisierung der durchnittlichen Bezahlung für Länder und Bildungsniveau wird ein gruppiertes Balkendiagramm verwendet. Die Balken sind hierbei nach Bildungsniveau gruppiert.
 
-Desweiteren sind zur besseren Veranschaulichung die Beschriftungen auf der X-Achse um 45 Grad gedreht.
+Zusätzlich wurden die Beschriftungen auf der X-Achse um 45 Grad gedreht, um eine verbesserte Veranschaulichung zu gewährleisten.
 
 ```{r}
 ggplot(salary_final, aes(x = Country, y = Salary, fill = factor(Education.Level))) +
@@ -476,11 +476,11 @@ ggplot(salary_final, aes(x = Country, y = Salary, fill = factor(Education.Level)
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  
 ```
 
-Es ist deutlich zu erkennen, dass die Gehälter in jedem Land deutlich ansteigen je höher das Bildungsniveau ist.
+Es ist deutlich zu erkennen, dass die Gehälter in jedem Land deutlich ansteigen, je höher das Bildungsniveau ist.
 
 ### 4.3.5 Average Salary by Country and Race
 
-Auch hier wird zum Vergleich der durchschnittlichen Gehälter zwischen den Ländern und ethnischen Gruppen, ein gestapeltes Balkendiagramm erstellt. Die Balken sind nach ethnischer Gruppe gruppiert und gestapelt.
+Auch hier wird zum Vergleich der durchschnittlichen Gehälter zwischen den Ländern und ethnischen Gruppen, ein gestapeltes Balkendiagramm erstellt. Hierbei sind die Balken nach ethnischer Gruppe gruppiert und gestapelt.
 
 ```{r}
 ggplot(salary_final, aes(x = Country, y = Salary, fill = Race)) +
@@ -493,9 +493,7 @@ ggplot(salary_final, aes(x = Country, y = Salary, fill = Race)) +
   scale_y_continuous(labels = scales::comma)
 ```
 
-!!!!! Salary passt nicht!!!!!!!
-
-Hier ist deutlich sichtbar, dass nicht in jedem Land logischerweise jede ethnische Gruppe vertreten ist. So sind nur in 2 Ländern mehr als 3 verschiedene Gruppen in diesem Datensatz aufgeführt
+Die Grafik verdeutlicht, dass nicht zwangsläufig in jedem Land alle ethnischen Gruppen vertreten sind. Es ist ersichtlich, dass nur in 2 Ländern mehr als 3 verschiedene ethnische Gruppen in diesem Datensatz aufgeführt sind.
 
 ### 4.3.6 Average Salary by Job Title
 
@@ -509,14 +507,14 @@ ggplot(salary_final, aes(x = Job.Title, y = Salary)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  
 ```
 
-Hier wird festgestellt das in dem Datensatz zu viele Jobtitle vorkommen:
+Hier wird festgestellt, dass in dem vorliegenden Datensatz eine hohe Anzahl von verschiedenen Jobtiteln existiert:
 
 ```{r}
 job_title_count <- table(salary_final$Job.Title)
 print(job_title_count)
 ```
 
-Hier nochmal das obere genauer grafisch herausgearbeitet:
+Hier nochmal umfangreicher grafisch ausgearbeitet:
 
 ```{r}
 job_title_count <- table(salary_final$Job.Title)
@@ -530,7 +528,7 @@ ggplot(job_title_df, aes(x = Job_Title, y = Frequency)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
 ```
 
-Jeder Job wurde Dargestellt. Es ist zu notieren das es nicht möglich ist die Vielzahl der unterschiedlichen Jobs darzustellen. Es ist nicht möglich die Vielzahl der unterschiedlichen Jobs dazustellen.
+Jeder Job wurde aufgeführt. Es ist anzumerken, dass es aufgrund der enormen Vielfalt an unterschiedlichen Jobs nicht möglich ist, sämtliche in der Darstellung zu berücksichtigen.
 
 ```{r}
 library(dplyr)
@@ -590,7 +588,7 @@ ggplot(job_title_df, aes(x = Job_Title, y = Frequency)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Auf min 30 Jobhäufigkeiten angepasst.
+Auf mindestens 30 Jobhäufigkeiten angepasst.
 
 ```{r}
 job_title_count_filtered <- table(filtered_data$Job.Title)
@@ -601,7 +599,7 @@ cat(paste(names(job_title_count_filtered), ":", job_title_count_filtered, "\n"))
 
 ## 5.2.1 Anzahl der technischen / administrativen Jobs
 
-Im Folgenden werden Jobs auf Basis Ihrer Jobtitel in technische und adminisztrative Kategoerien unterteilt. Danach werden die Datensätze "technische_jobs" und "admin_Jobs" erstellt.
+Im Folgenden werden Jobs auf Basis Ihrer Jobtitel in technische und adminisztrative Kategorien unterteilt. Daraufhin werden die Datensätze "technische_jobs" und "admin_Jobs" erstellt.
 
 ```{r}
 
@@ -629,9 +627,7 @@ cat("Anzahl der administrativen Jobs:", anzahl_admin_jobs, "\n")
 
 ```
 
-Zu erkennen ist hier, dass es detlich mehr technische Jobs als administraive Jobs in diesem Datensatz gibt.
-
-???? notwenig nochmal zu wissen wie viele insgesamt in filtered data sind????
+Zu erkennen ist hier, dass es in diesem Datensatz signifikant mehr technische Jobs als administrative Jobs gibt.
 
 ```{r}
 
@@ -643,7 +639,7 @@ cat("Anzahl der Werte in filtered_data:", anzahl_werte_filtered_data, "\n")
 
 ```
 
-Insgesamt gibt es in dem gefilterten Datensatz 6398 Einträge, was bedeutet, dass ungefähr 60% technische Jobs und 40% administrative Jobs sind.
+Insgesamt gibt es in dem gefilterten Datensatz 6398 Einträge, was bedeutet, dass es sich bei ungefähr 60% um technische Jobs handelt und 40% administrative Jobs sind.
 
 Nun wird nochmal der gefilterte Datensatz mit der Summe von "anzahl_technische_jobs" und "anzahl_administraive Jobs" verglichen.
 
@@ -652,7 +648,7 @@ anzahl_jobs <- anzahl_technische_jobs + anzahl_admin_jobs
 cat(anzahl_jobs)
 ```
 
-Zu erkennen ist hier, dass es zwei unterschiedliche Werte für die Beiden Datensätze gibt.
+Zu erkennen ist hier, dass es zwei unterschiedliche Werte für die beiden Datensätze gibt.
 
 Wir vermuten, dass einige Jobs doppelt gezählt werden. Dies würde erklären, dass deutlich mehr Einträge in "anzahl_jobs" sind. Unser Lösungsvorschlag wäre hier, dass wir den Jobs IDs geben.
 
@@ -660,7 +656,7 @@ Wir vermuten, dass einige Jobs doppelt gezählt werden. Dies würde erklären, d
 
 Der erste Lösungsansatz sieht wie folgt aus:
 
-Die jobs werden basierend auf bestimmten Namen ( data, enginner etc. ) gefiltert und alle Duplikate werden entfernt. Das Ergebnis ist nun ein neuer Datensatz "filtered_data_neu" in dem alle Zeilen außer, die technischen und administrativen Jobs enthält.
+Die Jobs werden durch Filter anhand bestimmter Namen (wie "data", "engineer" usw.) ausgewählt und alle Duplikate entfernt. Das Ergebnis ist nun ein neuer Datensatz namens "filtered_data_neu", der alle Zeilen außer die mit technischen und administrativen Jobs enthält.
 
 ```{r}
 
@@ -693,7 +689,7 @@ Es scheint als würde dieser Lösungsansatz nicht funktionieren, da der neue Dat
 
 #### 5.2.1.2 Lösungsansatz 2
 
-Der zweite Lösungsansatz zum Problem der Klassifizierung der verschiedenen Job Typen kann gelöst werden, indem die beiden Jobs nicht in 2 Tabellen unterteilt werden, sondern Jede Zeile einen Wert des entsprechenden Jobs Typs zugeordnet wird.
+Der zweite Lösungsansatz für das Problem der Klassifizierung der verschiedenen Jobtypen besteht darin, dass nicht in zwei Tabellen unterteilt wird, sondern dass jeder Zeile ein Wert des entsprechenden Jobtyps zugeordnet wird.
 
 ```{r}
 filtered_data$job_type <- ifelse(
@@ -715,7 +711,7 @@ print(count_job_types)
 
 ```
 
-Es wird eine neue Spalte namens "job_type" erstellt. Diese Spalte wird nun mit Werten gefüllt. Der Wert = für Zielen mit technischen Jobs und 1 für administrative Jobs. NA erhalten alle anderen Jobtypen.
+Es wird eine neue Spalte namens "job_type" erstellt und mit Werten gefüllt. Dabei wird der Wert 0 für Zeilen mit technischen Jobs, 1 für administrative Jobs und NA für alle anderen Jobtypen vergeben.
 
 Nun werden die eben gefundenen NAs in einen neuen Datensatz geschrieben.
 
@@ -742,11 +738,11 @@ print(count_job_types)
 
 ```
 
-Nun ist das Klassifizierungsproblem gelöst. Aufgrund dessen können jetzt auch Diegramme über Job_types ausgewertet werden.
+Nun ist das Klassifizierungsproblem gelöst. Aufgrund dessen können jetzt auch Diagramme über Job_types ausgewertet werden.
 
 ## 5.3 Zugewanderte ( Expats ) & Einheimische
 
-Im folgenden werden einige Boxplots erstellt.
+Im Folgenden werden einige Boxplots erstellt.
 
 ### 5.3.1 Years of Experience vs. Gender
 
@@ -833,9 +829,9 @@ ggplot(data_usa, aes(x = factor(Gender), y = Salary, fill = Gender)) +
 
 ```
 
-Nach intensiven vergleichen der Grafiken, bezüglich der Salary ,stellt sich nun die Frage:
+Nach intensiver Betrachtung der Grafiken bezüglich der Salary, kommt folgende Frage auf:
 
-Ist die Gender-Pay-Gap in China doch Größer, da der größte Faktor für die Salary die Years of Experience sind?
+Ist die Gender-Pay-Gap in China doch größer, da der größte Faktor für die Salary die Years of Experience sind?
 
 Hierzu werden die Korrelationen errechnet.
 
@@ -876,15 +872,15 @@ cat("Die Korrelation zwischen Seniority und Years.Of.Experience ist:", correlati
 
 Das Ergebnis der Korrelationen:
 
--   Von Salary und Years.of.experience ist es 0.81.
+-   Von Salary und Years.of.experience ist es 0.81
 
--   Von Salary und Age ist es 0.73 und die
+-   Von Salary und Age ist es 0.73.
 
--   von Age und Years.Of.Experience ist es 0.93.
+-   Von Age und Years.Of.Experience ist es 0.93.
 
 Nun stellt sich folgende Frage:
 
-Wie kommt es zu so einem großen Unterschied Zwischen den Werten im Vergleich zu Salary, obwohl sie doch eine starke Korrelation zueinadner haben?
+Wie kommt es zu so einem großen Unterschied zwischen den Werten im Vergleich zu Salary, obwohl sie doch eine starke Korrelation zueinander haben?
 
 Mögliche Antworten auf diese Frage wären:
 
@@ -896,7 +892,7 @@ Ausreißer: Das Vorhandensein von Ausreißern kann die Korrelation beeinflussen.
 
 Stichprobengröße: Bei kleineren Stichproben können Korrelationswerte instabiler sein.
 
-Nun werden die Daten auf technische und administrative Jobs gefiltert, anschließend werden die Gehälter der beiden Gruppen ausgegeben und in einem Diagramm ausgeben und verglichen.
+Nun werden die Daten auf technische und administrative Jobs gefiltert, anschließend werden die Gehälter der beiden Gruppen ausgegeben und in einem Diagramm dargestellt und verglichen.
 
 ```{r}
 technische_jobs <- subset(filtered_data, job_type == 0)
@@ -920,13 +916,13 @@ ggplot(all_average_salaries, aes(x = Job.Type, y = Average.Salary, fill = Job.Ty
 
 ```
 
-Obwohl in den Admin Jobs auch direktoren und Manager vertreten sind, nehmen wir an, dass ein Manager ein Job Titel, wie "Projekt Manager" und nicht "Manager für Projekte" hat und dieser Titel in unserem Datensatz Director ist (Thema Führungsposition).
+Obwohl in den administrativen Jobs auch Direktoren und Manager vertreten sind, nehmen wir an, dass ein Manager einen Job Titel, wie "Projekt Manager" und nicht "Manager für Projekte" hat und dieser Titel in unserem Datensatz "Director" ist (Thema Führungsposition).
 
 Unsere Untersuchungen haben ergeben, dass wir die Daten für unsere Explorative Datenanalyse aber auch für die folgenden Regressionen neu aufbereiten müssen.
 
-Dazu wird untersucht::
+Dazu werden folgende Fragen untersucht:
 
-Unterscheidet sich ein native und expat im jeweiligen Land? Welche Annahmen sind dafür nötig? Hier die Annahme das "White" generell nicht ausgewandert ist da wir hier Länder mit ähnlicher Kultur und Salary haben.
+Unterscheidet sich ein Native und Expat im jeweiligen Land? Welche Annahmen sind dafür nötig? Hier die Annahme das "White" generell nicht ausgewandert ist, da wir hier Länder mit ähnlicher Kultur und Salary haben.
 
 ```{r}
 ggplot(filtered_data, aes(x = Country, fill = Race)) +
@@ -938,9 +934,7 @@ ggplot(filtered_data, aes(x = Country, fill = Race)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Dafür wird eine neue Spalte eingefügt, die mit numerischen werten arbeitet. 0 steht für Einheimische und 1 für einen Expat. Den Wert null erhalten alle zeilen bei denen wir folgende Übereinstimmung feststellen: African American (USA) White (Canada, USA, UK, Australia) Chinese (China) Australian(Australia) Welsh (UK) jede andere Race ist ja dementsprechend Expat und erhält eine 1 in der Spalte Expat.
-
-????????
+Dafür wird eine neue Spalte eingefügt, die mit numerischen Werten arbeitet. 0 steht für Einheimische und 1 für einen Expat. Den Wert null erhalten alle zeilen bei denen wir folgende Übereinstimmung feststellen: African American (USA) White (Canada, USA, UK, Australia) Chinese (China) Australian(Australia) Welsh (UK) jede andere Race ist dementsprechend Expat und erhält eine 1 in der Spalte Expat.
 
 ```{r}
 filtered_data$Expat <- 0
@@ -958,19 +952,19 @@ filtered_data$Expat <- ifelse(expat_conditions[[1]] | expat_conditions[[2]], 0,
 head(filtered_data)
 ```
 
-Ausgabe hier sind nun die ersten Zeilen der aktualisierten Version von "filtered_data" indem die Spalte "Expat" basierend auf den oben genannten Kriterien befüllt wurde.
+Ausgabe hier sind nun die ersten Zeilen der aktualisierten Version von "filtered_data", indem die Spalte "Expat" basierend auf den oben genannten Kriterien befüllt wurde.
 
 # 6. Thesen
 
-Aus den überlegungen der Tests und der Vorarbeit wurden folgende Thesen formuliert.
-
 Der folgende Absatz wird in unterschiedliche Teilabschnitte geteilt, um eine gute Leserlichkeit zu erreichen.
+
+Basierend auf den durchgeführten Tests und der Vorarbeit ergeben sich folgende Thesen, die im Anschluss untersucht werden sollen:
 
 ## 6.1 Genderpaygap
 
-1.  Männer verdienen mehr als Frauen
+1.  Männer verdienen mehr als Frauen.
 2.  Die Differenz der Salary zwischen den Geschlechtern ist in China höher als in den westlichen Ländern.
-3.  Männer haben im Durchschnitt mehr Yrs of Experience als Frauen -\> Lässt sich die Genderpaygap auf die Yrs of Exp übertragen? Und gilt dies auch für China
+3.  Männer haben im Durchschnitt mehr Years of Experience als Frauen -\> Lässt sich die Genderpaygap auf die Yrs of Exp übertragen? Und gilt dies auch für China?
 
 ### 6.1.1 Männer verdienen mehr als Frauen
 
@@ -991,7 +985,7 @@ Anhand des Boxplots ist zu erkennen, dass der Median der Männer deutlich höher
 
 ### 6.1.2.: Die Differenz der Salary zwischen den Geschlechtern ist in China höher als in den westlichen Ländern. Hier alle westlichen Länder hinzufügen
 
-Um diese These zu beantworten werrden zunächst Die Erfahrungsjahre zwischen China und der USA verglichen. Anschließend werden die Gehälter verglichen. Nebenbei haben die Boxplots immer eine Differenzierung zwischen Männern und Frauen um den Unterschied darzustellen.
+Um diese These zu beantworten werden zunächst die Erfahrungsjahre zwischen China und den USA verglichen. Anschließend werden die Gehälter verglichen. Nebenbei haben die Boxplots immer eine Differenzierung zwischen Männern und Frauen um den Unterschied darzustellen.
 
 Zu Beantwortung dieser These werden Boxplots verwendet.
 
@@ -1059,7 +1053,7 @@ correlation_salary_experience <- cor(filtered_data$Salary, filtered_data$Years.O
 cat("Die Korrelation zwischen Salary und Years.Of.Experience ist:", correlation_salary_experience, "\n")
 ```
 
-Aus den obigen Test ist außerdem hervor gegangen, dass die Berufserfahrung eine hohe Korrelation zu dem Gehalt hat.
+Aus den obigen Tests ist außerdem hervorgegangen, dass die Berufserfahrung eine hohe Korrelation zu dem Gehalt hat.
 
 Deswegen lässt sich trotzdem sagen, dass diese These korrekt ist.
 
@@ -1080,9 +1074,11 @@ Die These ist korrekt, wie anhand des obigen Boxplots zu erkennen ist. Der Media
 
 ## 6.2 Zugewanderte Menschen verdienen mehr als einheimische Menschen
 
-Unsere Untersuchungen haben Ergeben das wir die Daten für unsere Explorative Datenanalyse aber auch die Regression neu aufbereiten müssen.
+Unsere Untersuchungen haben ergeben, dass wir die Daten für unsere Explorative Datenanalyse, sowie auch die Regression neu aufbereiten müssen.
 
-Dazu suchen wir: unterscheide ich einen native und expat im jeweiligen Land. Welche annahmen sind dafür nötig? Hier die annahme das White generell nicht ausgewandert ist da wir hier länder mit ähnlicher kultur und salary haben
+Dazu untersuchen wir:
+
+Wie unterscheide ich einen Native und Expat im jeweiligen Land. Welche Annahmen sind dafür nötig? Hier die Annahme, dass "White" generell nicht ausgewandert ist, da der Datensatz Länder mit ähnlicher Kultur und Salary beinhaltet.
 
 ### 6.2.1.: Alle Ethnizitäten je Land
 
@@ -1096,7 +1092,7 @@ ggplot(filtered_data, aes(x = Country, fill = Race)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Hier ist ist zu erkennen. welche Ethnizitäten wir in den unterschiedlichen Ländern haben. So ist zu erkennen, dass wir nie mehr als vier Ethnizitäten pro Land haben.
+Hier ist ist zu erkennen, welche Ethnizitäten in den unterschiedlichen Ländern existieren. So ist zu erkennen, dass es nie mehr als vier Ethnizitäten pro Land gibt.
 
 ### 6.2.2.: Gesamtbetrachtung
 
@@ -1112,7 +1108,7 @@ ggplot(filtered_data, aes(x = as.factor(Expat), y = Salary, fill = factor(Expat)
 
 ```
 
-Aus diesem Diagramm geht hervor, dass kein Unterschied vorerst zu erkennen ist.
+Aus diesem Diagramm geht hervor, dass vorerst kein Unterschied zu erkennen ist.
 
 ```{r}
 mean_salary_expat <- mean(filtered_data$Salary[filtered_data$Expat == 1], na.rm = TRUE)
@@ -1123,7 +1119,7 @@ mean_salary_native
 
 ```
 
-Auch nach Darstellung der Mittelwerte istr kein wirklicher Unterschied zu erkennen.
+Auch nach Darstellung der Mittelwerte ist kein wirklicher Unterschied zu erkennen.
 
 Deswegen wird die These verworfen, da es offensichtlich keine Unterschiede gibt.
 
@@ -1145,13 +1141,13 @@ Um diese These zu beantworten sind wir auf verschiedene Lösungsansätze gekomme
 
 1.  **Deskriptive Statistiken:** Es könnten Quantile oder Perzentile des Gehalts für jeden Bildungsniveau berechnet berechnet werden. Dies könnte einen Überblick über die Verteilung der Gehälter bieten und zeigt potenzielle Grenzwerte.
 
-2.  **Boxplots pro Bildungsniveau:** Es könnten Boxplots für jeden Bildungsniveau erstellt werden, um die Verteilung der Gehälter visuell zu vergleichen. Dies könnte unterstützend wirken, um Ausreißer und Unterschiede im Bildungsniveau zu identifizieren.
+2.  **Boxplots pro Bildungsniveau:** Es könnten Boxplots für jedes Bildungsniveau erstellt werden, um die Verteilung der Gehälter visuell zu vergleichen. Dies könnte unterstützend wirken, um Ausreißer und Unterschiede im Bildungsniveau zu identifizieren.
 
 3.  **Visualisierungen:** Es besteht die Möglichkeit verschiedene Visualiersierungen, wie Scatterplots oder Liniendiagramme zu erstellen, um Trends oder Muster zwischen Gehalt und Bildungsniveau zu erkennen.
 
 ### 6.3.1.: Desktiptive Statistiken:
 
-Hierzu werden erst die Daten brechnet und anschließend für die Grafik "ge-reshaped".
+Hierzu werden erst die Daten berechnet und diese anschließend für die Grafik "ge-reshaped".
 
 ```{r}
 library(ggplot2)
@@ -1188,7 +1184,7 @@ average_salary_education <- aggregate(Salary ~ Education.Level, data = filtered_
 average_salary_education
 ```
 
-Die oben gestellte Aussage wird auch nochmal bestätigt, durch die Ausgabe der "avarage Salary". Hier ist zu erkennen, dass das durchschnittliche Gehalt höher ist, je höher das Bildungsniveau ist.
+Die oben gestellte Aussage wird erneut bestätigt, durch die Ausgabe der "Average Salary". Hier ist zu erkennen, dass das durchschnittliche Gehalt höher ist, je höher das Bildungsniveau ist.
 
 ### 6.3.2.: **Boxplots pro Bildungsniveau:**
 
@@ -1235,9 +1231,9 @@ ggplot(filtered_data, aes(x = Education.Level, y = Salary, group = 1)) +
   theme_minimal()
 ```
 
-Die roten Punkte zeigen den Medianwert des Gehalts je nach Bildungsniveau. ( bitte jonas nochmal fragen, verstehe ich nicht).
+Die roten Punkte zeigen den Medianwert des Gehalts je nach Bildungsniveau. Die schrägen Linien zeigen den Trend steigender Gehälter bei höheren Bildungsstufen.
 
-Ohne einen Hochschulabschluss gibt es eine Gehaltsgrenze. Die top 90% ohne Hochschulabschluss fangen bei den unteren 10% mit Hochschulabschluss an aus der Sicht des Gehalts.
+Ohne einen Hochschulabschluss gibt es eine Gehaltsgrenze. Die Top 90% ohne Hochschulabschluss fangen bei den unteren 10% mit Hochschulabschluss an aus der Sicht des Gehalts.
 
 Die These kann als Korrekt angesehen werden, da alle Lösungsansätze im Allgemeinen, das gleiche Ergebnis liefern.
 
@@ -1247,7 +1243,7 @@ Die These kann als Korrekt angesehen werden, da alle Lösungsansätze im Allgeme
 
 Unter dem Punkt "Daten aufbereiten 2" wurden bereits alle Jobs in administrativ und technisch unterteilt.
 
-Zudem werden noch im folgenden alle Werte aus dem Datensatz gefiltert, die den jobtitel "Director" enthalten, da dieser Job nicht eindeutig einer Gruppe zugeordnet werden kann (z.B "Engineering Director")
+Zudem werden noch im folgenden alle Werte aus dem Datensatz gefiltert, die den Jobtitel "Director" enthalten, da dieser Job nicht eindeutig einer Gruppe zugeordnet werden kann (z.B "Engineering Director").
 
 ```{r}
 filtered_data2 <- filtered_data
@@ -1267,7 +1263,7 @@ nrow(filtered_data2)
 
 ### 6.4.2.: Insgesamt
 
-In diesem Abschnitt wird eine Übersicht der durchschnittlichen Gehälter nach der Sortierung der Jobs nach technisch oder administrativ, erstellt. Dafür werden zunächst die Daten gefiltert. Danch werden die durchschnittlichen Gehälter der beiden Jobtypen berechnet. Anschließend werden dann die durchscnittlichen Gehälter in einen Datenrahmen zusammengeführt. Zum Schluss wird dann das Balkendiagramm erstellt.
+In diesem Abschnitt wird eine Übersicht der durchschnittlichen Gehälter nach der Sortierung der Jobs nach technisch oder administrativ, erstellt. Dafür werden zunächst die Daten gefiltert. Danach werden die durchschnittlichen Gehälter der beiden Jobtypen berechnet. Anschließend werden dann die durchschnittlichen Gehälter in einen Datenrahmen zusammengeführt. Zum Schluss wird dann das Balkendiagramm erstellt.
 
 ```{r}
 technische_jobs <- subset(filtered_data, job_type == 0)
@@ -1290,9 +1286,9 @@ ggplot(all_average_salaries, aes(x = Job.Type, y = Average.Salary, fill = Job.Ty
   scale_y_continuous(labels = scales::comma)
 ```
 
-In dem Balkendiagramm ist deutlich zu erkennen, dass das durchscnittliche Gehalt bei technischen Jobs höher ist.
+In dem Balkendiagramm ist deutlich zu erkennen, dass das durchscnittliche Gehalt bei den technischen Jobs höher ist.
 
-Anschließend werden die Werte der durchschnittlichen Gehälter auch nochmal seperat ohne Grafik ausgegeben:
+Anschließend werden die Werte der durchschnittlichen Gehälter auch nochmal separat ohne Grafik ausgegeben:
 
 ```{r}
 technische_jobs <- subset(filtered_data, job_type == 0)
@@ -1307,7 +1303,7 @@ cat("Durchschnittliches Gehalt für administrative Jobs:", average_salaries_admi
 
 ```
 
-Auch hier ist zu erennen, das das dcurchschnittliche Gehalt bei technischen Jobs um rund 20.000 GE höher ist.
+Auch hier ist zu erkennen, dass das durchschnittliche Gehalt bei technischen Jobs um rund 20.000 GE höher ist.
 
 ### 6.4.3.: Je Land
 
@@ -1326,9 +1322,9 @@ ggplot(summary_data, aes(x = Education.Level, y = Salary, fill = Country)) +
   theme_minimal()
 ```
 
-These Korrekt, und das Obwohl in den Admin Jobs auch in seltenen Fällen Manager vertreten sind.
+Die These ergibt sich als korrekt und das obwohl in den Admin Jobs auch in seltenen Fällen Manager vertreten sind.
 
-Es lässt sich zudem beobachten das Doktoren in Australien ein höheres Gehalt verdienen als in anderen Ländern.
+Es lässt sich zudem beobachten, dass Doktoren in Australien ein höheres Gehalt verdienen als in anderen Ländern.
 
 ## 6.5 Data Scientist verdienen aufgrund der hohen Nachfrage der Berufsgruppe im Schnitt mehr als andere Jobgruppen bei gleichbleibender Erfahrung und Abschlussniveau.
 
@@ -1336,15 +1332,15 @@ Es lässt sich zudem beobachten das Doktoren in Australien ein höheres Gehalt v
 
 Der Beruf des Data Scientist ist laut dem Harvard Business Review der "Sexiest Job of the 21st Century".
 
-Siehe link:
+Siehe Link:
 
 \*<https://hbr.org/2012/10/data-scientist-the-sexiest-job-of-the-21st-century>
 
-Nach Anbetracht dieser Aussage, stellt sich die Frage, ob gerade das Gehalt von Data Scientisten, zu dieser Aussage führt.
+Nach Anbetracht dieser Aussage, stellt sich die Frage, ob gerade das Gehalt von Data Scientists, zu dieser Aussage führt.
 
 ### 6.5.2.: Datenaufbereitung
 
-Um die These beantworten zu können müssen als erstes ein paar Anpassungen an den Datensatz vorgenommen werden.
+Um die These beantworten zu können, müssen als erstes ein paar Anpassungen an dem Datensatz vorgenommen werden.
 
 Zunächst wird eine Einengung nach Jobs, nach den Stichworten Data, Software, Developer und Egineer durchgeführt. Anschließend werden alle Manager und Direktoren rausgefiltert.
 
@@ -1369,7 +1365,7 @@ job_title_df <- data.frame(Job_Title = names(job_title_count), Frequency = as.nu
 job_title_df
 ```
 
-Anchließend wird, um die Leserlichkeit zu verbessern, eine Aufteilung der Jobs durchgeführt. Hierzu werden die Jobs in eine neue Spalte "data_job" aufgeteilt.
+Anschließend wird, um die Leserlichkeit zu verbessern, eine Aufteilung der Jobs durchgeführt. Hierzu werden die Jobs in eine neue Spalte "data_job" aufgeteilt.
 
 ```{r}
 filtered_data3 <- filtered_data3 %>%
@@ -1386,7 +1382,7 @@ cat("Anzahl der Zeilen mit dem Wert 1 bei data_job (Software Engineers & Co):", 
 
 ### 6.5.3.: Balkendiagramm
 
-Um die Übersicht zu verbessern, wird die Berufserfahrung in Quantile eingeteilt. Die Bildungsniveaus hingegen sind ja ebreits in Vier Werte eingeteilt.
+Um die Übersicht zu verbessern, wird die Berufserfahrung in Quantile eingeteilt. Die Bildungsniveaus hingegen wurden bereits im Vorfeld in vier Werte eingeteilt.
 
 Als erstes werden die Quantile der Berufserfahrung berechnet und anschließend ein Balkendiagramm für den Datensatz "data_job" erstellt, um das Gehalt zu vergleichen.
 
@@ -1432,13 +1428,13 @@ ggplot(filtered_data4, aes(y = Salary, x = factor(Education.Level))) +
   theme_minimal()
 ```
 
-Hier ist zu erkennen, dass Data Scientists mehr als Arbeitnehmer aus der Software Enginnering % Co Gruppe. Es muss jedoch beachtet werden, dass die "data- Gruppe" mindetens einen Bachelor besitzt und erst nach einem Master mehr verdient, als ihr Counterpart. Im Bezug auf die Berufserfahrung lässt sich feststellen, dass es in jedem Quantil einen höheres Gehaltsniveau bei der "data-Gruppe" gibt.
+Hier ist zu erkennen, dass Data Scientists mehr als Arbeitnehmer aus der Software Enginnering % Co Gruppe. Es muss jedoch beachtet werden, dass die "data- Gruppe" mindestens einen Bachelor besitzt und erst nach einem Master mehr verdient, als ihr Counterpart. Im Bezug auf die Berufserfahrung lässt sich feststellen, dass es in jedem Quantil einen höheres Gehaltsniveau bei der "data-Gruppe" gibt.
 
 Trotzdem lässt sich sagen, dass die These korrekt ist.
 
 ## 6.6 Die Gehälter sind in Ländern mit einem höheren BIP pro Kopf höher
 
-Zum Verständnis sind hier einmal die BIP's pro Kopf aufgelistet:
+Zum Verständnis sind hier einmal die BIP's pro Kopf aus externen Quellen aufgelistet, da diese nicht im Datensatz vertreten sind:
 
 Australien 64.813,85 US-Dollar Quelle: [Australien - BIP pro Kopf bis 2028 \| Statista](https://de.statista.com/statistik/daten/studie/14425/umfrage/bruttoinlandsprodukt-pro-kopf-in-australien/#:~:text=Im%20Jahr%202022%20hat%20das%20Bruttoinlandsprodukt%20pro%20Kopf,Kopf%20in%20Australien%20auf%20rund%2063.487%2C05%20US-Dollar%20prognostiziert. "https://de.statista.com/statistik/daten/studie/14425/umfrage/bruttoinlandsprodukt-pro-kopf-in-australien/#:~:text=im%20jahr%202022%20hat%20das%20bruttoinlandsprodukt%20pro%20kopf,kopf%20in%20australien%20auf%20rund%2063.487%2c05%20us-dollar%20prognostiziert.")
 
@@ -1473,7 +1469,7 @@ head(filtered_data3)
 
 ### 6.6.2.: Visualisierung und Berechnung
 
-Mithilfe von Streudiagrammen und Berechnungen wird nun versucht die These zu wiederlegen oder als richtig markieren zu können.
+Mithilfe von Streudiagrammen und Berechnungen wird nun versucht die These zu widerlegen oder als richtig markieren zu können.
 
 ```{r}
 ggplot(filtered_data, aes(x = BIP_Per_Person, y = Salary, color = Country)) +
@@ -1486,9 +1482,9 @@ ggplot(filtered_data, aes(x = BIP_Per_Person, y = Salary, color = Country)) +
   scale_color_viridis(discrete = TRUE)
 ```
 
-Mithilfe dieses Streudiagramm ist wirklich viel zu erkennen. Deswegen werden weitere BErechnungen angestellt.
+Mithilfe dieses Streudiagramm ist viel zu erkennen. Deswegen werden weitere Berechnungen angestellt.
 
-Zunächst werden die Mittelwerte nach Land berechnet. und anschließend die Mittelwerte nach Land nach Betracht auf das BIP.
+Zunächst werden die Mittelwerte nach Land berechnet und anschließend die Mittelwerte nach Land in Bezug auf das BIP.
 
 ```{r}
 mean_salaries_by_country <- filtered_data3 %>%
@@ -1507,7 +1503,7 @@ mean_salaries_by_country
 
 ```
 
-Außerdem wird noch die Korrelation zwischen der Salary und dem Bip Berechnet.
+Außerdem wird noch die Korrelation zwischen der Salary und dem BIP Berechnet.
 
 ```{r}
 cor(filtered_data$Salary, filtered_data$BIP_Per_Person, use = "complete.obs")
@@ -1516,9 +1512,9 @@ cor(filtered_data$Salary, filtered_data$BIP_Per_Person, use = "complete.obs")
 
 Es geht hervor, dass es keine große Korrelation ziwschen dem Gehalt und dem BIP gibt.
 
-Nun wird das ganze noch ohne China druchgeführt:
+Nun wird das Ganze noch ohne China durchgeführt:
 
-Zunächst wird ein Datensatz ohne China erstellt und anschließend wird die Korrelation erneut berechnet. Zudem wird noch die Anzahl der Datensätze mit dem land "China" in dem neuen Datensatz.
+Zunächst wird ein Datensatz ohne China erstellt und anschließend wird die Korrelation erneut berechnet. Zudem wird die Anzahl der Datensätze mit dem land "China" in dem neuen Datensatz festgehalten.
 
 ```{r}
 filtered_data_no_china <- filtered_data %>% filter(Country != "China")
@@ -1533,9 +1529,9 @@ count_china <- filtered_data_no_china %>% filter(Country == "China") %>% nrow()
 count_china
 ```
 
-Anhand der Berechnung und des Streudiagramms lässt sich die These als nicht korrekt beantworten. Es gibt eine negative Korrelation zwischen dem Gehalt, welches ein Arbeitnehmer erhält und dem BIP des jeweiligen Landes. Selbst wenn China aus der Berechnung rausgenommen wird, welches aufgrund der hohen Einwohnerzahl und diversen Wirtschaft ( Sonderverwaltungszonen und Kommunismus) einen sehr niedrigen BIP hat.
+Anhand der Berechnung und des Streudiagramms, lässt sich die These als nicht korrekt beantworten. Es gibt eine negative Korrelation zwischen dem Gehalt, welches ein Arbeitnehmer erhält und dem BIP des jeweiligen Landes. Selbst wenn China aus der Berechnung rausgenommen wird, welches aufgrund der hohen Einwohnerzahl und diversen Wirtschaft (Sonderverwaltungszonen und Kommunismus) einen sehr niedrigen BIP hat.
 
-Nun stellt sich die Frage, ob eventuell in dem Datensatz bwusst Jobs mit hohem Gehalt gewählt wurden. Oder wurden Werte von spezifischen Firmen, die international tätig sind und gut bezahlen, genommen?
+Nun stellt sich die Frage, ob eventuell in dem Datensatz bewusst Jobs mit hohem Gehalt gewählt wurden. Oder wurden Werte von spezifischen Firmen, die international tätig sind und gut bezahlen, genommen?
 
 Siehe folgende Links:
 
@@ -1545,13 +1541,13 @@ Siehe folgende Links:
 
 # 7. Regressionen
 
-In dem folgenden Absatz werden die Regressionen durchfegührt.
+In dem folgenden Absatz werden die Regressionen durchgeführt.
 
 ## 7.1.: Einfache Lineare Regression Gehalt und Arbeitserfahrung
 
-Als erstes wird eine einfache lineare Regression mit dem Gehalt und der Arbeitserfahrung durchgeführt
+Zu Beginn wird eine einfache lineare Regression mit dem Gehalt und der Arbeitserfahrung durchgeführt
 
-Die Korrelation von Arbeitserfahtung und Gehalt liegt bei 0.81 weshalb wir uns entscheiden haben diese als Regression zu verwenden. Des weiteren nutzen wir auch das Alter so wie das Bildungsniveau.
+Die Korrelation von Arbeitserfahrung und Gehalt liegt bei 0.81, weshalb wir uns entscheiden haben diese als Regression zu verwenden. Des weiteren nutzen wir zusätzlich das Alter und das Bildungsniveau.
 
 Die Korrelation zwischen der Arbeitserfahrung und Gehalt liegt bei 0.81. Deshalb wurde entschieden diese als Regression zu verwenden. Des Weiteren wird auch das Alter, so wie das Bildungsniveau verwendet.
 
@@ -1569,13 +1565,13 @@ filtered_data %>%
   scale_y_continuous(labels = scales::comma)
 ```
 
-Anhand dieser Grafik kann gesagt werden, das der Trend deutlich nach oben geht, je mehr Berufserfahrung eine Person hat.
+Anhand dieser Grafik kann gesagt werden, dass der Trend deutlich nach oben geht, je mehr Berufserfahrung eine Person hat.
 
 ### 7.1.2.: Datenaufbereitung
 
-Es muss noch etwas an dem Datensatz geändert werden.
+Um mit der Regressionsanalyse fortzufahren, müssen noch Änderungen am Datensatz durchgeführt werden.
 
-Zunächst mpüssen alle Werte, die nicht für die Regression relevant sind, rausgenommen werden. Deswegen werden nur "Salary" und "Years of Experience" behalten.
+Zunächst müssen alle Werte, die nicht für die Regression relevant sind, entfernt werden. Deswegen werden nur "Salary" und "Years of Experience" behalten.
 
 ```{r}
 filtered_data5 <- filtered_data %>%
@@ -1630,7 +1626,7 @@ Lineare Regression von Salary (basierend auf der Berufserfahrung):
 lm_fit <- lm_model |> fit(Salary ~ Years.Of.Experience, data = fd5_train)
 ```
 
-Zusammenfassung des Ergebnis:
+Zusammenfassung vom Ergebnis:
 
 ```{r}
 summary <- lm_fit |> extract_fit_engine() |> summary()
@@ -1639,7 +1635,7 @@ summary
 
 Vorhersagen auf Trainings- und Testdatensatz:
 
-Nun werden Vorhersagen für die Tranings-, sowie Testdaten erstellt. Anaschließend werden die tatsächlichen "Salary"-Werte mit den Vorhersagen kombiniert. Dies geschieht um zwei seperate Datenrahmen zu erstellen.
+Nun werden Vorhersagen für die Tranings-, sowie Testdaten erstellt. Anschließend werden die tatsächlichen "Salary"-Werte mit den Vorhersagen kombiniert. Dies geschieht um zwei seperate Datenrahmen zu erstellen.
 
 ```{r}
 pred_train <- predict(lm_fit, new_data = fd5_train) |> rename("pred_train" = ".pred")
@@ -1658,7 +1654,7 @@ head(compare_test)
 
 ### 7.1.4.: Grafische Darstellung
 
-Im folgenden Codechunk, werden zwei Grafiken, zum Einen für die Testendaten und zum anderen für die Traiingsdaten erstellt.
+Im folgenden Codechunk, werden zwei Grafiken, zum Einen für die Testdaten und zum Anderen für die Trainingsdaten erstellt.
 
 ```{r}
 train_data <- cbind(fd5_train, pred_train)
@@ -1686,7 +1682,7 @@ ggplot(test_data, aes(x = Years.Of.Experience, y = Salary)) +
 
 ```
 
-Anhand der zwei Grafiken ist zu erkennen, dass die unterschiedlichen Werte bei der Vorhersage der Trainingsdaten deutlich dichter zusammen liegen, als bei den Testdaten. Trotzdem sind die beiden Grafiken gleich was den Trend angeht. Dies ist Mithilfe der Regressionsgerade zu erkennen.
+Anhand der zwei Grafiken ist zu erkennen, dass die unterschiedlichen Werte bei der Vorhersage der Trainingsdaten deutlich dichter zusammen liegen, als bei den Testdaten. Trotzdem sind die beiden Grafiken gleich, was den Trend angeht. Dies ist Mithilfe der Regressionsgeraden zu erkennen.
 
 ### 7.1.5.: Fehler
 
@@ -1863,7 +1859,7 @@ ggplot(data = filtered_data, aes(x = Years.Of.Experience, y = Salary)) +
 
 Aufgrund der Kurve wurde sich entschieden eine weitere Variable, sowie die Potenzen 2, 3 und 4 von " Years of Experience" hinzuzufügen und anschließend je 3 unterschiedliche Regressionen durchzuführen. Anschließend wird dann geschaut, wie akkurat sich das Modell auf die Testdaten mit der jeweiligen Potenz verhält.
 
-Da Age zwar einen hohen Korrelationswert hat aber auch mit den Years.Of.Experience einhergeht nehmen wir diesen wert nicht sondern stattdessen das Education.Level. Dies wird in den nächsten Absätzen behandelt.
+Da Age zwar einen hohen Korrelationswert hat aber auch mit den Years.Of.Experience einhergeht nehmen wir diesen Wert nicht, sondern stattdessen das Education.Level. Dies wird in den nächsten Absätzen behandelt.
 
 ### 7.2.2.: Korrelationen
 
@@ -1884,7 +1880,7 @@ print(correlations)
 
 Nun ist zu erkennen, dass zwischen dem Education Level und Salary eine Korrelation von 0.63 vorliegt. Zwischen dem Alter und den Bildungsniveau liegt dann eine Korrelation von 0.59. und dem " Years of Experience" eine Korrelation von 0.61.
 
-Es ist also zu erkennen, dass Die Korrelationen zischen den bildungsniveau und den anderen stets relativ hoch ist.
+Es ist also zu erkennen, dass Die Korrelationen zwischen dem Bildungsniveau und den anderen stets relativ hoch ist.
 
 ### 7.2.3.: Datenaufbereitung
 
@@ -1940,7 +1936,7 @@ sd(filtered_data6_z$Education.Level)
 
 Bei beiden liegt eine Abweichung von 1 vor.
 
-Um eine lineare Regression durchzuführen wird der Datensatz filtered_data_z in trainings und Testdaten eingeteilt. Mithilfe der Funktion "set.seed(007)" initialisiert den Zufallsgenerator mit einer festen Zahl, um sicherzustellen, dass die Ergebnisse bei jedem Durchlauf reproduzierbar sind. "initial_split" teilt dann den Datensatz in Tranings- und Testdaten. Der Parameter strata = Years.Of.Experience sorgt dafür, dass die Daten nach dem Gehalts-Wert stratifiziert werden, um sicherzustellen, dass die Trainings- und Testdaten eine ähnliche Verteilung von Gehalts-Werten aufweisen. Da die Potenzen dieser Variable alle in der selben Reihe stehen muss hier nichts verändert werden. Die Funktion training() extrahiert die Trainingsdaten aus dem aufgeteilten Datensatz, während testing() die Testdaten extrahiert.
+Um eine lineare Regression durchzuführen wird der Datensatz filtered_data_z in Trainings- und Testdaten eingeteilt. Mithilfe der Funktion "set.seed(007)" initialisiert den Zufallsgenerator mit einer festen Zahl, um sicherzustellen, dass die Ergebnisse bei jedem Durchlauf reproduzierbar sind. "initial_split" teilt dann den Datensatz in Tranings- und Testdaten. Der Parameter strata = Years.Of.Experience sorgt dafür, dass die Daten nach dem Gehalts-Wert stratifiziert werden, um sicherzustellen, dass die Trainings- und Testdaten eine ähnliche Verteilung von Gehalts-Werten aufweisen. Da die Potenzen dieser Variable alle in der selben Reihe stehen muss hier nichts verändert werden. Die Funktion training() extrahiert die Trainingsdaten aus dem aufgeteilten Datensatz, während testing() die Testdaten extrahiert.
 
 ```{r}
 set.seed(007)  
@@ -2051,7 +2047,7 @@ head(compare_test4)
 
 ### 7.2.4.: Grafische Darstellung
 
-In dem folgenden Absatz werden die unterschiedlichen Potenzen mithilfe eines Vorhersage Plots grafiosch dargestellt.
+In dem folgenden Absatz werden die unterschiedlichen Potenzen mithilfe eines Vorhersage Plots grafisch dargestellt.
 
 Hierzu wurde eine zusätzliche Quelle verwendet: ( <https://statologie.de/vorhergesagte-werte-plotten-r/>)
 
@@ -2128,7 +2124,7 @@ Es ist bereits eine Tendenz zu erkennen. Die 4er Potenz der Berufserfahrung auf 
 
 ### 7.2.5.: Fehler
 
-AUch hier werden die Potenzen einzeln und hintereinander mit dem "rmse" untersucht.
+Auch hier werden die Potenzen einzeln und hintereinander mit dem "rmse" untersucht.
 
 2er Potenz
 
@@ -2144,9 +2140,9 @@ Testfehler:
 rmse(compare_test2, Salary, pred_test2)
 ```
 
-Es geht hervor, dass das Modell auf den den Trainingsdaten besser perfomt als auf den Testdaten
+Es geht hervor, dass das Modell auf den Trainingsdaten besser perfomt als auf den Testdaten.
 
-Diese Tatsache weißt auf Overfitting hin.
+Diese Tatsache weist auf Overfitting hin.
 
 3er Potenz:
 
@@ -2178,11 +2174,11 @@ Testfehler:
 rmse(compare_test4, Salary, pred_test4)
 ```
 
-Auch wenn alle Modelle nur geringe Unterschiede aufweisen, performt dieses auf den Trainingsdaten gleich wie auf den Testdaten. Demnach ist es das präziseste Modell und wird als einzigstes weiter verwendet und weiter verwendet.
+Auch wenn alle Modelle nur geringe Unterschiede aufweisen, performt dieses auf den Trainingsdaten gleich wie auf den Testdaten. Demnach ist es das präziseste Modell und wird als einziges weiter verwendet und weiter verwendet.
 
-Dies ließ sich bereits unter 7.2.1 Erkenne da das 3. polynom das Geom Smooth Grafisch die beste Linie abgebildet hat.
+Dies ließ sich bereits unter 7.2.1 erkennen, da das 3. Polynom das Geom Smooth grafisch die beste Linie abgebildet hat.
 
-!Zur Einordnung der Fehler die Verteilung von Gehalt ansehen:
+Zur Einordnung der Fehler die Verteilung von Gehalt ansehen:
 
 Verteilung von Gehalt:
 
@@ -2194,7 +2190,7 @@ describe(filtered_data5, Salary)
 
 Der Aufbau, sowie die Definiton zu den Risiduen wurden bereits unter 7.1.6 aufgeführt.
 
-Deswegen werden die Funtkionen ebenfalls nicht erneut erklärt.
+Deswegen werden die Funktionen ebenfalls nicht erneut erläutert.
 
 Es wird sich jediglich nur um die Ausgabe gekümmert, und anschließend beschrieben.
 
@@ -2251,7 +2247,7 @@ Aus den beiden Histogrammen geht also hervor, dass die Abweichungen zwischen den
 
 Wie auch bei den Risiduen bleibt hier der Aufbau gleich wie in 7.1.7.
 
-Jediglich die Aussagen sind erneut anders.
+Lediglich die Aussagen sind erneut anders.
 
 Trainingsdaten:
 
@@ -2279,9 +2275,9 @@ ggplot(data = residuals_test2, aes(sample = standardized_resid2)) +
   theme_minimal()
 ```
 
-Der Plot Bildet die Ausreißer vom Gehalt nach oben und unten ab welche wir im ersten Diagramm von 7.2.1 sehen, die Residuen sind nicht perfekt normalverteilt. Eventuell gibt es hier Datenpunkte welche die Residuen beeinflussen. Aufgrund der explorativen Datenanalyse wissen wir das Jobs mit hoher Arbeitserfahrung oft Führungsverantwortung beinhalten welche nochmal zusätzlich monetär honoriert wird. Die Flache Linie durch die Gerade oben durch deutet auf ein Gehaltscap hin. Die Ausreißer am unteren Ende lassen sich durch Einstiegsjobs so wie Niedriglohnjobs ohne Hochschulabchlüsse erklären. (Ausbildungsberufe werden hier nicht berücksichtigt).
+Der Plot bildet die Ausreißer vom Gehalt nach oben und unten ab, welche wir im ersten Diagramm von 7.2.1 sehen, die Residuen sind nicht perfekt normalverteilt. Eventuell gibt es hier Datenpunkte, welche die Residuen beeinflussen. Aufgrund der explorativen Datenanalyse wissen wir, dass Jobs mit hoher Arbeitserfahrung oft Führungsverantwortung beinhalten, welche nochmal zusätzlich monetär honoriert wird. Die Flache Linie durch die Gerade oben durch deutet auf ein Gehaltscap hin. Die Ausreißer am unteren Ende lassen sich durch Einstiegsjobs, so wie Niedriglohnjobs ohne Hochschulabchlüsse erklären. (Ausbildungsberufe werden hier nicht berücksichtigt).
 
-Der Testfehler in der einfachen Linearen Regression betrug 30763 während der in der mehrfachen Linearen Regression mit der 4er Potenz von Arbeitserfahrung 27456 welches eine verbesserung der Vorhersagen von 10% gegenüber der einfach Linearen regression aus 7.1 ergibt. Des weiteren gibt es hier auch kein Overfitting des Modells mehr da die Test und Trainingsfehler exakt die selben sind (27456) .
+Der Testfehler in der einfachen Linearen Regression betrug 30763, während der in der mehrfachen Linearen Regression mit der 4er Potenz von Arbeitserfahrung 27456 ergibt, welches eine verbesserung der Vorhersagen von 10% gegenüber der einfach Linearen regression aus 7.1 ergibt. Des Weiteren gibt es hier auch kein Overfitting des Modells mehr, da die Test und Trainingsfehler exakt die selben sind (27456) .
 
 ## 7.3.: Entscheidungsbaum
 
@@ -2291,11 +2287,11 @@ Hierzu werden die Software Engineering Jobs und deren Führungsposition bertrach
 
 ### 7.3.1.: Vorbereitung
 
-Zunächst wurden beide Jobs nach dem Kriterium einer Häufigkeitsverteilung von N\>30 ausgewählt.
+Zunächst werden beide Jobs nach dem Kriterium einer Häufigkeitsverteilung von N\>30 ausgewählt.
 
 Die Gründe sind in 5.1 aufgezählt.
 
-Hierzu wird zunächst einen Datenrahmen erstellt, der die Job-Titel und Ihre Häufigkeit enthält.
+Hierzu wird zunächst einen Datenrahmen erstellt, der die Job-Titel und ihre Häufigkeit enthält.
 
 Anschließend wird dann ein Balkendiagramm erstellt.
 
@@ -2315,7 +2311,7 @@ ggplot(jobs_count, aes(x = Job.Title, y = count, fill = Job.Title)) +
 
 ```
 
-Hier ist zu erkennen, dass es natürlich deutlich weniger Director und Manager gibt.
+Hier ist zu erkennen, dass es deutlich weniger Director und Manager gibt.
 
 Nun wird noch einmal, das Durchschnittsgehalt der verschiedenen Jobs berechnet.
 
@@ -2329,7 +2325,7 @@ filtered_data %>%
 
 ### 7.3.2.: Datenaufbereitung
 
-Vorab ist es wichtig zu erwähnen, dass keine Z-Skalierung der Daten durchgeführt wird. Dies liegt daran, da sonst die Diagramme unübersichtlich werden.
+Vorab ist es wichtig zu erwähnen, dass keine Z-Skalierung der Daten durchgeführt wird. Dies liegt daran, da die Diagramme sonst zu unübersichtlich werden.
 
 Zunächst werden alle benötigten Jobtitel aus dem Datenrahmen rausgefiltert.
 
@@ -2338,7 +2334,7 @@ filtered_data7 <- filtered_data %>%
   filter(Job.Title %in% c("Software Engineer", "Software Engineer Manager", "Data Scientist", "Director of Data Science"))
 ```
 
-Asnchließend werden den Managern und Director der Wert 1 zugewiesen.
+Anschließend werden den Managern und Director der Wert 1 zugewiesen.
 
 ```{r}
 filtered_data7 <- filtered_data7 %>%
@@ -2382,7 +2378,7 @@ tree_fit |>
 
 Mit Beschriftungen (Als Klassifizierung umgesetzt/ In Klassen umgewandelt).
 
-Nun wird das ganze als Klassifikation umgesetzt. Hierbei wird in Klassen umgewandelt.
+Nun wird das Ganze als Klassifikation umgesetzt. Hierbei wird in Klassen umgewandelt.
 
 Hierzu wird zunächst eine Kopie des Trainingsatzes erstellt. Anschließend wird die Konvertierung von "Education Level" und "Manager" umgekehrt. Folgend wird dann das Baumodell erstellt, gefittet und zum Schluss visualisiert.
 
@@ -2406,18 +2402,15 @@ tree_fit |>
 
 ```
 
-Nach Ansehen des Entscheidungsbaumes, scheint es als hätten "Expat", sowie "Country" eine schwache Vorhersagekraft und Mangelnde Bedeutung auf den Wert Manager. Deswegen tauchen sie nicht im Entscheidungsbaum auf.
+Nach Ansehen des Entscheidungsbaumes, scheint es als hätten "Expat", sowie "Country" eine schwache Vorhersagekraft und mangelnde Bedeutung auf den Wert Manager. Deswegen tauchen sie nicht im Entscheidungsbaum auf.
 
-Es gibt durchaus die Möglichkeit einen Entscheidungsbaum-Algorithmus Zur Regression auf eine Variable anzuwenden, die nur die Werte 0 und 1 aufweist. Ist dies der Fall, würde der Baum versuchen eine Regression, auf Basis der gegebenen Eingabevariable ( Features ) durchzuführen. Dadurch würde die kontinuierliche numerische Variable vorherzusagen.
-
-(!!! Umschreiben\
-Ja, Sie können durchaus einen Entscheidungsbaum-Algorithmus zur Regression auf eine Variable anwenden, die nur Werte von 0 und 1 aufweist. In diesem Fall würde der Baum versuchen, auf Basis der gegebenen Eingabevariablen (Features) eine Regression durchzuführen, um die kontinuierliche numerische Variable vorherzusagen. )
+Es ist durchaus möglich, einen Entscheidungsbaum-Algorithmus zur Regression auf eine Variable anzuwenden, die lediglich Werte von 0 und 1 annimmt. In diesem Szenario würde der Baum versuchen, anhand der gegebenen Eingabevariablen (Features) eine Regression durchzuführen, um die kontinuierliche numerische Variable vorherzusagen.
 
 Es gibt jedoch einige wichtige Aspekte zu beachten:
 
-1.  **Ausgabe als Kategorie interpretieren:** Wenn Ihre Zielvariable tatsächlich binär ist und Sie eine Klassifizierung (0 oder 1) vornehmen wollen, dann sollten Sie einen Klassifikationsalgorithmus verwenden, nicht eine Regressionsmethode. Ein Entscheidungsbaum für die Klassifikation würde besser geeignet sein, um Vorhersagen in Form von Kategorien (hier: 0 oder 1) zu treffen.
+1.  **Ausgabe als Kategorie interpretieren:** Wenn ihre Zielvariable tatsächlich binär ist und sie eine Klassifizierung (0 oder 1) vornehmen wollen, dann sollten Sie einen Klassifikationsalgorithmus verwenden, nicht eine Regressionsmethode. Ein Entscheidungsbaum für die Klassifikation würde besser geeignet sein, um Vorhersagen in Form von Kategorien (hier: 0 oder 1) zu treffen.
 
-2.  **Interpretation der Vorhersagen:** Wenn Sie den Entscheidungsbaum für die Regression auf eine binäre Variable anwenden, werden die Vorhersagen des Modells als kontinuierliche Werte zwischen 0 und 1 liegen. Diese Vorhersagen können dann als Wahrscheinlichkeiten interpretiert werden, z.B. als die Wahrscheinlichkeit, dass eine bestimmte Beobachtung den Wert 1 annimmt. Um Klassen vorherzusagen, müssten Sie normalerweise einen Schwellenwert festlegen (zum Beispiel 0,5), um diese Wahrscheinlichkeiten in Klassen umzuwandeln.
+2.  **Interpretation der Vorhersagen:** Wenn sie den Entscheidungsbaum für die Regression auf eine binäre Variable anwenden, werden die Vorhersagen des Modells als kontinuierliche Werte zwischen 0 und 1 liegen. Diese Vorhersagen können dann als Wahrscheinlichkeiten interpretiert werden, z.B. als die Wahrscheinlichkeit, dass eine bestimmte Beobachtung den Wert 1 annimmt. Um Klassen vorherzusagen, müssten Sie normalerweise einen Schwellenwert festlegen (zum Beispiel 0,5), um diese Wahrscheinlichkeiten in Klassen umzuwandeln.
 
 Vorhersage auf Test- und Trainingsdaten:
 
@@ -2464,11 +2457,9 @@ Der Trainingsfehler ist geringer als der Testfehler. Dies weist darauf hin, dass
 
 ### 7.3.6.: Residuen
 
-!! Umschreiben
+Trotz der binären Beschaffenheit des abhängigen Merkmals ('Manager') ist es möglich, ein Entscheidungsbaummodell für die Prognose von Wahrscheinlichkeiten zu nutzen. Das Modell wird Vorhersagen über die Wahrscheinlichkeiten des Eintretens oder Nicht-Eintretens des Ereignisses (hier: Manager oder nicht Manager) treffen.
 
-Obwohl das abhängige Merkmal ('Manager') binär ist, kann die Anpassung eines Entscheidungsbaummodells (wie in Ihrem Fall) immer noch zur Vorhersage von Wahrscheinlichkeiten verwendet werden. Das Modell wird Wahrscheinlichkeiten für das Eintreten oder Nicht-Eintreten des Ereignisses (hier: Manager oder nicht Manager) vorhersagen.
-
-Die Residuen in einem solchen Fall geben die Abweichung zwischen den tatsächlichen beobachteten Werten (0 und 1 in Ihrem Fall) und den vorhergesagten Wahrscheinlichkeiten wieder. Sie ermöglichen eine Überprüfung, wie gut das Modell die Beobachtungen anpasst. Obwohl sie nicht direkt die Vorhersage von 0 oder 1 zeigen, reflektieren sie immer noch, wie gut das Modell die Wahrscheinlichkeiten, dass ein bestimmtes Ereignis eintritt oder nicht, schätzt.
+Die Residuen in einem solchen Kontext repräsentieren die Differenz zwischen den tatsächlich beobachteten Werten (0 und 1) und den vorhergesagten Wahrscheinlichkeiten. Sie bieten somit eine Möglichkeit zur Überprüfung, wie gut das Modell die Beobachtungen anpasst. Auch wenn sie nicht unmittelbar die Vorhersage von 0 oder 1 anzeigen, spiegeln sie dennoch wider, wie gut das Modell die Wahrscheinlichkeiten einschätzt, dass ein bestimmtes Ereignis eintritt oder nicht.
 
 ```{r}
 residuals_train7 <- augment(tree_fit, new_data = fd7_train) %>% select(.resid)
@@ -2522,7 +2513,7 @@ Siehe folgende links:
 
 <https://topepo.github.io/caret/measuring-performance.html>
 
-Nun werden zunächst die Faktoren kovertiert und levels gesetzt. Anschließend wird die Accuracy für die Tranings-, sowie für die Testdaten berechnet.
+Nun werden zunächst die Faktoren konvertiert und Levels gesetzt. Anschließend wird die Accuracy für die Tranings-, sowie für die Testdaten berechnet.
 
 ```{r}
 library(caret)
@@ -2597,16 +2588,32 @@ In beiden Trainings- und Testdaten zeigt das Modell eine perfekte Vorhersagegena
 
 ## 8.1.: Kritik
 
-Hätte man alle Betrachtungen under der gleichstellung von Years of Experience und Education level betrachten sollen bei länder und geschlechter vergleichen? Oder generell bei allen daten? Dies in die Datenaufbereitung mit aufnehemen? Dies bedarf genaueren untersuchungen
+Folgende Kritikpunkte und offene Fragen sind nach Beendigung der Datenanalyse aufgetreten:
 
-Hätte man alle nicht numerischen Werte numerisch transformieren können um andere Korrelationen und damit andere Regressionen herauszufinden?
+1.  Berücksichtigung von Years of Experience und Education Level beim Vergleichen:
 
-Gibt es in China nur berichte von Westlichen Firmen die auch dort hohe Gehälter Zahlen (Niedriger BIP pro Person)
+    War es angemessen, alle Betrachtungen unter der Gleichstellung von Years of Experience und Education Level in Länder- und Geschlechtsvergleichen zu berücksichtigen? Hätte dies generell in die Datenaufbereitung aufgenommen werden sollen? Dies bedarf genauerer Untersuchung
 
-Hätte man den Entscheidungsbaum als reine klassifikation angehen sollen?
+2.  Numerische Transformation nicht-numerischer Werte:
 
-Hätte man sich in der gesamten analyse nur auf einige wenige jobs beschränken sollen um genauere ergebnisse mit weniger außreißern zu erzielen?
+    Wäre es möglich gewesen, alle nicht-numerischen Werte in numerische zu transformieren, um potenziell andere Korrelationen und Regressionen zu identifizieren?
 
-gibt es weitere methoden um die zuverlässigkeit des entscheidungsbaumes zu prüfen? wenn ja hätte man alle anwenden sollen um mehrere Faktoren zu beurteilen
+3.  Daten aus China:
 
-Mit mehr Zeit hätten wir gerne die Data Frames übersichtlicher und einheitlicher transformiert. So haben wir ca 10 verschiedene dataframes mit teilweise ünübersichtlicher bennennung was nicht nur die durchlaufzeit erhöht sondern auch manchmal zu Problemen beim coden geführt hat.
+    Gibt es Anzeichen dafür, dass in China nur Berichte von westlichen Firmen vorliegen, die dort hohe Gehälter zahlen, insbesondere vor dem Hintergrund des niedrigen BIP pro Person?
+
+4.  Entscheidungsbaum als reine Klassifikation:
+
+    Hätte der Entscheidungsbaum möglicherweise effektiver als reines Klassifikationsmodell angegangen werden sollen?
+
+5.  Beschränkung auf weniger Jobs:
+
+    Hätte es Sinn gemacht, sich in der gesamten Analyse auf einige wenige Jobs zu beschränken, um präzisere Ergebnisse mit weniger Ausreißern zu erzielen?
+
+6.  Prüfung der Zuverlässigkeit des Entscheidungsbaumes:
+
+    Existieren alternative Methoden zur Prüfung der Zuverlässigkeit des Entscheidungsbaumes? Falls ja wäre es ratsam gewesen, mehrere dieser Methoden anzuwenden, um mehrere Faktoren zu beurteilen.
+
+7.  Data Frames:
+
+    Mit mehr Zeit hätten wir gerne eine übersichtlichere und einheitlichere Transformation der Data Frames angestrebt. Nun haben wir circa 10 verschiedene Data Frames mit teilweise unübersichtlicher Benennung, was nicht nur die Durchlaufzeit erhöht, sondern auch manchmal zu Problemen beim Coden geführt hat.
